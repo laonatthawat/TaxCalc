@@ -90,7 +90,7 @@ export default function SummaryDashboard({ subscriptions }: Props) {
                     <Cell key={index} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value: number) => `฿${value.toLocaleString()}`} />
+                <Tooltip formatter={(value: any) => `฿${value.toLocaleString()}`} />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -102,7 +102,7 @@ export default function SummaryDashboard({ subscriptions }: Props) {
               <BarChart data={barData}>
                 <XAxis dataKey="name" tick={{ fontSize: 11 }} />
                 <YAxis />
-                <Tooltip formatter={(value: number) => `฿${value.toLocaleString()}`} />
+                <Tooltip formatter={(value: any) => `฿${value.toLocaleString()}`} />
                 <Bar dataKey="monthlyPrice" fill="#6366f1" />
               </BarChart>
             </ResponsiveContainer>
