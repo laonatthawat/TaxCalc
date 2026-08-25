@@ -45,6 +45,25 @@ export function getMonthlyComparisonData(subscriptions: Subscription[]) {
     .sort((a, b) => b.monthlyPrice - a.monthlyPrice)
 }
 
+// จัดกลุ่มยอดตาม "วันที่ในเดือน" (1-31) ที่ต้องจ่าย เพื่อดูว่ารายจ่ายไปกองวันไหนของเดือนเยอะสุด
+// ใช้ราคาจริง (ไม่แปลงเป็นรายเดือน) เพราะอยากรู้ว่าวันนั้นๆ มีเงินออกจากกระเป๋าเท่าไหร่จริงๆ
+// parse วันที่จาก string ตรงๆ (แทนที่จะใช้ new Date().getDate()) เพื่อกันปัญหา timezone เพี้ยนวัน
+export function groupByDayOfMonth(subscriptions: Subscription[]) {
+  const totals = new Array(31).fill(0)
+
+  subscriptions.forEach((sub) => {
+    const day = Number(sub.next_billing_date.slice(8, 10))
+    if (day >= 1 && day <= 31) {
+      totals[day - 1] += sub.price
+    }
+  })
+
+  return totals.map((total, index) => ({
+    day: String(index + 1),
+    total: Math.round(total * 100) / 100,
+  }))
+}
+
 // หา subscription ที่ใกล้ต่ออายุภายในจำนวนวันที่กำหนด
 export function getUpcomingRenewals(subscriptions: Subscription[], daysAhead: number) {
   const today = new Date()

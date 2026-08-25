@@ -55,7 +55,24 @@ export default function LoginPage() {
             />
           </div>
           <div className="form-field">
-            <label className="form-label">Password</label>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: 6,
+              }}
+            >
+              <label className="form-label" style={{ marginBottom: 0 }}>
+                Password
+              </label>
+              <a
+                href="/forgot-password"
+                style={{ fontSize: 12, fontWeight: 600, color: '#6552cc', textDecoration: 'none' }}
+              >
+                ลืมรหัสผ่าน?
+              </a>
+            </div>
             <input
               type="password"
               className="form-input"

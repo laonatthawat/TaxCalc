@@ -19,6 +19,7 @@ import {
   calculateTotals,
   groupByCategory,
   getMonthlyComparisonData,
+  groupByDayOfMonth,
   getUpcomingRenewals,
 } from '@/lib/subscriptionUtils'
 
@@ -53,6 +54,7 @@ export default function SummaryDashboard({ subscriptions }: Props) {
   const { totalMonthly, totalYearly } = calculateTotals(subscriptions)
   const categoryData = groupByCategory(subscriptions)
   const barData = getMonthlyComparisonData(subscriptions)
+  const dayOfMonthData = groupByDayOfMonth(subscriptions)
   const upcomingRenewals = getUpcomingRenewals(subscriptions, RENEWAL_ALERT_DAYS)
 
   return (
@@ -216,9 +218,40 @@ export default function SummaryDashboard({ subscriptions }: Props) {
                     dataKey="monthlyPrice"
                     position="top"
                     style={{ fontSize: 11, fill: '#2b2b33' }}
-                    formatter={(value: number) => `฿${value.toLocaleString()}`}
+                    formatter={(value: any) => `฿${Number(value).toLocaleString()}`}
                   />
                 </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* กราฟแท่ง: รายจ่ายตามวันที่ในเดือน (1-31) ดูว่าเงินไปกองวันไหนของเดือนเยอะสุด
+              แสดงทุกวัน 1-31 แม้ไม่มีรายจ่าย เพื่อให้เห็น "รูปทรง" การกระจายตัวทั้งเดือนชัดเจน */}
+          <div
+            style={{
+              flex: '1 1 100%',
+              minWidth: 300,
+              background: '#ffffff',
+              border: '0.5px solid #ececE5',
+              borderRadius: 14,
+              padding: 16,
+            }}
+          >
+            <h3 style={{ marginTop: 0, fontSize: 15, fontWeight: 600, color: '#2b2b33' }}>
+              รายจ่ายตามวันที่ในเดือน
+            </h3>
+            <p style={{ margin: '0 0 12px', fontSize: 12, color: '#47474f' }}>
+              ดูว่าแต่ละเดือนเงินไหลออกกองวันไหนเยอะสุด (ตามวันที่ต่ออายุของแต่ละ subscription)
+            </p>
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart data={dayOfMonthData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+                <XAxis dataKey="day" tick={{ fontSize: 10 }} interval={1} />
+                <YAxis tick={{ fontSize: 11 }} />
+                <Tooltip
+                  formatter={(value: any) => [`฿${value.toLocaleString()}`, 'รวม']}
+                  labelFormatter={(day) => `วันที่ ${day}`}
+                />
+                <Bar dataKey="total" fill="#948bf3" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
