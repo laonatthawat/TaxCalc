@@ -28,12 +28,11 @@ export default function SummaryDashboard({ subscriptions }: Props) {
       {upcomingRenewals.length > 0 && (
         <div
           style={{
-            background: '#fef3c7',
-            border: '1px solid #f59e0b',
-            borderRadius: 8,
-            padding: 16,
-            marginBottom: 24,
-            color: '#78350f',
+            background: 'linear-gradient(135deg, #FBEAF0, #FAECE7)',
+            borderRadius: 14,
+            padding: '16px 20px',
+            marginBottom: 28,
+            color: '#72243E',
           }}
         >
           <strong>⚠️ ใกล้ถึงวันต่ออายุ (ภายใน {RENEWAL_ALERT_DAYS} วัน)</strong>
@@ -50,22 +49,46 @@ export default function SummaryDashboard({ subscriptions }: Props) {
       )}
 
       {/* การ์ดสรุปยอดรวม */}
-      <div style={{ display: 'flex', gap: 16, marginBottom: 24, flexWrap: 'wrap' }}>
-        <div style={{ flex: 1, minWidth: 200, border: '1px solid #ddd', borderRadius: 8, padding: 16 }}>
+            <div style={{ display: 'flex', gap: 14, marginBottom: 28, flexWrap: 'wrap' }}>
+        <div
+          style={{
+            flex: 1,
+            minWidth: 200,
+            background: 'linear-gradient(160deg, #EEEDFE, #F1EFE8)',
+            borderRadius: 14,
+            padding: '1.1rem',
+          }}
+        >
           <p style={{ margin: 0, color: '#666', fontSize: 13 }}>ยอดรวมต่อเดือน</p>
-          <p style={{ margin: '4px 0 0', fontSize: 24, fontWeight: 'bold' }}>
+          <p style={{ margin: '6px 0 0', fontSize: 26, fontWeight: 500 }}>
             ฿{totalMonthly.toLocaleString(undefined, { maximumFractionDigits: 2 })}
           </p>
         </div>
-        <div style={{ flex: 1, minWidth: 200, border: '1px solid #ddd', borderRadius: 8, padding: 16 }}>
+        <div
+          style={{
+            flex: 1,
+            minWidth: 200,
+            background: 'linear-gradient(160deg, #E1F5EE, #F1EFE8)',
+            borderRadius: 14,
+            padding: '1.1rem',
+          }}
+        >
           <p style={{ margin: 0, color: '#666', fontSize: 13 }}>ยอดรวมต่อปี (ประมาณการ)</p>
-          <p style={{ margin: '4px 0 0', fontSize: 24, fontWeight: 'bold' }}>
+          <p style={{ margin: '6px 0 0', fontSize: 26, fontWeight: 500 }}>
             ฿{totalYearly.toLocaleString(undefined, { maximumFractionDigits: 2 })}
           </p>
         </div>
-        <div style={{ flex: 1, minWidth: 200, border: '1px solid #ddd', borderRadius: 8, padding: 16 }}>
+        <div
+          style={{
+            flex: 1,
+            minWidth: 200,
+            background: 'linear-gradient(160deg, #FAEEDA, #F1EFE8)',
+            borderRadius: 14,
+            padding: '1.1rem',
+          }}
+        >
           <p style={{ margin: 0, color: '#666', fontSize: 13 }}>จำนวน Subscription</p>
-          <p style={{ margin: '4px 0 0', fontSize: 24, fontWeight: 'bold' }}>{subscriptions.length}</p>
+          <p style={{ margin: '6px 0 0', fontSize: 26, fontWeight: 500 }}>{subscriptions.length}</p>
         </div>
       </div>
 
