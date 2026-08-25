@@ -76,87 +76,69 @@ export default function SubscriptionModal({ isOpen, onClose, editingSubscription
   }
 
   return (
-    // พื้นหลังสีดำโปร่งแสง คลิกแล้วปิด modal
-    <div
-      onClick={onClose}
-      style={{
-        position: 'fixed',
-        inset: 0,
-        background: 'rgba(0,0,0,0.5)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 50,
-      }}
-    >
+    // พื้นหลังสีเข้มโปร่งแสง คลิกแล้วปิด modal
+    <div className="modal-overlay" onClick={onClose}>
       {/* กล่อง modal เอง: stopPropagation กันไม่ให้คลิกข้างในแล้วปิดตัวเอง */}
-      <div
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          background: 'white',
-          padding: 24,
-          borderRadius: 8,
-          width: 400,
-          maxWidth: '90%',
-        }}
-      >
-        <h2>{editingSubscription ? 'แก้ไข Subscription' : 'เพิ่ม Subscription'}</h2>
+      <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+        <h2 className="modal-title">
+          {editingSubscription ? 'แก้ไข Subscription' : 'เพิ่ม Subscription'}
+        </h2>
         <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: 12 }}>
-            <label>ชื่อ</label>
+          <div className="form-field">
+            <label className="form-label">ชื่อ</label>
             <input
               type="text"
+              className="form-input"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              style={{ width: '100%', padding: 8 }}
             />
           </div>
 
-          <div style={{ marginBottom: 12 }}>
-            <label>ราคา (บาท)</label>
+          <div className="form-field">
+            <label className="form-label">ราคา (บาท)</label>
             <input
               type="number"
               step="0.01"
+              className="form-input"
               value={price}
               onChange={(e) => setPrice(e.target.value)}
               required
-              style={{ width: '100%', padding: 8 }}
             />
           </div>
 
-          <div style={{ marginBottom: 12 }}>
-            <label>รอบการต่ออายุ</label>
+          <div className="form-field">
+            <label className="form-label">รอบการต่ออายุ</label>
             <select
+              className="form-input"
               value={billingCycle}
               onChange={(e) => setBillingCycle(e.target.value as 'monthly' | 'yearly')}
-              style={{ width: '100%', padding: 8 }}
             >
               <option value="monthly">รายเดือน</option>
               <option value="yearly">รายปี</option>
             </select>
           </div>
 
-          <div style={{ marginBottom: 12 }}>
-            <label>วันที่ต่ออายุถัดไป</label>
+          <div className="form-field">
+            <label className="form-label">วันที่ต่ออายุถัดไป</label>
             <input
               type="date"
+              className="form-input"
               value={nextBillingDate}
               onChange={(e) => setNextBillingDate(e.target.value)}
               required
-              style={{ width: '100%', padding: 8 }}
             />
           </div>
 
-                    <div style={{ marginBottom: 16 }}>
-            <label>หมวดหมู่ (ไม่บังคับ)</label>
+          <div className="form-field" style={{ marginBottom: 20 }}>
+            <label className="form-label">หมวดหมู่ (ไม่บังคับ)</label>
             <input
               type="text"
               list="category-options"
+              className="form-input"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               placeholder="เลือกจากรายการ หรือพิมพ์เอง"
-              style={{ width: '100%', padding: 8 }}
             />
             <datalist id="category-options">
               <option value="Entertainment" />
@@ -170,13 +152,13 @@ export default function SubscriptionModal({ isOpen, onClose, editingSubscription
             </datalist>
           </div>
 
-          {error && <p style={{ color: 'red' }}>{error}</p>}
+          {error && <p className="auth-alert-error">{error}</p>}
 
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button type="submit" disabled={isSaving} style={{ padding: '8px 16px' }}>
+          <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+            <button type="submit" disabled={isSaving} className="btn-gradient-primary">
               {isSaving ? 'กำลังบันทึก...' : 'บันทึก'}
             </button>
-            <button type="button" onClick={onClose} style={{ padding: '8px 16px' }}>
+            <button type="button" onClick={onClose} className="btn-secondary">
               ยกเลิก
             </button>
           </div>

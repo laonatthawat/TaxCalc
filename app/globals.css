@@ -12,12 +12,9 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* แอปนี้ยังไม่มีดีไซน์สำหรับ dark mode (การ์ด/พื้นหลังทุกจุดเป็นโทนสว่างตายตัว) จึงตัดการสลับสี
+   ตาม prefers-color-scheme ออก — ไม่งั้นเครื่องที่ตั้ง dark mode จะได้ --foreground สีขาวเกือบสนิท
+   ทำให้ตัวหนังสือที่ไม่ได้ตั้งสีเอง (เช่น value ในช่องกรอกข้อมูล, หัวข้อ) จางจนอ่านไม่ออกบนการ์ดพื้นขาว */
 
 body {
   background: var(--background);
@@ -30,10 +27,23 @@ body {
 .auth-page {
   min-height: 100vh;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #eeedfe 0%, #e6f1fb 50%, #faece7 100%);
+  background:
+    radial-gradient(circle at 1px 1px, rgba(127, 119, 221, 0.16) 1px, transparent 0) 0 0 / 28px 28px,
+    linear-gradient(135deg, #eeedfe 0%, #e6f1fb 50%, #faece7 100%);
   padding: 24px;
+}
+
+/* หน้า dashboard ใช้ gradient พื้นหลังเดียวกับหน้า login/signup (+ ลวดลายจุดจางๆ เพิ่มความมีชีวิตชีวา)
+   เพื่อให้ธีมเข้ากันทั้งแอป ต่างกันตรงที่ dashboard เนื้อหายาว/สูงไม่เท่ากัน จึงจัดชิดบนแทนการ center แนวตั้งแบบ auth */
+.dashboard-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 1px 1px, rgba(127, 119, 221, 0.16) 1px, transparent 0) 0 0 / 28px 28px,
+    linear-gradient(135deg, #eeedfe 0%, #e6f1fb 50%, #faece7 100%);
+  padding: 24px 0 48px;
 }
 
 .auth-card {
@@ -55,14 +65,14 @@ body {
 .auth-subtitle {
   margin: 0 0 28px;
   font-size: 13px;
-  color: #8a8a92;
+  color: #47474f;
 }
 
-.auth-field {
+.form-field {
   margin-bottom: 16px;
 }
 
-.auth-label {
+.form-label {
   display: block;
   font-size: 13px;
   font-weight: 500;
@@ -70,7 +80,7 @@ body {
   margin-bottom: 6px;
 }
 
-.auth-input {
+.form-input {
   width: 100%;
   padding: 11px 14px;
   font-size: 14px;
@@ -78,10 +88,17 @@ body {
   border: 1px solid #e5e5ea;
   outline: none;
   box-sizing: border-box;
+  font-family: inherit;
+  color: #2b2b33;
+  background: #ffffff;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 
-.auth-input:focus {
+.form-input::placeholder {
+  color: #a9a9b2;
+}
+
+.form-input:focus {
   border-color: #afa9ec;
   box-shadow: 0 0 0 3px rgba(175, 169, 236, 0.25);
 }
@@ -130,15 +147,102 @@ body {
   margin: 24px 0 0;
   text-align: center;
   font-size: 13px;
-  color: #8a8a92;
+  color: #47474f;
 }
 
 .auth-footer-link a {
-  color: #7f77dd;
+  color: #6552cc;
   font-weight: 600;
   text-decoration: none;
 }
 
 .auth-footer-link a:hover {
   text-decoration: underline;
+}
+
+/* ===== Buttons ===== */
+
+.btn-secondary {
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #4a4a52;
+  background: #f5f4f0;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-secondary:hover {
+  background: #ecead4;
+}
+
+.btn-secondary-danger {
+  padding: 7px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #993c1d;
+  background: #faece7;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-secondary-danger:hover {
+  background: #f5c4b3;
+}
+
+/* ===== Modal (add/edit subscription) ===== */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(43, 43, 51, 0.45);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 50;
+}
+
+.modal-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 28px 28px 24px;
+  width: 400px;
+  max-width: 100%;
+  box-shadow: 0 20px 60px -20px rgba(43, 43, 51, 0.45);
+}
+
+.modal-title {
+  margin: 0 0 20px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #2b2b33;
+}
+
+/* ===== Renewal countdown badge ===== */
+
+.renewal-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.renewal-badge-urgent {
+  background: linear-gradient(135deg, #f5c4b3, #faece7);
+  color: #993c1d;
+}
+
+.renewal-badge-normal {
+  background: #f1efe8;
+  color: #47474f;
 }

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import Logo from '@/components/Logo'
 
 export default function SignupPage() {
   const [email, setEmail] = useState('')
@@ -38,26 +39,29 @@ export default function SignupPage() {
 
   return (
     <div className="auth-page">
+      <div style={{ marginBottom: 20 }}>
+        <Logo />
+      </div>
       <div className="auth-card">
         <h1 className="auth-title">สมัครสมาชิก</h1>
         <p className="auth-subtitle">สร้างบัญชีเพื่อเริ่มติดตาม subscription ของคุณ</p>
 
         <form onSubmit={handleSignup}>
-          <div className="auth-field">
-            <label className="auth-label">Email</label>
+          <div className="form-field">
+            <label className="form-label">Email</label>
             <input
               type="email"
-              className="auth-input"
+              className="form-input"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
-          <div className="auth-field">
-            <label className="auth-label">Password</label>
+          <div className="form-field">
+            <label className="form-label">Password</label>
             <input
               type="password"
-              className="auth-input"
+              className="form-input"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required

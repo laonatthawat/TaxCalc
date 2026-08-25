@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import Logo from '@/components/Logo'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -35,26 +36,29 @@ export default function LoginPage() {
 
   return (
     <div className="auth-page">
+      <div style={{ marginBottom: 20 }}>
+        <Logo />
+      </div>
       <div className="auth-card">
         <h1 className="auth-title">เข้าสู่ระบบ</h1>
         <p className="auth-subtitle">เข้าสู่ระบบเพื่อดู subscription ของคุณ</p>
 
         <form onSubmit={handleLogin}>
-          <div className="auth-field">
-            <label className="auth-label">Email</label>
+          <div className="form-field">
+            <label className="form-label">Email</label>
             <input
               type="email"
-              className="auth-input"
+              className="form-input"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
-          <div className="auth-field">
-            <label className="auth-label">Password</label>
+          <div className="form-field">
+            <label className="form-label">Password</label>
             <input
               type="password"
-              className="auth-input"
+              className="form-input"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required

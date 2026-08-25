@@ -58,3 +58,30 @@ export function getUpcomingRenewals(subscriptions: Subscription[], daysAhead: nu
     return billingDate >= today && billingDate <= cutoff
   })
 }
+
+// เรียง subscription ตามวันต่ออายุที่ใกล้ที่สุดก่อน
+export function sortByNextBilling(subscriptions: Subscription[]) {
+  return [...subscriptions].sort(
+    (a, b) => new Date(a.next_billing_date).getTime() - new Date(b.next_billing_date).getTime()
+  )
+}
+
+// จำนวนวันที่เหลือถึงวันต่ออายุ (ติดลบ = เลยกำหนดมาแล้วกี่วัน)
+export function getDaysUntilRenewal(dateStr: string): number {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
+  const billingDate = new Date(dateStr)
+  billingDate.setHours(0, 0, 0, 0)
+
+  const diffMs = billingDate.getTime() - today.getTime()
+  return Math.round(diffMs / (1000 * 60 * 60 * 24))
+}
+
+// แปลงจำนวนวันเป็นข้อความอ่านง่าย เช่น "อีก 3 วัน", "พรุ่งนี้", "เลยกำหนด 2 วัน"
+export function formatDaysUntilRenewal(days: number): string {
+  if (days < 0) return `เลยกำหนด ${Math.abs(days)} วัน`
+  if (days === 0) return 'ต่ออายุวันนี้'
+  if (days === 1) return 'พรุ่งนี้'
+  return `อีก ${days} วัน`
+}
