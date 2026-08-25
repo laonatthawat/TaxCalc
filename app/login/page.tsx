@@ -8,11 +8,13 @@ export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const router = useRouter()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    setIsSubmitting(true)
 
     const supabase = createClient()
 
@@ -23,6 +25,7 @@ export default function LoginPage() {
 
     if (error) {
       setError(error.message)
+      setIsSubmitting(false)
       return
     }
 
@@ -31,37 +34,43 @@ export default function LoginPage() {
   }
 
   return (
-    <div style={{ maxWidth: 400, margin: '80px auto', padding: 20 }}>
-      <h1>เข้าสู่ระบบ</h1>
-      <form onSubmit={handleLogin}>
-        <div style={{ marginBottom: 12 }}>
-          <label>Email</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            style={{ width: '100%', padding: 8 }}
-          />
-        </div>
-        <div style={{ marginBottom: 12 }}>
-          <label>Password</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            style={{ width: '100%', padding: 8 }}
-          />
-        </div>
-        <button type="submit" style={{ padding: '8px 16px' }}>
-          เข้าสู่ระบบ
-        </button>
-      </form>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      <p>
-        ยังไม่มีบัญชี? <a href="/signup">สมัครสมาชิก</a>
-      </p>
+    <div className="auth-page">
+      <div className="auth-card">
+        <h1 className="auth-title">เข้าสู่ระบบ</h1>
+        <p className="auth-subtitle">เข้าสู่ระบบเพื่อดู subscription ของคุณ</p>
+
+        <form onSubmit={handleLogin}>
+          <div className="auth-field">
+            <label className="auth-label">Email</label>
+            <input
+              type="email"
+              className="auth-input"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div className="auth-field">
+            <label className="auth-label">Password</label>
+            <input
+              type="password"
+              className="auth-input"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          <button type="submit" className="btn-gradient-primary" disabled={isSubmitting}>
+            {isSubmitting ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบ'}
+          </button>
+        </form>
+
+        {error && <p className="auth-alert-error">{error}</p>}
+
+        <p className="auth-footer-link">
+          ยังไม่มีบัญชี? <a href="/signup">สมัครสมาชิก</a>
+        </p>
+      </div>
     </div>
   )
 }

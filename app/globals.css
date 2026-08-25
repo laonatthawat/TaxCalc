@@ -24,3 +24,121 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* ===== Auth pages (login / signup) — pastel theme ===== */
+
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #eeedfe 0%, #e6f1fb 50%, #faece7 100%);
+  padding: 24px;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 400px;
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 40px 36px;
+  box-shadow: 0 20px 60px -20px rgba(127, 119, 221, 0.35);
+}
+
+.auth-title {
+  margin: 0 0 6px;
+  font-size: 22px;
+  font-weight: 600;
+  color: #2b2b33;
+}
+
+.auth-subtitle {
+  margin: 0 0 28px;
+  font-size: 13px;
+  color: #8a8a92;
+}
+
+.auth-field {
+  margin-bottom: 16px;
+}
+
+.auth-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: #4a4a52;
+  margin-bottom: 6px;
+}
+
+.auth-input {
+  width: 100%;
+  padding: 11px 14px;
+  font-size: 14px;
+  border-radius: 10px;
+  border: 1px solid #e5e5ea;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.auth-input:focus {
+  border-color: #afa9ec;
+  box-shadow: 0 0 0 3px rgba(175, 169, 236, 0.25);
+}
+
+.btn-gradient-primary {
+  width: 100%;
+  padding: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #afa9ec, #7f77dd);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.btn-gradient-primary:hover {
+  opacity: 0.9;
+}
+
+.btn-gradient-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.auth-alert-error {
+  margin-top: 16px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #f5c4b3, #faece7);
+  color: #993c1d;
+  font-size: 13px;
+}
+
+.auth-alert-success {
+  margin-top: 16px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #9fe1cb, #e1f5ee);
+  color: #0f6e56;
+  font-size: 13px;
+}
+
+.auth-footer-link {
+  margin: 24px 0 0;
+  text-align: center;
+  font-size: 13px;
+  color: #8a8a92;
+}
+
+.auth-footer-link a {
+  color: #7f77dd;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-footer-link a:hover {
+  text-decoration: underline;
+}
