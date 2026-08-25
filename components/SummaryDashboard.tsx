@@ -21,10 +21,15 @@ import {
   getMonthlyComparisonData,
   groupByDayOfMonth,
   getUpcomingRenewals,
+  getDaysUntilRenewal,
+  formatDaysUntilRenewal,
+  sortByNextBilling,
 } from '@/lib/subscriptionUtils'
+import PainMeter from './PainMeter'
 
 type Props = {
   subscriptions: Subscription[]
+  monthlyBudget: number | null
 }
 
 const COLORS = ['#6366f1', '#ec4899', '#f59e0b', '#10b981', '#3b82f6', '#ef4444', '#8b5cf6']
@@ -50,12 +55,13 @@ function HeroDots() {
   )
 }
 
-export default function SummaryDashboard({ subscriptions }: Props) {
+export default function SummaryDashboard({ subscriptions, monthlyBudget }: Props) {
   const { totalMonthly, totalYearly } = calculateTotals(subscriptions)
   const categoryData = groupByCategory(subscriptions)
   const barData = getMonthlyComparisonData(subscriptions)
   const dayOfMonthData = groupByDayOfMonth(subscriptions)
-  const upcomingRenewals = getUpcomingRenewals(subscriptions, RENEWAL_ALERT_DAYS)
+  // เรียงเอาตัวที่เลยกำหนดมานานสุด/ใกล้ครบกำหนดสุดขึ้นก่อน จะได้เห็นตัวที่เร่งด่วนที่สุดบนสุด
+  const upcomingRenewals = sortByNextBilling(getUpcomingRenewals(subscriptions, RENEWAL_ALERT_DAYS))
 
   return (
     <div style={{ marginBottom: 32 }}>
@@ -70,18 +76,24 @@ export default function SummaryDashboard({ subscriptions }: Props) {
             color: '#993C1D',
           }}
         >
-          <strong>⚠️ ใกล้ถึงวันต่ออายุ (ภายใน {RENEWAL_ALERT_DAYS} วัน)</strong>
+          <strong>⚠️ ใกล้ถึง/เลยกำหนดจ่าย (ภายใน {RENEWAL_ALERT_DAYS} วัน หรือค้างจ่ายอยู่)</strong>
           <ul style={{ margin: '8px 0 0', paddingLeft: 20 }}>
-            {upcomingRenewals.map((sub) => (
-              <li key={sub.id}>
-                {sub.name} — ต่ออายุวันที่{' '}
-                {new Date(sub.next_billing_date).toLocaleDateString('th-TH')} (฿
-                {sub.price.toLocaleString()})
-              </li>
-            ))}
+            {upcomingRenewals.map((sub) => {
+              const daysUntil = getDaysUntilRenewal(sub.next_billing_date)
+              return (
+                <li key={sub.id}>
+                  <strong>{formatDaysUntilRenewal(daysUntil)}</strong> — {sub.name} (฿
+                  {sub.price.toLocaleString()}) ครบกำหนดวันที่{' '}
+                  {new Date(sub.next_billing_date).toLocaleDateString('th-TH')}
+                </li>
+              )
+            })}
           </ul>
         </div>
       )}
+
+      {/* มิเตอร์ความเจ็บ: เทียบยอดรวมต่อเดือนกับงบที่ตั้งไว้ หน้าแมวเปลี่ยนอารมณ์ตาม % ที่ใช้ไป */}
+      <PainMeter monthlyBudget={monthlyBudget} totalMonthly={totalMonthly} />
 
       {/* การ์ด hero: ยอดรวมต่อเดือนเด่นเป็นจุดสนใจหลัก + สถิติย่อย (ต่อปี, จำนวน) แปะไว้ด้านล่างในการ์ดเดียวกัน */}
       <div
@@ -143,7 +155,7 @@ export default function SummaryDashboard({ subscriptions }: Props) {
               <Layers size={15} color="#ffffff" />
             </div>
             <div>
-              <p style={{ margin: 0, fontSize: 11, color: 'rgba(255,255,255,0.85)' }}>Subscription</p>
+              <p style={{ margin: 0, fontSize: 11, color: 'rgba(255,255,255,0.85)' }}>รายการทั้งหมด</p>
               <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>{subscriptions.length} รายการ</p>
             </div>
           </div>

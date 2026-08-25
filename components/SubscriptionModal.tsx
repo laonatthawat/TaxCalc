@@ -18,6 +18,26 @@ type Props = {
   editingSubscription: Subscription | null
 }
 
+// รายการหมวดหมู่แนะนำ — ใช้กับ dropdown ที่สไตล์เอง แทน <datalist> ของ browser
+// (datalist ของแต่ละ browser หน้าตาไม่เหมือนกันเลย แก้สีแก้ฟอนต์เองไม่ได้)
+const CATEGORY_OPTIONS = [
+  'ที่พัก/ค่าเช่า',
+  'ค่าน้ำ-ไฟ-เน็ต',
+  'ค่าโทรศัพท์',
+  'ค่าผ่อน',
+  'ประกัน',
+  'เดินทาง',
+  'Entertainment',
+  'Productivity',
+  'Music',
+  'Cloud Storage',
+  'Software',
+  'Fitness',
+  'Education',
+  'Gaming',
+  'อื่นๆ',
+]
+
 export default function SubscriptionModal({ isOpen, onClose, editingSubscription }: Props) {
   const [name, setName] = useState('')
   const [price, setPrice] = useState('')
@@ -26,6 +46,7 @@ export default function SubscriptionModal({ isOpen, onClose, editingSubscription
   const [category, setCategory] = useState('')
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState('')
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false)
 
   // เมื่อเปิด modal สำหรับ "แก้ไข" ให้เติมค่าเดิมลงในฟอร์ม
   useEffect(() => {
@@ -81,7 +102,7 @@ export default function SubscriptionModal({ isOpen, onClose, editingSubscription
       {/* กล่อง modal เอง: stopPropagation กันไม่ให้คลิกข้างในแล้วปิดตัวเอง */}
       <div className="modal-card" onClick={(e) => e.stopPropagation()}>
         <h2 className="modal-title">
-          {editingSubscription ? 'แก้ไข Subscription' : 'เพิ่ม Subscription'}
+          {editingSubscription ? 'แก้ไขรายจ่ายประจำ' : 'เพิ่มรายจ่ายประจำ'}
         </h2>
         <form onSubmit={handleSubmit}>
           <div className="form-field">
@@ -108,7 +129,7 @@ export default function SubscriptionModal({ isOpen, onClose, editingSubscription
           </div>
 
           <div className="form-field">
-            <label className="form-label">รอบการต่ออายุ</label>
+            <label className="form-label">รอบการจ่าย</label>
             <select
               className="form-input"
               value={billingCycle}
@@ -120,7 +141,7 @@ export default function SubscriptionModal({ isOpen, onClose, editingSubscription
           </div>
 
           <div className="form-field">
-            <label className="form-label">วันที่ต่ออายุถัดไป</label>
+            <label className="form-label">วันที่ครบกำหนดจ่ายถัดไป</label>
             <input
               type="date"
               className="form-input"
@@ -130,26 +151,44 @@ export default function SubscriptionModal({ isOpen, onClose, editingSubscription
             />
           </div>
 
-          <div className="form-field" style={{ marginBottom: 20 }}>
+          <div className="form-field" style={{ marginBottom: 20, position: 'relative' }}>
             <label className="form-label">หมวดหมู่ (ไม่บังคับ)</label>
             <input
               type="text"
-              list="category-options"
               className="form-input"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
+              onFocus={() => setIsCategoryOpen(true)}
+              onBlur={() => setTimeout(() => setIsCategoryOpen(false), 120)}
               placeholder="เลือกจากรายการ หรือพิมพ์เอง"
+              autoComplete="off"
             />
-            <datalist id="category-options">
-              <option value="Entertainment" />
-              <option value="Productivity" />
-              <option value="Music" />
-              <option value="Cloud Storage" />
-              <option value="Software" />
-              <option value="Fitness" />
-              <option value="Education" />
-              <option value="Gaming" />
-            </datalist>
+            {isCategoryOpen &&
+              (() => {
+                const filtered = CATEGORY_OPTIONS.filter((option) =>
+                  option.toLowerCase().includes(category.toLowerCase())
+                )
+                if (filtered.length === 0) return null
+
+                return (
+                  <div className="select-dropdown">
+                    {filtered.map((option) => (
+                      <div
+                        key={option}
+                        className="select-dropdown-item"
+                        // ใช้ onMouseDown แทน onClick เพราะ onBlur ของ input จะทำงานก่อน onClick เสมอ
+                        // (mousedown เกิดก่อน blur ทำให้เลือกตัวเลือกได้ก่อนที่ dropdown จะถูกปิด)
+                        onMouseDown={() => {
+                          setCategory(option)
+                          setIsCategoryOpen(false)
+                        }}
+                      >
+                        {option}
+                      </div>
+                    ))}
+                  </div>
+                )
+              })()}
           </div>
 
           {error && <p className="auth-alert-error">{error}</p>}

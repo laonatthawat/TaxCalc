@@ -22,10 +22,18 @@ export default async function DashboardPage() {
     return <p>เกิดข้อผิดพลาดในการโหลดข้อมูล: {error.message}</p>
   }
 
+  // งบรายจ่ายต่อเดือนของ user (สำหรับการ์ด "มิเตอร์ความเจ็บ") — ไม่ error ถ้ายังไม่เคยตั้งงบ (ยังไม่มีแถว)
+  const { data: settings } = await supabase
+    .from('user_settings')
+    .select('monthly_budget')
+    .eq('user_id', user.id)
+    .maybeSingle()
+
   return (
     <DashboardClient
       initialSubscriptions={subscriptions ?? []}
       userEmail={user.email ?? ''}
+      monthlyBudget={settings?.monthly_budget ?? null}
     />
   )
 }

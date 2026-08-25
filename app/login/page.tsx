@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Logo from '@/components/Logo'
+import CatMascot from '@/components/CatMascot'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -40,8 +41,11 @@ export default function LoginPage() {
         <Logo />
       </div>
       <div className="auth-card">
+        <div className="auth-card-cat">
+          <CatMascot size={72} />
+        </div>
         <h1 className="auth-title">เข้าสู่ระบบ</h1>
-        <p className="auth-subtitle">เข้าสู่ระบบเพื่อดู subscription ของคุณ</p>
+        <p className="auth-subtitle">เข้าสู่ระบบเพื่อดูรายจ่ายประจำของคุณ</p>
 
         <form onSubmit={handleLogin}>
           <div className="form-field">

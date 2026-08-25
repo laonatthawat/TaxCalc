@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "จ่ายจนเจ็บ — ติดตาม Subscription ของคุณ",
+  title: "จ่ายจนเจ็บ — ติดตามรายจ่ายประจำของคุณ",
   description:
-    "แอปติดตามค่าใช้จ่าย subscription รายเดือน/รายปี พร้อมแจ้งเตือนก่อนต่ออายุ ก่อนจะจ่ายจนเจ็บ",
+    "แอปคำนวณรายจ่ายประจำรายเดือน/รายปี (ค่าเช่า ค่าน้ำค่าไฟ ค่าผ่อน subscription ฯลฯ) พร้อมแจ้งเตือนก่อนถึงกำหนดจ่าย ก่อนจะจ่ายจนเจ็บ",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

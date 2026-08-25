@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Logo from '@/components/Logo'
+import CatMascot from '@/components/CatMascot'
 
 export default function SignupPage() {
   const [email, setEmail] = useState('')
@@ -43,8 +44,11 @@ export default function SignupPage() {
         <Logo />
       </div>
       <div className="auth-card">
+        <div className="auth-card-cat">
+          <CatMascot size={72} />
+        </div>
         <h1 className="auth-title">สมัครสมาชิก</h1>
-        <p className="auth-subtitle">สร้างบัญชีเพื่อเริ่มติดตาม subscription ของคุณ</p>
+        <p className="auth-subtitle">สร้างบัญชีเพื่อเริ่มติดตามรายจ่ายประจำของคุณ</p>
 
         <form onSubmit={handleSignup}>
           <div className="form-field">

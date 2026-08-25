@@ -6,9 +6,10 @@ import { sortByNextBilling, getDaysUntilRenewal, formatDaysUntilRenewal } from '
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Logo from './Logo'
+import CatMascot from './CatMascot'
 import SubscriptionModal from './SubscriptionModal'
 import SummaryDashboard from './SummaryDashboard'
-import { deleteSubscription, signOut } from '@/app/dashboard/actions'
+import { deleteSubscription, markSubscriptionAsPaid, signOut } from '@/app/dashboard/actions'
 
 type Subscription = {
   id: string
@@ -22,14 +23,16 @@ type Subscription = {
 type Props = {
   initialSubscriptions: Subscription[]
   userEmail: string
+  monthlyBudget: number | null
 }
 
 // จำนวนวันที่ถือว่า "ใกล้ต่ออายุ" แล้วให้ badge เปลี่ยนเป็นสีเตือน
 const URGENT_RENEWAL_DAYS = 3
 
-export default function DashboardClient({ initialSubscriptions, userEmail }: Props) {
+export default function DashboardClient({ initialSubscriptions, userEmail, monthlyBudget }: Props) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null)
+  const [markingPaidId, setMarkingPaidId] = useState<string | null>(null)
   const router = useRouter()
 
   // เรียงตามวันต่ออายุที่ใกล้ที่สุดก่อน จะได้เห็นอันที่ต้องจ่ายเร็วๆ นี้ก่อน
@@ -51,7 +54,7 @@ export default function DashboardClient({ initialSubscriptions, userEmail }: Pro
   }
 
   const handleDelete = async (id: string) => {
-    const confirmed = window.confirm('ยืนยันลบ subscription นี้?')
+    const confirmed = window.confirm('ยืนยันลบรายการนี้?')
     if (!confirmed) return
 
     await deleteSubscription(id)
@@ -60,6 +63,18 @@ export default function DashboardClient({ initialSubscriptions, userEmail }: Pro
 
   const handleLogout = async () => {
     await signOut()
+  }
+
+  // checkbox "จ่ายแล้ว": เลื่อนวันครบกำหนดของรายการนี้ไปรอบถัดไปเลย (ดูฟังก์ชัน markSubscriptionAsPaid)
+  // ไม่ได้เก็บสถานะ "จ่ายแล้ว/ยัง" ค้างไว้ เพราะพอเลื่อนรอบใหม่แล้วก็ถือว่ายังไม่จ่ายของรอบใหม่อยู่ดี
+  const handleMarkAsPaid = async (id: string) => {
+    setMarkingPaidId(id)
+    try {
+      await markSubscriptionAsPaid(id)
+      router.refresh()
+    } finally {
+      setMarkingPaidId(null)
+    }
   }
 
   return (
@@ -96,7 +111,7 @@ export default function DashboardClient({ initialSubscriptions, userEmail }: Pro
                 padding: '10px 18px',
               }}
             >
-              <Plus size={16} /> เพิ่ม Subscription
+              <Plus size={16} /> เพิ่มรายจ่าย
             </button>
             <button onClick={handleLogout} className="btn-secondary">
               ออกจากระบบ
@@ -104,10 +119,10 @@ export default function DashboardClient({ initialSubscriptions, userEmail }: Pro
           </div>
         </div>
 
-        <SummaryDashboard subscriptions={subscriptions} />
+        <SummaryDashboard subscriptions={subscriptions} monthlyBudget={monthlyBudget} />
 
         <h2 style={{ fontSize: 16, fontWeight: 600, color: '#2b2b33', margin: '0 0 14px' }}>
-          รายการ Subscription
+          รายการรายจ่ายประจำ
         </h2>
 
         {subscriptions.length === 0 ? (
@@ -120,25 +135,15 @@ export default function DashboardClient({ initialSubscriptions, userEmail }: Pro
               border: '0.5px solid #ececE5',
             }}
           >
-            <div
-              style={{
-                width: 56,
-                height: 56,
-                margin: '0 auto 16px',
-                borderRadius: '50%',
-                background: 'linear-gradient(135deg, #AFA9EC, #7F77DD)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <Plus size={26} color="#ffffff" />
+            {/* แมวมาสคอตนั่งเฉาๆ แทนไอคอนวงกลมเดิม — สื่อว่า "ยังไม่มีอะไรให้ดูเลย" น่ารักกว่าเดิม */}
+            <div style={{ margin: '0 auto 8px', display: 'flex', justifyContent: 'center' }}>
+              <CatMascot size={110} />
             </div>
             <p style={{ margin: '0 0 4px', fontWeight: 500, color: '#2b2b33' }}>
-              ยังไม่มี subscription เลย
+              ยังไม่มีรายจ่ายประจำเลย
             </p>
             <p style={{ margin: '0 0 20px', fontSize: 13, color: '#47474f' }}>
-              เริ่มเพิ่ม subscription แรกของคุณเพื่อเริ่มติดตามค่าใช้จ่าย
+              เริ่มเพิ่มรายจ่ายประจำแรกของคุณเพื่อเริ่มติดตามค่าใช้จ่าย
             </p>
             <button
               onClick={openAddModal}
@@ -151,7 +156,7 @@ export default function DashboardClient({ initialSubscriptions, userEmail }: Pro
                 padding: '10px 20px',
               }}
             >
-              <Plus size={16} /> เพิ่ม Subscription
+              <Plus size={16} /> เพิ่มรายจ่าย
             </button>
           </div>
         ) : (
@@ -236,6 +241,29 @@ export default function DashboardClient({ initialSubscriptions, userEmail }: Pro
                       {formatDaysUntilRenewal(daysUntil)}
                     </span>
                   </div>
+
+                  {/* checkbox จ่ายแล้ว: กดแล้วเลื่อนวันครบกำหนดไปรอบถัดไปให้อัตโนมัติ
+                      (ไม่ค้างสถานะติ๊กไว้ เพราะรอบใหม่ก็ถือว่ายังไม่จ่ายอยู่ดี) */}
+                  <label
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      fontSize: 12,
+                      color: '#47474f',
+                      margin: '0 0 12px',
+                      cursor: markingPaidId === sub.id ? 'wait' : 'pointer',
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={markingPaidId === sub.id}
+                      disabled={markingPaidId === sub.id}
+                      onChange={() => handleMarkAsPaid(sub.id)}
+                      style={{ width: 16, height: 16, accentColor: '#7F77DD', cursor: 'inherit' }}
+                    />
+                    {markingPaidId === sub.id ? 'กำลังบันทึก...' : 'จ่ายแล้ว (เลื่อนรอบถัดไป)'}
+                  </label>
 
                   <div style={{ display: 'flex', gap: 8 }}>
                     <button
