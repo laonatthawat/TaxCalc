@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Logo from '@/components/Logo'
+import MountainBackdrop from '@/components/MountainBackdrop'
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
@@ -14,6 +15,12 @@ export default function ForgotPasswordPage() {
     e.preventDefault()
     setError('')
     setMessage('')
+
+    if (!email.trim()) {
+      setError('กรุณากรอกอีเมล')
+      return
+    }
+
     setIsSubmitting(true)
 
     const supabase = createClient()
@@ -36,14 +43,17 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="auth-page">
-      <div style={{ marginBottom: 20 }}>
+      <MountainBackdrop />
+      <div style={{ marginBottom: 20, position: 'relative', zIndex: 1 }}>
         <Logo />
       </div>
       <div className="auth-card">
         <h1 className="auth-title">ลืมรหัสผ่าน</h1>
         <p className="auth-subtitle">กรอกอีเมลที่ใช้สมัคร เราจะส่งลิงก์สำหรับตั้งรหัสผ่านใหม่ให้</p>
 
-        <form onSubmit={handleSubmit}>
+        {/* noValidate: ปิด popup แจ้งเตือนของ browser เอง (หน้าตาไม่เข้าธีม, เป็นภาษาอังกฤษ)
+            แล้วโชว์ error ของเราเองแทนผ่าน .auth-alert-error ด้านล่างฟอร์ม */}
+        <form onSubmit={handleSubmit} noValidate>
           <div className="form-field">
             <label className="form-label">Email</label>
             <input

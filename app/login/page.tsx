@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Logo from '@/components/Logo'
 import CatMascot from '@/components/CatMascot'
+import MountainBackdrop from '@/components/MountainBackdrop'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -16,6 +17,12 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+
+    if (!email.trim() || !password.trim()) {
+      setError('กรุณากรอกอีเมลและรหัสผ่านให้ครบ')
+      return
+    }
+
     setIsSubmitting(true)
 
     const supabase = createClient()
@@ -37,17 +44,20 @@ export default function LoginPage() {
 
   return (
     <div className="auth-page">
-      <div style={{ marginBottom: 20 }}>
+      <MountainBackdrop />
+      <div style={{ marginBottom: 20, position: 'relative', zIndex: 1 }}>
         <Logo />
       </div>
       <div className="auth-card">
         <div className="auth-card-cat">
-          <CatMascot size={72} />
+          <CatMascot size={72} variant="tabby" />
         </div>
         <h1 className="auth-title">เข้าสู่ระบบ</h1>
         <p className="auth-subtitle">เข้าสู่ระบบเพื่อดูรายจ่ายประจำของคุณ</p>
 
-        <form onSubmit={handleLogin}>
+        {/* noValidate: ปิด popup แจ้งเตือนของ browser เอง (หน้าตาไม่เข้าธีม, เป็นภาษาอังกฤษ)
+            แล้วโชว์ error ของเราเองแทนผ่าน .auth-alert-error ด้านล่างฟอร์ม */}
+        <form onSubmit={handleLogin} noValidate>
           <div className="form-field">
             <label className="form-label">Email</label>
             <input

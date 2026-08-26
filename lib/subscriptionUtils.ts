@@ -20,6 +20,8 @@ export function calculateTotals(subscriptions: Subscription[]) {
 }
 
 // จัดกลุ่มยอดตามหมวดหมู่ สำหรับกราฟวงกลม
+// เรียงจากหมวดที่ยอดรวมมากไปน้อยเสมอ (ไม่เรียงตามลำดับที่ user เพิ่ม subscription เข้ามา)
+// เพื่อให้กลีบวงกลมเรียงใหญ่ -> เล็กตามเข็มนาฬิกา อ่านสัดส่วนได้ง่ายขึ้น แทนที่จะสลับมั่วๆ
 export function groupByCategory(subscriptions: Subscription[]) {
   const map = new Map<string, number>()
 
@@ -29,10 +31,12 @@ export function groupByCategory(subscriptions: Subscription[]) {
     map.set(key, current + toMonthlyPrice(sub))
   })
 
-  return Array.from(map.entries()).map(([category, value]) => ({
-    name: category,
-    value: Math.round(value * 100) / 100,
-  }))
+  return Array.from(map.entries())
+    .map(([category, value]) => ({
+      name: category,
+      value: Math.round(value * 100) / 100,
+    }))
+    .sort((a, b) => b.value - a.value)
 }
 
 // ข้อมูลสำหรับกราฟแท่ง เทียบค่าใช้จ่ายรายเดือนของแต่ละ subscription

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Logo from '@/components/Logo'
+import MountainBackdrop from '@/components/MountainBackdrop'
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState('')
@@ -31,6 +32,16 @@ export default function ResetPasswordPage() {
     e.preventDefault()
     setError('')
 
+    if (!password.trim() || !confirmPassword.trim()) {
+      setError('กรุณากรอกรหัสผ่านให้ครบทุกช่อง')
+      return
+    }
+
+    if (password.length < 6) {
+      setError('รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร')
+      return
+    }
+
     if (password !== confirmPassword) {
       setError('รหัสผ่านทั้งสองช่องไม่ตรงกัน')
       return
@@ -53,7 +64,8 @@ export default function ResetPasswordPage() {
 
   return (
     <div className="auth-page">
-      <div style={{ marginBottom: 20 }}>
+      <MountainBackdrop />
+      <div style={{ marginBottom: 20, position: 'relative', zIndex: 1 }}>
         <Logo />
       </div>
       <div className="auth-card">
@@ -72,7 +84,9 @@ export default function ResetPasswordPage() {
           <>
             <p className="auth-subtitle">กรอกรหัสผ่านใหม่ที่ต้องการใช้</p>
 
-            <form onSubmit={handleSubmit}>
+            {/* noValidate: ปิด popup แจ้งเตือนของ browser เอง (หน้าตาไม่เข้าธีม, เป็นภาษาอังกฤษ)
+                แล้วโชว์ error ของเราเองแทนผ่าน .auth-alert-error ด้านล่างฟอร์ม */}
+            <form onSubmit={handleSubmit} noValidate>
               <div className="form-field">
                 <label className="form-label">รหัสผ่านใหม่</label>
                 <input

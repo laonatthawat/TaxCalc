@@ -16,6 +16,7 @@ import {
   CartesianGrid,
 } from 'recharts'
 import Logo from './Logo'
+import HelpTooltip from './HelpTooltip'
 import { signOut } from '@/app/dashboard/actions'
 import { saveInvestmentPlan } from '@/app/investments/actions'
 import { calculateProjection, calculateMonthlyProjection, findCrossoverPoints } from '@/lib/investmentUtils'
@@ -58,7 +59,9 @@ export default function InvestmentClient({ initialPlan, userEmail }: Props) {
   const [saveMessage, setSaveMessage] = useState('')
   const router = useRouter()
 
-  const yearsNum = Math.max(1, Math.min(50, Number(years) || 1))
+  const yearsRawNum = Number(years) || 0
+  const yearsNum = Math.max(1, Math.min(50, yearsRawNum || 1))
+  const isYearsClamped = yearsRawNum > 50
   const planInput = {
     initial_amount: Number(initialAmount) || 0,
     monthly_contribution: Number(monthlyContribution) || 0,
@@ -86,7 +89,17 @@ export default function InvestmentClient({ initialPlan, userEmail }: Props) {
   // หาจุดตัดทั้งหมด ไม่ใช่แค่จุดแรก เผื่อเงื่อนไขที่เส้นสลับตำแหน่งกันมากกว่า 1 ครั้ง
   const crossoverPoints = useMemo(() => findCrossoverPoints(chartData), [chartData])
   const finalYear = yearlyProjections[yearlyProjections.length - 1]
-  const yearTicks = useMemo(() => Array.from({ length: yearsNum + 1 }, (_, i) => i), [yearsNum])
+
+  // ระยะเวลายิ่งยาว ยิ่งต้อง "group" ป้ายกำกับบนแกน X ให้ห่างขึ้น ไม่งั้นตัวเลขทับกันจนอ่านไม่ออก
+  // (ระยะเวลา <=15 ปี โชว์ทุกปี, <=30 ปี โชว์ทีละ 2 ปี, มากกว่านั้นโชว์ทีละ 5 ปี — ข้อมูลกราฟยังละเอียดรายเดือนเหมือนเดิม
+  // แค่ป้ายบนแกนที่ห่างขึ้น เส้นโค้งจึงยังคมชัดเหมือนเดิม ไม่ได้ทำให้กราฟหยาบลง)
+  const yearTickStep = yearsNum > 30 ? 5 : yearsNum > 15 ? 2 : 1
+  const yearTicks = useMemo(() => {
+    const ticks: number[] = []
+    for (let y = 0; y <= yearsNum; y += yearTickStep) ticks.push(y)
+    if (ticks[ticks.length - 1] !== yearsNum) ticks.push(yearsNum)
+    return ticks
+  }, [yearsNum, yearTickStep])
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -126,6 +139,9 @@ export default function InvestmentClient({ initialPlan, userEmail }: Props) {
           <Link href="/tax" className="page-tab">
             ภาษี
           </Link>
+          <Link href="/overview" className="page-tab">
+            ภาพรวม
+          </Link>
         </div>
 
         <div
@@ -139,7 +155,23 @@ export default function InvestmentClient({ initialPlan, userEmail }: Props) {
           }}
         >
           <div>
-            <h1 style={{ margin: 0, fontSize: 22, color: '#2b2b33' }}>เครื่องคำนวณการลงทุน</h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <h1 style={{ margin: 0, fontSize: 22, color: '#2b2b33' }}>เครื่องคำนวณการลงทุน</h1>
+              <HelpTooltip title="วิธีใช้หน้าการลงทุน">
+                <p style={{ margin: '0 0 8px' }}>
+                  กรอกเงินต้นเริ่มต้น เงินลงทุนเพิ่มต่อเดือน อัตราผลตอบแทนต่อปีที่คาดหวัง และระยะเวลา
+                  (ปี) ระบบจะคำนวณดอกเบี้ยทบต้นให้
+                </p>
+                <p style={{ margin: '0 0 8px' }}>
+                  กราฟมี 2 เส้น: เงินที่คุณลงทุนไปเอง (เงินต้นสะสม) กับดอกเบี้ย/ผลตอบแทนที่ทบต้นให้
+                  (ดอกเบี้ยสะสม)
+                </p>
+                <p style={{ margin: 0 }}>
+                  จุดสีแดงบนกราฟคือ <b>จุดตัด</b> — ปีที่ดอกเบี้ยสะสมเริ่มมากกว่าเงินที่คุณลงเอง อาจมี
+                  มากกว่า 1 จุดได้ ตัวเลขทั้งหมดเป็นการประมาณการทางคณิตศาสตร์ ไม่ได้การันตีผลตอบแทนจริง
+                </p>
+              </HelpTooltip>
+            </div>
             <p style={{ color: '#47474f', margin: '4px 0 0' }}>{userEmail}</p>
           </div>
           <button onClick={handleLogout} className="btn-secondary">
@@ -206,6 +238,13 @@ export default function InvestmentClient({ initialPlan, userEmail }: Props) {
                 value={years}
                 onChange={(e) => setYears(e.target.value)}
               />
+              {/* เพดาน 50 ปีถูก clamp ไว้ในโค้ดอยู่แล้ว (yearsNum) แต่ถ้าไม่บอกผู้ใช้ พอพิมพ์เกินแล้วกราฟ
+                  เงียบๆ ไม่ขยับตามที่พิมพ์ จะดูเหมือนแอปค้าง — ข้อความนี้เลยอธิบายไว้ตรงๆ */}
+              <p style={{ margin: '6px 0 0', fontSize: 11, color: isYearsClamped ? '#e05555' : '#8a8a94', lineHeight: 1.5 }}>
+                {isYearsClamped
+                  ? `กรอกได้สูงสุด 50 ปี — ระบบปรับให้เป็น 50 ปีให้อัตโนมัติ`
+                  : 'คำนวณให้ได้สูงสุด 50 ปี'}
+              </p>
             </div>
           </div>
 

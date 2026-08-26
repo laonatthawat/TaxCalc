@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import Logo from './Logo'
 import CatMascot from './CatMascot'
 import IncomeModal from './IncomeModal'
+import HelpTooltip from './HelpTooltip'
 import { deleteIncome, markIncomeAsReceived } from '@/app/income/actions'
 import { signOut } from '@/app/dashboard/actions'
 import {
@@ -89,6 +90,9 @@ export default function IncomeClient({ initialIncomes, userEmail }: Props) {
           <Link href="/tax" className="page-tab">
             ภาษี
           </Link>
+          <Link href="/overview" className="page-tab">
+            ภาพรวม
+          </Link>
         </div>
 
         <div
@@ -102,7 +106,23 @@ export default function IncomeClient({ initialIncomes, userEmail }: Props) {
           }}
         >
           <div>
-            <h1 style={{ margin: 0, fontSize: 22, color: '#2b2b33' }}>รายรับของคุณ</h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <h1 style={{ margin: 0, fontSize: 22, color: '#2b2b33' }}>รายรับของคุณ</h1>
+              <HelpTooltip title="วิธีใช้หน้ารายรับ">
+                <p style={{ margin: '0 0 8px' }}>
+                  แบ่งเป็น <b>รายรับประจำ</b> (recurring เช่น เงินเดือน) กับ <b>ครั้งเดียว</b> (one-time
+                  เช่น โบนัส งาน freelance)
+                </p>
+                <p style={{ margin: '0 0 8px' }}>
+                  ตอนเพิ่มรายรับต้องเลือก &quot;ประเภทเงินได้ตามมาตรา 40&quot; เพื่อให้หน้าภาษีคำนวณ
+                  ค่าใช้จ่ายหักได้ถูกหมวด
+                </p>
+                <p style={{ margin: 0 }}>
+                  ประเภท &quot;เงินให้&quot; (จากพ่อแม่/คู่สมรส) นับเป็นรายรับในหน้านี้ แต่จะไม่ถูกนำไป
+                  คำนวณภาษี เพราะกฎหมายยกเว้นให้
+                </p>
+              </HelpTooltip>
+            </div>
             <p style={{ color: '#47474f', margin: '4px 0 0' }}>{userEmail}</p>
           </div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -172,7 +192,7 @@ export default function IncomeClient({ initialIncomes, userEmail }: Props) {
             }}
           >
             <div style={{ margin: '0 auto 8px', display: 'flex', justifyContent: 'center' }}>
-              <CatMascot size={110} />
+              <CatMascot size={110} variant="cream" />
             </div>
             <p style={{ margin: '0 0 4px', fontWeight: 500, color: '#2b2b33' }}>ยังไม่มีรายรับเลย</p>
             <p style={{ margin: '0 0 20px', fontSize: 13, color: '#47474f' }}>

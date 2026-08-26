@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import Logo, { APP_NAME } from '@/components/Logo'
 import CatMascot from '@/components/CatMascot'
+import MountainBackdrop from '@/components/MountainBackdrop'
 import { Wallet2, TrendingUp, Receipt, Landmark } from 'lucide-react'
 
 // การ์ดแนะนำ 4 โมดูลหลักของแอป — เรียงตามลำดับที่ผู้ใช้ควรเริ่มใช้งาน
@@ -45,14 +46,24 @@ export default async function Home() {
   }
 
   return (
-    <div className="dashboard-page">
-      <div style={{ maxWidth: 880, margin: '0 auto', padding: '48px 24px 24px', textAlign: 'center' }}>
+    <div className="landing-page">
+      <MountainBackdrop />
+      <div
+        style={{
+          maxWidth: 880,
+          margin: '0 auto',
+          padding: '48px 24px 24px',
+          textAlign: 'center',
+          position: 'relative',
+          zIndex: 1,
+        }}
+      >
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24 }}>
           <Logo size="lg" />
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}>
-          <CatMascot size={100} />
+          <CatMascot size={100} variant="lavender" />
         </div>
 
         <h1 style={{ fontSize: 30, fontWeight: 700, color: '#2b2b33', margin: '0 0 12px' }}>

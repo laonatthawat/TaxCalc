@@ -10,6 +10,7 @@ import Logo from './Logo'
 import CatMascot from './CatMascot'
 import SubscriptionModal from './SubscriptionModal'
 import SummaryDashboard from './SummaryDashboard'
+import HelpTooltip from './HelpTooltip'
 import { deleteSubscription, markSubscriptionAsPaid, signOut } from '@/app/dashboard/actions'
 
 type Subscription = {
@@ -104,6 +105,9 @@ export default function DashboardClient({
           <Link href="/tax" className="page-tab">
             ภาษี
           </Link>
+          <Link href="/overview" className="page-tab">
+            ภาพรวม
+          </Link>
         </div>
 
         <div
@@ -117,7 +121,21 @@ export default function DashboardClient({
           }}
         >
           <div>
-            <h1 style={{ margin: 0, fontSize: 22, color: '#2b2b33' }}>สวัสดี 👋</h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <h1 style={{ margin: 0, fontSize: 22, color: '#2b2b33' }}>สวัสดี 👋</h1>
+              <HelpTooltip title="วิธีใช้หน้ารายจ่าย">
+                <p style={{ margin: '0 0 8px' }}>
+                  หน้านี้แสดงค่าใช้จ่ายประจำที่คุณเพิ่มไว้ (ค่าเช่า ค่าน้ำค่าไฟ ค่าผ่อน subscription ฯลฯ)
+                </p>
+                <p style={{ margin: '0 0 8px' }}>
+                  <b>มิเตอร์ความเจ็บ</b> เทียบยอดใช้จ่ายรวมต่อเดือนกับงบที่คุณตั้งไว้ ยิ่งใกล้/เกินงบ
+                  หน้าแมวยิ่งดูเจ็บมากขึ้น กดที่มิเตอร์เพื่อตั้ง/แก้งบได้เลย
+                </p>
+                <p style={{ margin: 0 }}>
+                  กด &quot;ต่ออายุ&quot; เมื่อจ่ายแล้ว ระบบจะเลื่อนวันครบกำหนดของรอบถัดไปให้อัตโนมัติ
+                </p>
+              </HelpTooltip>
+            </div>
             <p style={{ color: '#47474f', margin: '4px 0 0' }}>{userEmail}</p>
           </div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -162,7 +180,7 @@ export default function DashboardClient({
           >
             {/* แมวมาสคอตนั่งเฉาๆ แทนไอคอนวงกลมเดิม — สื่อว่า "ยังไม่มีอะไรให้ดูเลย" น่ารักกว่าเดิม */}
             <div style={{ margin: '0 auto 8px', display: 'flex', justifyContent: 'center' }}>
-              <CatMascot size={110} />
+              <CatMascot size={110} variant="charcoal" />
             </div>
             <p style={{ margin: '0 0 4px', fontWeight: 500, color: '#2b2b33' }}>
               ยังไม่มีรายจ่ายประจำเลย

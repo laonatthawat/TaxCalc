@@ -30,10 +30,22 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background:
-    radial-gradient(circle at 1px 1px, rgba(127, 119, 221, 0.16) 1px, transparent 0) 0 0 / 28px 28px,
-    linear-gradient(135deg, #eeedfe 0%, #e6f1fb 50%, #faece7 100%);
+  position: relative;
+  overflow: hidden;
+  /* สีตกกันเผื่อกรอบแรกก่อน MountainBackdrop (SVG) จะ paint — ตรงกับสีท้องฟ้าบนสุดของ SVG นั้น */
+  background: #efeafb;
   padding: 24px;
+}
+
+/* หน้า landing (`/`) — มีพื้นหลัง MountainBackdrop (SVG ภูเขาซ้อนชั้น) ซ้อนอยู่เหมือนหน้า auth
+   แยก class จาก .dashboard-page เพราะหน้า dashboard/income/investments/tax/overview (ที่ล็อกอินแล้ว)
+   ยังใช้ลวดลายจุดแบบเดิม ไม่ใส่ภูเขา เพราะมีตาราง/ฟอร์มเยอะ พื้นหลังที่มีรายละเอียดจะรกเกินไป */
+.landing-page {
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+  background: #efeafb;
+  padding: 24px 0 48px;
 }
 
 /* หน้า dashboard ใช้ gradient พื้นหลังเดียวกับหน้า login/signup (+ ลวดลายจุดจางๆ เพิ่มความมีชีวิตชีวา)
@@ -48,6 +60,7 @@ body {
 
 .auth-card {
   position: relative;
+  z-index: 1; /* ต้องอยู่เหนือ MountainBackdrop (z-index: 0) เสมอ */
   width: 100%;
   max-width: 400px;
   background: #ffffff;

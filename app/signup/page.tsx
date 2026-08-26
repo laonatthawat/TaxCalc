@@ -5,6 +5,7 @@ import { Check, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import Logo from '@/components/Logo'
 import CatMascot from '@/components/CatMascot'
+import MountainBackdrop from '@/components/MountainBackdrop'
 
 export default function SignupPage() {
   const [email, setEmail] = useState('')
@@ -23,6 +24,16 @@ export default function SignupPage() {
     e.preventDefault()
     setError('')
     setMessage('')
+
+    if (!email.trim() || !password.trim() || !confirmPassword.trim()) {
+      setError('กรุณากรอกข้อมูลให้ครบทุกช่อง')
+      return
+    }
+
+    if (password.length < 6) {
+      setError('รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร')
+      return
+    }
 
     if (password !== confirmPassword) {
       setError('รหัสผ่านและยืนยันรหัสผ่านไม่ตรงกัน')
@@ -53,17 +64,20 @@ export default function SignupPage() {
 
   return (
     <div className="auth-page">
-      <div style={{ marginBottom: 20 }}>
+      <MountainBackdrop />
+      <div style={{ marginBottom: 20, position: 'relative', zIndex: 1 }}>
         <Logo />
       </div>
       <div className="auth-card">
         <div className="auth-card-cat">
-          <CatMascot size={72} />
+          <CatMascot size={72} variant="graytabby" />
         </div>
         <h1 className="auth-title">สมัครสมาชิก</h1>
         <p className="auth-subtitle">สร้างบัญชีเพื่อเริ่มติดตามรายจ่ายประจำของคุณ</p>
 
-        <form onSubmit={handleSignup}>
+        {/* noValidate: ปิด popup แจ้งเตือนของ browser เอง (หน้าตาไม่เข้าธีม, เป็นภาษาอังกฤษ)
+            แล้วโชว์ error ของเราเองแทนผ่าน .auth-alert-error ด้านล่างฟอร์ม */}
+        <form onSubmit={handleSignup} noValidate>
           <div className="form-field">
             <label className="form-label">Email</label>
             <input
