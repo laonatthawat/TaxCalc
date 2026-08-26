@@ -123,6 +123,9 @@ export default function InvestmentClient({ initialPlan, userEmail }: Props) {
             รายรับ
           </Link>
           <span className="page-tab page-tab-active">การลงทุน</span>
+          <Link href="/tax" className="page-tab">
+            ภาษี
+          </Link>
         </div>
 
         <div

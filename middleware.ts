@@ -33,8 +33,8 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // หน้าที่ต้อง login ก่อนถึงเข้าได้ (เผื่อ /tax ในอนาคต)
-  const protectedPrefixes = ['/dashboard', '/income', '/investments']
+  // หน้าที่ต้อง login ก่อนถึงเข้าได้
+  const protectedPrefixes = ['/dashboard', '/income', '/investments', '/tax']
   const isProtectedPath = protectedPrefixes.some((prefix) => request.nextUrl.pathname.startsWith(prefix))
 
   if (!user && isProtectedPath) {

@@ -86,6 +86,9 @@ export default function IncomeClient({ initialIncomes, userEmail }: Props) {
           <Link href="/investments" className="page-tab">
             การลงทุน
           </Link>
+          <Link href="/tax" className="page-tab">
+            ภาษี
+          </Link>
         </div>
 
         <div
