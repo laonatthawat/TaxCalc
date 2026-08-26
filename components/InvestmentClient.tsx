@@ -327,7 +327,7 @@ export default function InvestmentClient({ initialPlan, userEmail }: Props) {
               <YAxis tick={{ fontSize: 11 }} tickFormatter={formatCompact} />
               <Tooltip
                 formatter={(value: any) => `฿${Number(value).toLocaleString()}`}
-                labelFormatter={(y: number) => formatYearLabel(y)}
+                labelFormatter={(y: any) => formatYearLabel(Number(y))}
               />
               <Legend wrapperStyle={{ fontSize: 12 }} />
               {crossoverPoints.map((cp, i) => (
@@ -359,7 +359,6 @@ export default function InvestmentClient({ initialPlan, userEmail }: Props) {
                   fill="#e05555"
                   stroke="#ffffff"
                   strokeWidth={2}
-                  isFront
                 />
               ))}
             </LineChart>
