@@ -33,8 +33,11 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // ถ้ายังไม่ login และพยายามเข้าหน้า dashboard ให้เด้งไป login
-  if (!user && request.nextUrl.pathname.startsWith('/dashboard')) {
+  // หน้าที่ต้อง login ก่อนถึงเข้าได้ — เพิ่ม /income เข้ามาอีกหน้า (และเผื่อ /investments, /tax ในอนาคต)
+  const protectedPrefixes = ['/dashboard', '/income']
+  const isProtectedPath = protectedPrefixes.some((prefix) => request.nextUrl.pathname.startsWith(prefix))
+
+  if (!user && isProtectedPath) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)

@@ -261,6 +261,31 @@ body {
   background: #f1efff;
 }
 
+/* ===== Page tabs (สลับ รายจ่าย / รายรับ) ===== */
+
+.page-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.page-tab {
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #6552cc;
+  background: #ffffff;
+  border-radius: 999px;
+  text-decoration: none;
+  border: 1px solid #e5e5ea;
+}
+
+.page-tab-active {
+  color: #ffffff;
+  background: linear-gradient(135deg, #afa9ec, #7f77dd);
+  border: none;
+}
+
 /* ===== Renewal countdown badge ===== */
 
 .renewal-badge {

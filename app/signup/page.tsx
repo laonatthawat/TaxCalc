@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Check, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import Logo from '@/components/Logo'
 import CatMascot from '@/components/CatMascot'
@@ -8,14 +9,26 @@ import CatMascot from '@/components/CatMascot'
 export default function SignupPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // เช็คว่ารหัสผ่าน 2 ช่องตรงกันไหม แสดงไอคอนถูก/ผิดแบบ real-time ตอนพิมพ์
+  // ไม่โชว์ไอคอนเลยถ้ายังไม่พิมพ์อะไรในช่องยืนยันรหัสผ่าน (กันกวนตาตอนหน้ายังว่างๆ)
+  const passwordsMatch = confirmPassword.length > 0 && password === confirmPassword
+  const passwordsMismatch = confirmPassword.length > 0 && password !== confirmPassword
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     setMessage('')
+
+    if (password !== confirmPassword) {
+      setError('รหัสผ่านและยืนยันรหัสผ่านไม่ตรงกัน')
+      return
+    }
+
     setIsSubmitting(true)
 
     const supabase = createClient()
@@ -72,7 +85,50 @@ export default function SignupPage() {
               minLength={6}
             />
           </div>
-          <button type="submit" className="btn-gradient-primary" disabled={isSubmitting}>
+          <div className="form-field">
+            <label className="form-label">ยืนยันรหัสผ่าน</label>
+            {/* wrapper position: relative เพื่อวางไอคอนถูก/ผิดซ้อนในช่องกรอก */}
+            <div style={{ position: 'relative' }}>
+              <input
+                type="password"
+                className="form-input"
+                style={{
+                  paddingRight: 40,
+                  // ใส่กรอบสีเขียว/แดงตามผลตรง เพื่อให้เห็นชัดแม้ไม่มองไอคอน
+                  borderColor: passwordsMismatch ? '#e05555' : passwordsMatch ? '#4CAF80' : undefined,
+                }}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+              />
+              {(passwordsMatch || passwordsMismatch) && (
+                <span
+                  style={{
+                    position: 'absolute',
+                    right: 12,
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    display: 'flex',
+                    pointerEvents: 'none',
+                  }}
+                >
+                  {passwordsMatch ? (
+                    <Check size={18} color="#4CAF80" />
+                  ) : (
+                    <X size={18} color="#e05555" />
+                  )}
+                </span>
+              )}
+            </div>
+            {passwordsMismatch && (
+              <p style={{ margin: '6px 0 0', fontSize: 12, color: '#e05555' }}>รหัสผ่านไม่ตรงกัน</p>
+            )}
+          </div>
+          <button
+            type="submit"
+            className="btn-gradient-primary"
+            disabled={isSubmitting || passwordsMismatch}
+          >
             {isSubmitting ? 'กำลังสมัครสมาชิก...' : 'สมัครสมาชิก'}
           </button>
         </form>

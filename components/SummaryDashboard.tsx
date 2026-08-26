@@ -1,6 +1,6 @@
 'use client'
 
-import { CalendarDays, Layers } from 'lucide-react'
+import { CalendarDays, Layers, Wallet2 } from 'lucide-react'
 import {
   PieChart,
   Pie,
@@ -30,6 +30,7 @@ import PainMeter from './PainMeter'
 type Props = {
   subscriptions: Subscription[]
   monthlyBudget: number | null
+  monthlyIncome: number
 }
 
 const COLORS = ['#6366f1', '#ec4899', '#f59e0b', '#10b981', '#3b82f6', '#ef4444', '#8b5cf6']
@@ -55,13 +56,15 @@ function HeroDots() {
   )
 }
 
-export default function SummaryDashboard({ subscriptions, monthlyBudget }: Props) {
+export default function SummaryDashboard({ subscriptions, monthlyBudget, monthlyIncome }: Props) {
   const { totalMonthly, totalYearly } = calculateTotals(subscriptions)
   const categoryData = groupByCategory(subscriptions)
   const barData = getMonthlyComparisonData(subscriptions)
   const dayOfMonthData = groupByDayOfMonth(subscriptions)
   // เรียงเอาตัวที่เลยกำหนดมานานสุด/ใกล้ครบกำหนดสุดขึ้นก่อน จะได้เห็นตัวที่เร่งด่วนที่สุดบนสุด
   const upcomingRenewals = sortByNextBilling(getUpcomingRenewals(subscriptions, RENEWAL_ALERT_DAYS))
+  // กระแสเงินสดสุทธิต่อเดือน = รายรับประจำ − รายจ่ายประจำ (ยังไม่รวมรายรับ/รายจ่ายแบบครั้งเดียว)
+  const netCashFlow = monthlyIncome - totalMonthly
 
   return (
     <div style={{ marginBottom: 32 }}>
@@ -159,6 +162,35 @@ export default function SummaryDashboard({ subscriptions, monthlyBudget }: Props
               <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>{subscriptions.length} รายการ</p>
             </div>
           </div>
+
+          {/* กระแสเงินสดสุทธิ: โชว์เฉพาะเมื่อมีข้อมูลรายรับแล้ว (ไม่งั้นจะติดลบเท่ากับรายจ่ายเสมอ ทำให้เข้าใจผิดว่าติดลบจริง) */}
+          {monthlyIncome > 0 && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div
+                style={{
+                  width: 30,
+                  height: 30,
+                  borderRadius: '50%',
+                  background: 'rgba(255,255,255,0.2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                <Wallet2 size={15} color="#ffffff" />
+              </div>
+              <div>
+                <p style={{ margin: 0, fontSize: 11, color: 'rgba(255,255,255,0.85)' }}>
+                  กระแสเงินสดสุทธิ/เดือน
+                </p>
+                <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>
+                  {netCashFlow >= 0 ? '+' : '-'}฿
+                  {Math.abs(netCashFlow).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

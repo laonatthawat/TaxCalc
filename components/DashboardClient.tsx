@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { Plus, Calendar } from 'lucide-react'
 import { getCategoryStyle } from '@/lib/categoryStyles'
 import { sortByNextBilling, getDaysUntilRenewal, formatDaysUntilRenewal } from '@/lib/subscriptionUtils'
@@ -24,12 +25,18 @@ type Props = {
   initialSubscriptions: Subscription[]
   userEmail: string
   monthlyBudget: number | null
+  monthlyIncome: number
 }
 
 // จำนวนวันที่ถือว่า "ใกล้ต่ออายุ" แล้วให้ badge เปลี่ยนเป็นสีเตือน
 const URGENT_RENEWAL_DAYS = 3
 
-export default function DashboardClient({ initialSubscriptions, userEmail, monthlyBudget }: Props) {
+export default function DashboardClient({
+  initialSubscriptions,
+  userEmail,
+  monthlyBudget,
+  monthlyIncome,
+}: Props) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null)
   const [markingPaidId, setMarkingPaidId] = useState<string | null>(null)
@@ -85,6 +92,14 @@ export default function DashboardClient({ initialSubscriptions, userEmail, month
           <Logo />
         </div>
 
+        {/* แท็บสลับไปหน้ารายรับ/รายจ่าย — ใช้ next/link เพื่อสลับหน้าแบบ SPA ไม่ต้อง reload เต็มหน้า */}
+        <div className="page-tabs">
+          <span className="page-tab page-tab-active">รายจ่าย</span>
+          <Link href="/income" className="page-tab">
+            รายรับ
+          </Link>
+        </div>
+
         <div
           style={{
             display: 'flex',
@@ -119,7 +134,11 @@ export default function DashboardClient({ initialSubscriptions, userEmail, month
           </div>
         </div>
 
-        <SummaryDashboard subscriptions={subscriptions} monthlyBudget={monthlyBudget} />
+        <SummaryDashboard
+          subscriptions={subscriptions}
+          monthlyBudget={monthlyBudget}
+          monthlyIncome={monthlyIncome}
+        />
 
         <h2 style={{ fontSize: 16, fontWeight: 600, color: '#2b2b33', margin: '0 0 14px' }}>
           รายการรายจ่ายประจำ

@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import DashboardClient from '@/components/DashboardClient'
+import { calculateIncomeTotals } from '@/lib/incomeUtils'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -29,11 +30,17 @@ export default async function DashboardPage() {
     .eq('user_id', user.id)
     .maybeSingle()
 
+  // ดึงรายรับมาด้วย เพื่อคำนวณ "กระแสเงินสดสุทธิ" (รายรับประจำ − รายจ่ายประจำ) โชว์ในการ์ดสรุป
+  // ไม่ error ถ้า query พลาด เพราะหน้านี้โฟกัสรายจ่ายเป็นหลัก รายรับเป็นแค่ข้อมูลเสริม
+  const { data: incomes } = await supabase.from('incomes').select('*')
+  const { totalMonthlyRecurring: monthlyIncome } = calculateIncomeTotals(incomes ?? [])
+
   return (
     <DashboardClient
       initialSubscriptions={subscriptions ?? []}
       userEmail={user.email ?? ''}
       monthlyBudget={settings?.monthly_budget ?? null}
+      monthlyIncome={monthlyIncome}
     />
   )
 }
