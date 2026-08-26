@@ -98,6 +98,9 @@ export default function DashboardClient({
           <Link href="/income" className="page-tab">
             รายรับ
           </Link>
+          <Link href="/investments" className="page-tab">
+            การลงทุน
+          </Link>
         </div>
 
         <div

@@ -83,6 +83,9 @@ export default function IncomeClient({ initialIncomes, userEmail }: Props) {
             รายจ่าย
           </Link>
           <span className="page-tab page-tab-active">รายรับ</span>
+          <Link href="/investments" className="page-tab">
+            การลงทุน
+          </Link>
         </div>
 
         <div
