@@ -1,16 +1,16 @@
 import { CreditCard } from 'lucide-react'
 
 type Props = {
-  size?: 'sm' | 'md'
+  size?: 'sm' | 'md' | 'lg'
 }
 
 export const APP_NAME = 'จ่ายจนเจ็บ'
 
-// โลโก้แอป: ไอคอนกรอบมนไล่สีม่วง + ชื่อแอป ใช้ร่วมกันทั้งหน้า auth และ dashboard
+// โลโก้แอป: ไอคอนกรอบมนไล่สีม่วง + ชื่อแอป ใช้ร่วมกันทั้งหน้า auth, dashboard และหน้า landing (lg)
 export default function Logo({ size = 'md' }: Props) {
-  const boxSize = size === 'sm' ? 32 : 40
-  const iconSize = size === 'sm' ? 16 : 20
-  const fontSize = size === 'sm' ? 15 : 18
+  const boxSize = size === 'sm' ? 32 : size === 'lg' ? 52 : 40
+  const iconSize = size === 'sm' ? 16 : size === 'lg' ? 26 : 20
+  const fontSize = size === 'sm' ? 15 : size === 'lg' ? 24 : 18
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>

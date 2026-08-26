@@ -263,13 +263,19 @@ body {
 
 /* ===== Page tabs (สลับ รายจ่าย / รายรับ) ===== */
 
+/* overflow-x: auto แทน flex-wrap — บนจอมือถือแคบๆ ที่ใส่ครบ 4 แท็บ (รายจ่าย/รายรับ/การลงทุน/ภาษี)
+   ไม่พอดีในบรรทัดเดียว ให้เลื่อนซ้ายขวาได้แบบแท็บบาร์ทั่วไป แทนที่จะตกบรรทัดจนดันเนื้อหาด้านล่างเพี้ยน */
 .page-tabs {
   display: flex;
   gap: 8px;
   margin-bottom: 20px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 2px;
 }
 
 .page-tab {
+  flex-shrink: 0;
   padding: 8px 16px;
   font-size: 13px;
   font-weight: 600;
@@ -278,6 +284,7 @@ body {
   border-radius: 999px;
   text-decoration: none;
   border: 1px solid #e5e5ea;
+  white-space: nowrap;
 }
 
 .page-tab-active {

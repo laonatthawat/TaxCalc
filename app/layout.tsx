@@ -13,15 +13,15 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "จ่ายจนเจ็บ — ติดตามรายจ่ายประจำของคุณ",
+  title: "จ่ายจนเจ็บ — จัดการการเงินส่วนตัวครบวงจร",
   description:
-    "แอปคำนวณรายจ่ายประจำรายเดือน/รายปี (ค่าเช่า ค่าน้ำค่าไฟ ค่าผ่อน subscription ฯลฯ) พร้อมแจ้งเตือนก่อนถึงกำหนดจ่าย ก่อนจะจ่ายจนเจ็บ",
+    "แอปจัดการการเงินส่วนตัว ติดตามรายจ่ายประจำ รายรับ วางแผนการลงทุนด้วยเครื่องคำนวณดอกเบี้ยทบต้น และประมาณการภาษีเงินได้บุคคลธรรมดา ไว้ในที่เดียว ก่อนจะจ่ายจนเจ็บ",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
-      lang="en"
+      lang="th"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>

@@ -2,14 +2,16 @@
 // ⚠️ นี่คือ "การประมาณการ" จากข้อมูลที่ผู้ใช้กรอกเองเท่านั้น ไม่ใช่การยื่นภาษีจริง
 // อัตราหักค่าใช้จ่ายเหมาของเงินได้ประเภท 40(5)/40(6)/40(8) ในกฎหมายจริงมีรายละเอียดปลีกย่อยมากกว่านี้
 // (แยกตามประเภททรัพย์สิน/วิชาชีพ/ธุรกิจ) ในนี้ใช้อัตราที่พบบ่อยที่สุดของแต่ละประเภทเพื่อความง่าย
-import { Income, IncomeType } from './incomeUtils'
+import { Income, AssessableIncomeType } from './incomeUtils'
 
 // ===== 1) รวมรายรับรายปีแยกตามประเภทเงินได้ (มาตรา 40) =====
+// รายรับประเภท 'gift' (เงินให้จากพ่อแม่/คู่สมรส/ญาติ) ไม่ใช่เงินได้ตามมาตรา 40 และได้รับยกเว้นภาษี
+// จึงข้ามไปเลย ไม่นำมารวมในฐานคำนวณภาษีนี้ (ดู isExemptGiftIncome ใน incomeUtils.ts)
 
-export function groupIncomeByTypeAnnual(incomes: Income[]): Record<IncomeType, number> {
+export function groupIncomeByTypeAnnual(incomes: Income[]): Record<AssessableIncomeType, number> {
   const currentYear = new Date().getFullYear()
 
-  const totals: Record<IncomeType, number> = {
+  const totals: Record<AssessableIncomeType, number> = {
     '40_1': 0,
     '40_2': 0,
     '40_3': 0,
@@ -21,6 +23,8 @@ export function groupIncomeByTypeAnnual(incomes: Income[]): Record<IncomeType, n
   }
 
   incomes.forEach((income) => {
+    if (income.income_type === 'gift') return
+
     if (income.is_recurring) {
       const annual = income.billing_cycle === 'yearly' ? income.amount : income.amount * 12
       totals[income.income_type] += annual
@@ -30,6 +34,24 @@ export function groupIncomeByTypeAnnual(incomes: Income[]): Record<IncomeType, n
   })
 
   return totals
+}
+
+// รวมยอด "เงินให้" ที่ยกเว้นภาษีทั้งปี (annualize เหมือนฟังก์ชันด้านบน) — ใช้แค่โชว์เป็นข้อมูลความโปร่งใส
+// บนหน้าภาษีว่า "เอ่อ เรารู้นะว่ามีเงินก้อนนี้ แต่ตั้งใจไม่เอามาคำนวณ" ไม่ใช่เอาไปรวมในฐานภาษี
+export function calculateExemptGiftTotal(incomes: Income[]): number {
+  const currentYear = new Date().getFullYear()
+
+  return incomes
+    .filter((income) => income.income_type === 'gift')
+    .reduce((sum, income) => {
+      if (income.is_recurring) {
+        return sum + (income.billing_cycle === 'yearly' ? income.amount : income.amount * 12)
+      }
+      if (income.received_date && Number(income.received_date.slice(0, 4)) === currentYear) {
+        return sum + income.amount
+      }
+      return sum
+    }, 0)
 }
 
 // ===== 2) หักค่าใช้จ่ายเหมาตามประเภทเงินได้ =====
@@ -42,7 +64,9 @@ export type ExpenseBreakdownItem = {
   note?: string
 }
 
-export function calculateExpenseBreakdown(incomeByType: Record<IncomeType, number>): ExpenseBreakdownItem[] {
+export function calculateExpenseBreakdown(
+  incomeByType: Record<AssessableIncomeType, number>
+): ExpenseBreakdownItem[] {
   const items: ExpenseBreakdownItem[] = []
 
   // 40(1)+40(2) ใช้เพดานร่วมกัน: หัก 50% ของยอดรวม แต่ไม่เกิน 100,000 บาท
@@ -328,7 +352,7 @@ export function calculateProgressiveTax(netTaxableIncome: number): {
 // ===== 5) รวมทุกอย่างเป็นผลลัพธ์เดียว =====
 
 export type TaxEstimate = {
-  incomeByType: Record<IncomeType, number>
+  incomeByType: Record<AssessableIncomeType, number>
   expenseBreakdown: ExpenseBreakdownItem[]
   totalGrossIncome: number
   netIncomeAfterExpense: number
@@ -338,6 +362,7 @@ export type TaxEstimate = {
   brackets: TaxBracketResult[]
   totalTax: number
   effectiveRate: number
+  exemptGiftTotal: number
 }
 
 export function calculateTaxEstimate(incomes: Income[], deductions: TaxDeductions): TaxEstimate {
@@ -352,6 +377,7 @@ export function calculateTaxEstimate(incomes: Income[], deductions: TaxDeduction
   const netTaxableIncome = Math.max(0, Math.round(netIncomeAfterExpense - totalDeductions))
   const { brackets, totalTax } = calculateProgressiveTax(netTaxableIncome)
   const effectiveRate = totalGrossIncome > 0 ? (totalTax / totalGrossIncome) * 100 : 0
+  const exemptGiftTotal = calculateExemptGiftTotal(incomes)
 
   return {
     incomeByType,
@@ -363,6 +389,7 @@ export function calculateTaxEstimate(incomes: Income[], deductions: TaxDeduction
     netTaxableIncome,
     brackets,
     totalTax,
+    exemptGiftTotal,
     effectiveRate,
   }
 }

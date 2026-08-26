@@ -1,7 +1,11 @@
 // เงินได้ 8 ประเภทตามมาตรา 40 ประมวลรัษฎากร — เก็บไว้ตั้งแต่ตอนกรอกรายรับ
-// เพื่อให้โมดูลภาษี (ทำทีหลัง) คำนวณค่าใช้จ่ายเหมา/เครดิตภาษีของแต่ละประเภทได้ถูกต้อง
-// โดยไม่ต้องย้อนกลับมาแก้ข้อมูลเก่า
-export type IncomeType = '40_1' | '40_2' | '40_3' | '40_4' | '40_5' | '40_6' | '40_7' | '40_8'
+// เพื่อให้โมดูลภาษีคำนวณค่าใช้จ่ายเหมาของแต่ละประเภทได้ถูกต้อง โดยไม่ต้องย้อนกลับมาแก้ข้อมูลเก่า
+export type AssessableIncomeType = '40_1' | '40_2' | '40_3' | '40_4' | '40_5' | '40_6' | '40_7' | '40_8'
+
+// 'gift' = เงินให้จากพ่อแม่/คู่สมรส/บุตร/ญาติ หรือให้โดยเสน่หา — ไม่ใช่เงินได้ตามมาตรา 40
+// เป็นเงินได้ที่ได้รับยกเว้นภาษีตามมาตรา 42(27)/(28) (จากบุพการี/คู่สมรส/บุตร ไม่เกิน 20 ล้านบาท/ปี
+// จากบุคคลอื่นไม่เกิน 10 ล้านบาท/ปี) จึงแยกออกจากประเภทเงินได้ที่ต้องเสียภาษี และไม่ถูกนำไปคำนวณในโมดูลภาษี
+export type IncomeType = AssessableIncomeType | 'gift'
 
 export const INCOME_TYPE_OPTIONS: { value: IncomeType; label: string }[] = [
   { value: '40_1', label: 'เงินเดือน/ค่าจ้าง (40(1))' },
@@ -12,10 +16,15 @@ export const INCOME_TYPE_OPTIONS: { value: IncomeType; label: string }[] = [
   { value: '40_6', label: 'วิชาชีพอิสระ (40(6))' },
   { value: '40_7', label: 'รับเหมาก่อสร้าง (40(7))' },
   { value: '40_8', label: 'ธุรกิจ/พาณิชย์/ขายของออนไลน์ (40(8))' },
+  { value: 'gift', label: 'เงินให้ (จากพ่อแม่/คู่สมรส/ญาติ) — ยกเว้นภาษี' },
 ]
 
 export function getIncomeTypeLabel(type: IncomeType): string {
   return INCOME_TYPE_OPTIONS.find((o) => o.value === type)?.label ?? type
+}
+
+export function isExemptGiftIncome(type: IncomeType): type is 'gift' {
+  return type === 'gift'
 }
 
 export type Income = {

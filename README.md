@@ -1,36 +1,65 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# จ่ายจนเจ็บ 💸
 
-## Getting Started
+แอปจัดการการเงินส่วนตัวครบวงจร — ติดตามรายจ่ายประจำ รายรับ วางแผนการลงทุน และประมาณการภาษีเงินได้บุคคลธรรมดา ไว้ในที่เดียว จะได้เห็นภาพการเงินตัวเองชัดๆ ก่อนจะจ่ายจนเจ็บ
 
-First, run the development server:
+โปรเจกต์ส่วนตัวสำหรับฝึกฝนและเก็บพอร์ต (side project)
+
+## ฟีเจอร์หลัก
+
+**รายจ่ายประจำ** — บันทึกค่าเช่า ค่าน้ำค่าไฟ ค่าผ่อน subscription (Netflix, Spotify ฯลฯ) พร้อมแจ้งเตือนก่อนถึงกำหนดจ่าย และมิเตอร์ความเจ็บเทียบงบประมาณต่อเดือน
+
+**รายรับ** — บันทึกเงินเดือน โบนัส งานฟรีแลนซ์ ทั้งแบบประจำ (recurring) และครั้งเดียว (one-time) รวมถึงเงินให้จากพ่อแม่/คู่สมรส (ยกเว้นภาษี) ดูกระแสเงินสดสุทธิได้ทันที
+
+**การลงทุน** — เครื่องคำนวณดอกเบี้ยทบต้น แสดงกราฟการเติบโตแบบ exponential พร้อมจุดตัด (crossover point) ที่ดอกเบี้ยเริ่มทำงานหนักกว่าเงินต้นที่ลงทุนเพิ่ม
+
+**ภาษี** — ประมาณการภาษีเงินได้บุคคลธรรมดาจากรายรับจริงในระบบ แยกคำนวณค่าใช้จ่ายตามเงินได้ 8 ประเภท (มาตรา 40) ค่าลดหย่อนครบทุกรายการหลัก และตารางอัตราภาษีแบบขั้นบันได
+
+> ตัวเลขภาษี/ผลตอบแทนการลงทุนในแอปเป็นการประมาณการเท่านั้น ไม่ใช่คำแนะนำทางการเงิน/ภาษีอย่างเป็นทางการ
+
+## Tech Stack
+
+- **Framework**: [Next.js](https://nextjs.org) (App Router, TypeScript, `src` directory)
+- **Styling**: Tailwind CSS + custom CSS (`app/globals.css`)
+- **Database & Auth**: [Supabase](https://supabase.com) (PostgreSQL + Auth, email/password)
+- **Charts**: [Recharts](https://recharts.org)
+- **Icons**: [lucide-react](https://lucide.dev)
+- **Deploy**: [Vercel](https://vercel.com)
+
+## เริ่มต้นใช้งาน (Local Development)
+
+### 1. ติดตั้ง dependencies
+
+```bash
+npm install
+```
+
+### 2. ตั้งค่า environment variables
+
+สร้างไฟล์ `.env.local` ที่ root ของโปรเจกต์ แล้วใส่ค่าจาก Supabase project ของคุณ (Project Settings → API):
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://xxxxxxxxxxxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+### 3. รัน development server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+เปิด [http://localhost:3000](http://localhost:3000) เพื่อดูผลลัพธ์
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## โครงสร้างฐานข้อมูล (Supabase)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+ตารางหลักในฐานข้อมูล (ทุกตารางมี Row Level Security ป้องกันไม่ให้เห็นข้อมูลของผู้ใช้คนอื่น):
 
-## Learn More
+- `subscriptions` — รายการรายจ่ายประจำ
+- `incomes` — รายการรายรับ (ประจำ/ครั้งเดียว/เงินให้)
+- `user_settings` — งบประมาณต่อเดือน (สำหรับมิเตอร์ความเจ็บ)
+- `investment_plans` — แผนการลงทุน (เงินต้น เงินลงทุนต่อเดือน อัตราผลตอบแทน ระยะเวลา)
+- `tax_deductions` — ค่าลดหย่อนภาษีของแต่ละผู้ใช้
 
-To learn more about Next.js, take a look at the following resources:
+## Deploy
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Deploy ผ่าน [Vercel](https://vercel.com) โดยเชื่อมต่อกับ GitHub repository นี้ อย่าลืมตั้งค่า environment variables (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`) ใน Vercel project settings ด้วย

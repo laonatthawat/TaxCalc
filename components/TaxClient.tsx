@@ -222,6 +222,22 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
               </div>
             ))
           )}
+
+          {/* โชว์ยอด "เงินให้" ที่ตั้งใจไม่เอามารวมคำนวณ เพื่อความโปร่งใส — ผู้ใช้จะได้เห็นว่าไม่ใช่ข้อมูลหาย
+              แต่ระบบจงใจแยกออกเพราะเป็นเงินได้ที่กฎหมายยกเว้นภาษี ไม่ใช่เงินได้ตามมาตรา 40 */}
+          {estimate.exemptGiftTotal > 0 && (
+            <div
+              style={{
+                marginTop: 8,
+                padding: '10px 0 0',
+                borderTop: '1px solid #f1f0f5',
+                fontSize: 12,
+                color: '#8a8a94',
+              }}
+            >
+              เงินให้ (ยกเว้นภาษี) ฿{estimate.exemptGiftTotal.toLocaleString()} — ไม่นำมาคำนวณในหน้านี้
+            </div>
+          )}
         </div>
 
         {/* ฟอร์มค่าลดหย่อน */}
