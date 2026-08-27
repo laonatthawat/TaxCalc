@@ -1,13 +1,14 @@
 'use client'
 
 import Link from 'next/link'
-import { Plus, Calendar, Wallet2 } from 'lucide-react'
+import { Plus, Calendar, Wallet2, Search } from 'lucide-react'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Logo from './Logo'
 import CatMascot from './CatMascot'
 import IncomeModal from './IncomeModal'
 import HelpTooltip from './HelpTooltip'
+import ConfirmDialog from './ConfirmDialog'
 import { deleteIncome, markIncomeAsReceived } from '@/app/income/actions'
 import { signOut } from '@/app/dashboard/actions'
 import {
@@ -28,11 +29,21 @@ export default function IncomeClient({ initialIncomes, userEmail }: Props) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingIncome, setEditingIncome] = useState<Income | null>(null)
   const [markingReceivedId, setMarkingReceivedId] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [deleteTarget, setDeleteTarget] = useState<Income | null>(null)
   const router = useRouter()
 
   const { recurring, oneTime } = splitAndSortIncomes(initialIncomes)
   const { totalMonthlyRecurring, totalOneTimeThisYear, totalAnnualEstimate } =
     calculateIncomeTotals(initialIncomes)
+
+  // ค้นหาด้วยชื่อรายการ หรือประเภทเงินได้ — ใช้ query เดียวกันกรองทั้ง 2 ลิสต์ (ประจำ/ครั้งเดียว)
+  // ยอดสรุปการ์ดสีเขียวด้านบนยังคงคำนวณจาก initialIncomes ทั้งหมดเสมอ ไม่ผูกกับคำค้นหา
+  const query = searchQuery.trim().toLowerCase()
+  const matchesQuery = (income: Income) =>
+    income.name.toLowerCase().includes(query) || getIncomeTypeLabel(income.income_type).toLowerCase().includes(query)
+  const visibleRecurring = query ? recurring.filter(matchesQuery) : recurring
+  const visibleOneTime = query ? oneTime.filter(matchesQuery) : oneTime
 
   const openAddModal = () => {
     setEditingIncome(null)
@@ -49,11 +60,13 @@ export default function IncomeClient({ initialIncomes, userEmail }: Props) {
     router.refresh()
   }
 
-  const handleDelete = async (id: string) => {
-    const confirmed = window.confirm('ยืนยันลบรายการนี้?')
-    if (!confirmed) return
+  // เปิดกล่องยืนยันแบบมีธีมของแอปเองแทน window.confirm() ของ browser — ใส่ชื่อรายการในข้อความได้ด้วย
+  const requestDelete = (income: Income) => setDeleteTarget(income)
 
-    await deleteIncome(id)
+  const confirmDelete = async () => {
+    if (!deleteTarget) return
+    await deleteIncome(deleteTarget.id)
+    setDeleteTarget(null)
     router.refresh()
   }
 
@@ -214,10 +227,52 @@ export default function IncomeClient({ initialIncomes, userEmail }: Props) {
           </div>
         ) : (
           <>
-            {recurring.length > 0 && (
+            {/* ค้นหาด้วยชื่อรายการหรือประเภทเงินได้ — กรองทั้งลิสต์ประจำและครั้งเดียวพร้อมกัน */}
+            <div style={{ position: 'relative', marginBottom: 20, maxWidth: 340 }}>
+              <Search
+                size={15}
+                style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#a9a9b2' }}
+              />
+              <input
+                type="text"
+                placeholder="ค้นหาชื่อหรือประเภทเงินได้..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '9px 12px 9px 34px',
+                  borderRadius: 10,
+                  border: '1px solid #e5e5ea',
+                  fontSize: 13,
+                  background: '#ffffff',
+                  boxSizing: 'border-box',
+                }}
+              />
+            </div>
+
+            {visibleRecurring.length === 0 && visibleOneTime.length === 0 ? (
+              <div
+                style={{
+                  textAlign: 'center',
+                  padding: '40px 24px',
+                  background: '#ffffff',
+                  borderRadius: 14,
+                  border: '0.5px solid #ececE5',
+                  color: '#47474f',
+                  fontSize: 13,
+                }}
+              >
+                ไม่พบรายการที่ตรงกับ &quot;{searchQuery}&quot;
+              </div>
+            ) : (
+              <>
+            {visibleRecurring.length > 0 && (
               <>
                 <h2 style={{ fontSize: 16, fontWeight: 600, color: '#2b2b33', margin: '0 0 14px' }}>
-                  รายรับประจำ
+                  รายรับประจำ{' '}
+                  <span style={{ fontWeight: 400, color: '#8a8a94', fontSize: 13 }}>
+                    ({visibleRecurring.length} รายการ)
+                  </span>
                 </h2>
                 <div
                   style={{
@@ -227,7 +282,7 @@ export default function IncomeClient({ initialIncomes, userEmail }: Props) {
                     marginBottom: 32,
                   }}
                 >
-                  {recurring.map((income) => {
+                  {visibleRecurring.map((income) => {
                     const daysUntil = getDaysUntilRenewal(income.next_payment_date!)
 
                     return (
@@ -329,7 +384,7 @@ export default function IncomeClient({ initialIncomes, userEmail }: Props) {
                             แก้ไข
                           </button>
                           <button
-                            onClick={() => handleDelete(income.id)}
+                            onClick={() => requestDelete(income)}
                             className="btn-secondary-danger"
                             style={{ flex: 1, fontSize: 13 }}
                           >
@@ -343,10 +398,13 @@ export default function IncomeClient({ initialIncomes, userEmail }: Props) {
               </>
             )}
 
-            {oneTime.length > 0 && (
+            {visibleOneTime.length > 0 && (
               <>
                 <h2 style={{ fontSize: 16, fontWeight: 600, color: '#2b2b33', margin: '0 0 14px' }}>
-                  รายรับที่ได้รับแล้ว (ครั้งเดียว)
+                  รายรับที่ได้รับแล้ว (ครั้งเดียว){' '}
+                  <span style={{ fontWeight: 400, color: '#8a8a94', fontSize: 13 }}>
+                    ({visibleOneTime.length} รายการ)
+                  </span>
                 </h2>
                 <div
                   style={{
@@ -355,7 +413,7 @@ export default function IncomeClient({ initialIncomes, userEmail }: Props) {
                     gap: 16,
                   }}
                 >
-                  {oneTime.map((income) => (
+                  {visibleOneTime.map((income) => (
                     <div
                       key={income.id}
                       style={{
@@ -417,7 +475,7 @@ export default function IncomeClient({ initialIncomes, userEmail }: Props) {
                           แก้ไข
                         </button>
                         <button
-                          onClick={() => handleDelete(income.id)}
+                          onClick={() => requestDelete(income)}
                           className="btn-secondary-danger"
                           style={{ flex: 1, fontSize: 13 }}
                         >
@@ -429,10 +487,20 @@ export default function IncomeClient({ initialIncomes, userEmail }: Props) {
                 </div>
               </>
             )}
+              </>
+            )}
           </>
         )}
 
         <IncomeModal isOpen={isModalOpen} onClose={closeModal} editingIncome={editingIncome} />
+
+        <ConfirmDialog
+          isOpen={!!deleteTarget}
+          title="ยืนยันลบรายการ"
+          message={`ต้องการลบ "${deleteTarget?.name}" ใช่หรือไม่? การลบไม่สามารถย้อนกลับได้`}
+          onConfirm={confirmDelete}
+          onCancel={() => setDeleteTarget(null)}
+        />
       </div>
     </div>
   )

@@ -1,16 +1,22 @@
 'use client'
 
 import Link from 'next/link'
-import { Plus, Calendar } from 'lucide-react'
+import { Plus, Calendar, Search } from 'lucide-react'
 import { getCategoryStyle } from '@/lib/categoryStyles'
-import { sortByNextBilling, getDaysUntilRenewal, formatDaysUntilRenewal } from '@/lib/subscriptionUtils'
-import { useState } from 'react'
+import {
+  sortByNextBilling,
+  getDaysUntilRenewal,
+  formatDaysUntilRenewal,
+  toMonthlyPrice,
+} from '@/lib/subscriptionUtils'
+import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Logo from './Logo'
 import CatMascot from './CatMascot'
 import SubscriptionModal from './SubscriptionModal'
 import SummaryDashboard from './SummaryDashboard'
 import HelpTooltip from './HelpTooltip'
+import ConfirmDialog from './ConfirmDialog'
 import { deleteSubscription, markSubscriptionAsPaid, signOut } from '@/app/dashboard/actions'
 
 type Subscription = {
@@ -32,6 +38,30 @@ type Props = {
 // จำนวนวันที่ถือว่า "ใกล้ต่ออายุ" แล้วให้ badge เปลี่ยนเป็นสีเตือน
 const URGENT_RENEWAL_DAYS = 3
 
+type SortOption = 'renewal' | 'priceHigh' | 'priceLow' | 'name'
+
+const SORT_OPTIONS: { value: SortOption; label: string }[] = [
+  { value: 'renewal', label: 'ใกล้ครบกำหนดก่อน' },
+  { value: 'priceHigh', label: 'ราคาสูง → ต่ำ' },
+  { value: 'priceLow', label: 'ราคาต่ำ → สูง' },
+  { value: 'name', label: 'ชื่อ (ก-ฮ)' },
+]
+
+function sortSubscriptions(list: Subscription[], sortBy: SortOption): Subscription[] {
+  const arr = [...list]
+  switch (sortBy) {
+    case 'priceHigh':
+      return arr.sort((a, b) => toMonthlyPrice(b) - toMonthlyPrice(a))
+    case 'priceLow':
+      return arr.sort((a, b) => toMonthlyPrice(a) - toMonthlyPrice(b))
+    case 'name':
+      return arr.sort((a, b) => a.name.localeCompare(b.name, 'th'))
+    case 'renewal':
+    default:
+      return sortByNextBilling(arr)
+  }
+}
+
 export default function DashboardClient({
   initialSubscriptions,
   userEmail,
@@ -41,10 +71,22 @@ export default function DashboardClient({
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null)
   const [markingPaidId, setMarkingPaidId] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [sortBy, setSortBy] = useState<SortOption>('renewal')
+  const [deleteTarget, setDeleteTarget] = useState<Subscription | null>(null)
   const router = useRouter()
 
-  // เรียงตามวันต่ออายุที่ใกล้ที่สุดก่อน จะได้เห็นอันที่ต้องจ่ายเร็วๆ นี้ก่อน
-  const subscriptions = sortByNextBilling(initialSubscriptions)
+  // รายการที่โชว์ในกริดด้านล่าง: เรียง + กรองด้วยคำค้นหา (ชื่อ หรือ หมวดหมู่)
+  // แยกจาก initialSubscriptions ที่ส่งให้ SummaryDashboard ตรงๆ เพราะการ์ดสรุป/กราฟด้านบน
+  // ควรรวมข้อมูลทุกรายการเสมอ ไม่ควรเปลี่ยนตามคำค้นหาที่พิมพ์อยู่ในกริดด้านล่าง
+  const visibleSubscriptions = useMemo(() => {
+    const sorted = sortSubscriptions(initialSubscriptions, sortBy)
+    const query = searchQuery.trim().toLowerCase()
+    if (!query) return sorted
+    return sorted.filter(
+      (sub) => sub.name.toLowerCase().includes(query) || (sub.category ?? '').toLowerCase().includes(query)
+    )
+  }, [initialSubscriptions, sortBy, searchQuery])
 
   const openAddModal = () => {
     setEditingSubscription(null)
@@ -61,11 +103,13 @@ export default function DashboardClient({
     router.refresh() // ดึงข้อมูลใหม่จาก server หลังบันทึกเสร็จ
   }
 
-  const handleDelete = async (id: string) => {
-    const confirmed = window.confirm('ยืนยันลบรายการนี้?')
-    if (!confirmed) return
+  // เปิดกล่องยืนยันแบบมีธีมของแอปเองแทน window.confirm() ของ browser — ใส่ชื่อรายการในข้อความได้ด้วย
+  const requestDelete = (sub: Subscription) => setDeleteTarget(sub)
 
-    await deleteSubscription(id)
+  const confirmDelete = async () => {
+    if (!deleteTarget) return
+    await deleteSubscription(deleteTarget.id)
+    setDeleteTarget(null)
     router.refresh()
   }
 
@@ -159,16 +203,67 @@ export default function DashboardClient({
         </div>
 
         <SummaryDashboard
-          subscriptions={subscriptions}
+          subscriptions={initialSubscriptions}
           monthlyBudget={monthlyBudget}
           monthlyIncome={monthlyIncome}
         />
 
         <h2 style={{ fontSize: 16, fontWeight: 600, color: '#2b2b33', margin: '0 0 14px' }}>
           รายการรายจ่ายประจำ
+          {initialSubscriptions.length > 0 && (
+            <span style={{ fontWeight: 400, color: '#8a8a94', fontSize: 13 }}>
+              {' '}
+              ({visibleSubscriptions.length} รายการ)
+            </span>
+          )}
         </h2>
 
-        {subscriptions.length === 0 ? (
+        {/* ค้นหา + เรียงลำดับ — โชว์เฉพาะตอนมีรายการอยู่แล้ว (ค้นหา/เรียงรายการว่างเปล่าไม่มีประโยชน์) */}
+        {initialSubscriptions.length > 0 && (
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
+            <div style={{ position: 'relative', flex: '1 1 220px' }}>
+              <Search
+                size={15}
+                style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#a9a9b2' }}
+              />
+              <input
+                type="text"
+                placeholder="ค้นหาชื่อหรือหมวดหมู่..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '9px 12px 9px 34px',
+                  borderRadius: 10,
+                  border: '1px solid #e5e5ea',
+                  fontSize: 13,
+                  background: '#ffffff',
+                  boxSizing: 'border-box',
+                }}
+              />
+            </div>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as SortOption)}
+              style={{
+                padding: '9px 10px',
+                borderRadius: 10,
+                border: '1px solid #e5e5ea',
+                fontSize: 13,
+                background: '#ffffff',
+                color: '#2b2b33',
+              }}
+            >
+              {SORT_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {initialSubscriptions.length === 0 ? (
           <div
             style={{
               textAlign: 'center',
@@ -202,6 +297,21 @@ export default function DashboardClient({
               <Plus size={16} /> เพิ่มรายจ่าย
             </button>
           </div>
+        ) : visibleSubscriptions.length === 0 ? (
+          // ค้นหาแล้วไม่เจอ — ต่างจาก empty state ด้านบน (ยังไม่เคยมีรายการเลย) ตรงนี้แค่คำค้นหาแคบไป
+          <div
+            style={{
+              textAlign: 'center',
+              padding: '40px 24px',
+              background: '#ffffff',
+              borderRadius: 14,
+              border: '0.5px solid #ececE5',
+              color: '#47474f',
+              fontSize: 13,
+            }}
+          >
+            ไม่พบรายการที่ตรงกับ &quot;{searchQuery}&quot;
+          </div>
         ) : (
           <div
             style={{
@@ -210,7 +320,7 @@ export default function DashboardClient({
               gap: 16,
             }}
           >
-            {subscriptions.map((sub) => {
+            {visibleSubscriptions.map((sub) => {
               const theme = getCategoryStyle(sub.category)
               const Icon = theme.icon
               const daysUntil = getDaysUntilRenewal(sub.next_billing_date)
@@ -317,7 +427,7 @@ export default function DashboardClient({
                       แก้ไข
                     </button>
                     <button
-                      onClick={() => handleDelete(sub.id)}
+                      onClick={() => requestDelete(sub)}
                       className="btn-secondary-danger"
                       style={{ flex: 1, fontSize: 13 }}
                     >
@@ -334,6 +444,14 @@ export default function DashboardClient({
           isOpen={isModalOpen}
           onClose={closeModal}
           editingSubscription={editingSubscription}
+        />
+
+        <ConfirmDialog
+          isOpen={!!deleteTarget}
+          title="ยืนยันลบรายการ"
+          message={`ต้องการลบ "${deleteTarget?.name}" ใช่หรือไม่? การลบไม่สามารถย้อนกลับได้`}
+          onConfirm={confirmDelete}
+          onCancel={() => setDeleteTarget(null)}
         />
       </div>
     </div>
