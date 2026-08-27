@@ -114,7 +114,7 @@ export default function ArticlesPage() {
         {filtered.map((a) => (
           <Link
             key={a.id}
-            href="/articles/ladder"
+            href={`/articles/${a.id}`}
             style={{
               textAlign: "left",
               padding: "28px 32px",

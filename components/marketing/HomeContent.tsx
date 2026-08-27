@@ -16,8 +16,7 @@ export default function HomeContent() {
   const sso = Math.min(sal * 0.05, 750) * 12;
   const netInc = Math.max(0, annual - expDed - 60000 - sso);
   const heroTax = taxOf(netInc).tax;
-  const living = annual * 0.42;
-  const save = Math.max(0, annual - heroTax - living);
+  const afterTax = Math.max(0, annual - heroTax);
 
   const story = [
     {
@@ -56,21 +55,11 @@ export default function HomeContent() {
       dot: ACC_D,
       numFg: ACC_D,
     },
-    {
-      no: "5",
-      title: "สุดท้ายเหลือเป็นของตัวเองเท่าไร",
-      body: "หลังภาษีและค่ากินอยู่ ตัวเลขนี้คือคำตอบที่เล็กอยากรู้มาตลอด — และเป็นตัวเลขที่แอปเราตามให้ทุกเดือน",
-      num: "฿" + fmt(save),
-      numLabel: "เหลือเก็บทั้งปี",
-      dot: SAGE,
-      numFg: "#56633f",
-    },
   ];
 
   const prop = [
     { label: "ภาษี", value: "฿" + fmt(heroTax), w: (heroTax / Math.max(1, annual)) * 100, bg: ACC },
-    { label: "ค่ากินอยู่", value: "฿" + fmt(living), w: (living / Math.max(1, annual)) * 100, bg: "#c0b6a5" },
-    { label: "เหลือเก็บ", value: "฿" + fmt(save), w: (save / Math.max(1, annual)) * 100, bg: SAGE },
+    { label: "เงินหลังหักภาษี", value: "฿" + fmt(afterTax), w: (afterTax / Math.max(1, annual)) * 100, bg: SAGE },
   ];
 
   const audiences = [
@@ -433,7 +422,7 @@ export default function HomeContent() {
           {teaser.map((a) => (
             <Link
               key={a.id}
-              href="/articles/ladder"
+              href={`/articles/${a.id}`}
               style={{
                 textAlign: "left",
                 padding: 26,
