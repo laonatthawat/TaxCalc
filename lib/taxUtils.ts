@@ -1,60 +1,50 @@
 // เครื่องมือประมาณการภาษีเงินได้บุคคลธรรมดา (ปีภาษี 2568/ยื่นปี 2569)
 // ⚠️ นี่คือ "การประมาณการ" จากข้อมูลที่ผู้ใช้กรอกเองเท่านั้น ไม่ใช่การยื่นภาษีจริง
-// อัตราหักค่าใช้จ่ายเหมาของเงินได้ประเภท 40(5)/40(6)/40(8) ในกฎหมายจริงมีรายละเอียดปลีกย่อยมากกว่านี้
-// (แยกตามประเภททรัพย์สิน/วิชาชีพ/ธุรกิจ) ในนี้ใช้อัตราที่พบบ่อยที่สุดของแต่ละประเภทเพื่อความง่าย
-import { Income, AssessableIncomeType } from './incomeUtils'
+// ยังไม่รวมทางเลือกหักค่าใช้จ่ายตามจริง สิทธิเฉพาะกรณี และการแยกยื่นของคู่สมรส
+import {
+  Income,
+  getIncomeTypeMeta,
+  expenseRateOf,
+  subLabelOf,
+} from './incomeUtils'
 
-// ===== 1) รวมรายรับรายปีแยกตามประเภทเงินได้ (มาตรา 40) =====
-// รายรับประเภท 'gift' (เงินให้จากพ่อแม่/คู่สมรส/ญาติ) ไม่ใช่เงินได้ตามมาตรา 40 และได้รับยกเว้นภาษี
-// จึงข้ามไปเลย ไม่นำมารวมในฐานคำนวณภาษีนี้ (ดู isExemptGiftIncome ใน incomeUtils.ts)
+const fmtNum = (n: number) => Math.round(n).toLocaleString('en-US')
+const bt = (n: number) => (n < 0 ? '−฿' : '฿') + fmtNum(Math.abs(n))
 
-export function groupIncomeByTypeAnnual(incomes: Income[]): Record<AssessableIncomeType, number> {
-  const currentYear = new Date().getFullYear()
-
-  const totals: Record<AssessableIncomeType, number> = {
-    '40_1': 0,
-    '40_2': 0,
-    '40_3': 0,
-    '40_4': 0,
-    '40_5': 0,
-    '40_6': 0,
-    '40_7': 0,
-    '40_8': 0,
+// รายการหนึ่งนับเข้าฐานภาษีปีนี้หรือไม่ — ประจำนับเสมอ (annualize), ครั้งเดียวนับเฉพาะที่ได้รับปีนี้จริง
+function annualForTaxYear(income: Income): number {
+  if (income.is_recurring) {
+    const timesPerYear = income.billing_cycle === 'yearly' ? 1 : income.billing_cycle === 'biannual' ? 2 : income.billing_cycle === 'quarterly' ? 4 : 12
+    return income.amount * timesPerYear
   }
+  const currentYear = new Date().getFullYear()
+  if (income.received_date && Number(income.received_date.slice(0, 4)) === currentYear) {
+    return income.amount
+  }
+  return 0
+}
 
+// ===== 1) รวมรายรับรายปีแยกตามประเภทเงินได้ (มาตรา 40) — ใช้โชว์สรุปในหน้ารายรับ =====
+
+export function groupIncomeByTypeAnnual(incomes: Income[]): Record<string, number> {
+  const totals: Record<string, number> = {
+    '40_1': 0, '40_2': 0, '40_3': 0, '40_4': 0, '40_5': 0, '40_6': 0, '40_7': 0, '40_8': 0,
+  }
   incomes.forEach((income) => {
     if (income.income_type === 'gift') return
-
-    if (income.is_recurring) {
-      const annual = income.billing_cycle === 'yearly' ? income.amount : income.amount * 12
-      totals[income.income_type] += annual
-    } else if (income.received_date && Number(income.received_date.slice(0, 4)) === currentYear) {
-      totals[income.income_type] += income.amount
-    }
+    totals[income.income_type] += annualForTaxYear(income)
   })
-
   return totals
 }
 
-// รวมยอด "เงินให้" ที่ยกเว้นภาษีทั้งปี (annualize เหมือนฟังก์ชันด้านบน) — ใช้แค่โชว์เป็นข้อมูลความโปร่งใส
-// บนหน้าภาษีว่า "เอ่อ เรารู้นะว่ามีเงินก้อนนี้ แต่ตั้งใจไม่เอามาคำนวณ" ไม่ใช่เอาไปรวมในฐานภาษี
+// รวมยอด "เงินให้" ที่ยกเว้นภาษีทั้งปี — ใช้แค่โชว์เป็นข้อมูลความโปร่งใสบนหน้าภาษี ไม่ได้เอาไปรวมในฐานภาษี
 export function calculateExemptGiftTotal(incomes: Income[]): number {
-  const currentYear = new Date().getFullYear()
-
-  return incomes
-    .filter((income) => income.income_type === 'gift')
-    .reduce((sum, income) => {
-      if (income.is_recurring) {
-        return sum + (income.billing_cycle === 'yearly' ? income.amount : income.amount * 12)
-      }
-      if (income.received_date && Number(income.received_date.slice(0, 4)) === currentYear) {
-        return sum + income.amount
-      }
-      return sum
-    }, 0)
+  return incomes.filter((i) => i.income_type === 'gift').reduce((sum, i) => sum + annualForTaxYear(i), 0)
 }
 
-// ===== 2) หักค่าใช้จ่ายเหมาตามประเภทเงินได้ =====
+// ===== 2) หักค่าใช้จ่ายเหมาตามประเภทเงินได้ (และลักษณะย่อย ถ้ามี) =====
+// 40(1)+40(2) ใช้เพดานร่วมกัน (หัก 50% ไม่เกิน ฿100,000 รวมกัน) — ประเภทอื่นแยกเพดานตัวเอง
+// ค่าเช่า 40(5) และวิชาชีพอิสระ 40(6) อัตราขึ้นกับ "ลักษณะย่อย" ของแต่ละรายการ จึงต้อง bucket แยกตาม sub ด้วย
 
 export type ExpenseBreakdownItem = {
   label: string
@@ -64,87 +54,48 @@ export type ExpenseBreakdownItem = {
   note?: string
 }
 
-export function calculateExpenseBreakdown(
-  incomeByType: Record<AssessableIncomeType, number>
-): ExpenseBreakdownItem[] {
-  const items: ExpenseBreakdownItem[] = []
+type Bucket = { gross: number; rate: number; cap: number; label: string }
 
-  // 40(1)+40(2) ใช้เพดานร่วมกัน: หัก 50% ของยอดรวม แต่ไม่เกิน 100,000 บาท
-  const salaryTotal = incomeByType['40_1'] + incomeByType['40_2']
-  if (salaryTotal > 0) {
-    const expense = Math.min(salaryTotal * 0.5, 100000)
-    items.push({
-      label: 'เงินเดือน/ค่าจ้าง/ค่านายหน้า (40(1)+40(2))',
-      grossIncome: salaryTotal,
-      deductibleExpense: expense,
-      netIncome: salaryTotal - expense,
-    })
-  }
+export function calculateExpenseBreakdown(incomes: Income[]): ExpenseBreakdownItem[] {
+  const buckets: Record<string, Bucket> = {}
 
-  if (incomeByType['40_3'] > 0) {
-    const expense = Math.min(incomeByType['40_3'] * 0.5, 100000)
-    items.push({
-      label: 'ค่าลิขสิทธิ์ (40(3))',
-      grossIncome: incomeByType['40_3'],
-      deductibleExpense: expense,
-      netIncome: incomeByType['40_3'] - expense,
-    })
-  }
+  incomes.forEach((income) => {
+    const t = getIncomeTypeMeta(income.income_type)
+    if (t.exempt) return
+    const annual = annualForTaxYear(income)
+    if (annual <= 0) return
 
-  if (incomeByType['40_4'] > 0) {
-    items.push({
-      label: 'ดอกเบี้ย/เงินปันผล/กำไรขายหลักทรัพย์ (40(4))',
-      grossIncome: incomeByType['40_4'],
-      deductibleExpense: 0,
-      netIncome: incomeByType['40_4'],
-      note: 'หักค่าใช้จ่ายไม่ได้ตามกฎหมาย (กำไรขายหุ้นในตลาดหลักทรัพย์ไทยอาจได้รับยกเว้นภาษี — ไม่ได้คำนวณแยกในนี้)',
-    })
-  }
+    const key = t.capGroup === 'salary' ? 'salary' : income.income_type + (income.income_sub ? ':' + income.income_sub : '')
+    if (!buckets[key]) {
+      buckets[key] = {
+        gross: 0,
+        rate: expenseRateOf(income.income_type, income.income_sub),
+        cap: t.capGroup === 'salary' ? 100000 : t.cap === undefined ? Infinity : t.cap,
+        label:
+          t.capGroup === 'salary'
+            ? 'เงินเดือน + ฟรีแลนซ์ (40(1)(2))'
+            : t.subs
+              ? t.shortLabel + ' · ' + subLabelOf(income.income_type, income.income_sub)
+              : t.shortLabel,
+      }
+    }
+    buckets[key].gross += annual
+  })
 
-  if (incomeByType['40_5'] > 0) {
-    const expense = incomeByType['40_5'] * 0.3
-    items.push({
-      label: 'ค่าเช่า (40(5))',
-      grossIncome: incomeByType['40_5'],
-      deductibleExpense: expense,
-      netIncome: incomeByType['40_5'] - expense,
-      note: 'ใช้อัตราเหมา 30% (ประมาณการ — อัตราจริงมี 10-30% ตามประเภททรัพย์สิน)',
-    })
-  }
-
-  if (incomeByType['40_6'] > 0) {
-    const expense = incomeByType['40_6'] * 0.3
-    items.push({
-      label: 'วิชาชีพอิสระ (40(6))',
-      grossIncome: incomeByType['40_6'],
-      deductibleExpense: expense,
-      netIncome: incomeByType['40_6'] - expense,
-      note: 'ใช้อัตราเหมา 30% (ประมาณการ — วิชาชีพเวชกรรมหักได้ 60%, อื่นๆ ส่วนใหญ่ 30%)',
-    })
-  }
-
-  if (incomeByType['40_7'] > 0) {
-    const expense = incomeByType['40_7'] * 0.6
-    items.push({
-      label: 'รับเหมาก่อสร้าง (40(7))',
-      grossIncome: incomeByType['40_7'],
-      deductibleExpense: expense,
-      netIncome: incomeByType['40_7'] - expense,
-    })
-  }
-
-  if (incomeByType['40_8'] > 0) {
-    const expense = incomeByType['40_8'] * 0.6
-    items.push({
-      label: 'ธุรกิจ/พาณิชย์/ขายของออนไลน์ (40(8))',
-      grossIncome: incomeByType['40_8'],
-      deductibleExpense: expense,
-      netIncome: incomeByType['40_8'] - expense,
-      note: 'ใช้อัตราเหมา 60% (ประมาณการ — อัตราจริงมี 40-60% ตามประเภทธุรกิจ)',
-    })
-  }
-
-  return items
+  return Object.values(buckets).map((b) => {
+    const deductibleExpense = Math.min(b.gross * b.rate, b.cap)
+    const netIncome = b.gross - deductibleExpense
+    return {
+      label: b.label,
+      grossIncome: b.gross,
+      deductibleExpense,
+      netIncome,
+      note:
+        b.rate === 0
+          ? 'ประเภทนี้หักค่าใช้จ่ายแบบเหมาไม่ได้'
+          : 'หักเหมา ' + (b.rate * 100).toFixed(0) + '%' + (b.cap === Infinity ? ' ตามจริง' : ' ไม่เกิน ' + bt(b.cap)) + ' = ' + bt(deductibleExpense),
+    }
+  })
 }
 
 // ===== 3) ค่าลดหย่อนภาษี =====
@@ -161,9 +112,10 @@ export type TaxDeductions = {
   parent_health_insurance_premium: number
   pvd_contribution: number
   rmf_amount: number
-  ssf_amount: number
+  pension_insurance: number
   thai_esg_amount: number
   mortgage_interest: number
+  easy_e_receipt: number
   donation_general: number
   donation_education_sports: number
 }
@@ -180,9 +132,10 @@ export const DEFAULT_TAX_DEDUCTIONS: TaxDeductions = {
   parent_health_insurance_premium: 0,
   pvd_contribution: 0,
   rmf_amount: 0,
-  ssf_amount: 0,
+  pension_insurance: 0,
   thai_esg_amount: 0,
   mortgage_interest: 0,
+  easy_e_receipt: 0,
   donation_general: 0,
   donation_education_sports: 0,
 }
@@ -207,7 +160,7 @@ export function calculateDeductions(
   if (d.children_count_esg > 0) {
     items.push({
       label: `บุตรคนที่ 2 เป็นต้นไป (เกิดปี 2561+) ${d.children_count_esg} คน`,
-      amount: d.children_count_esg * 60000,
+      amount: d.children_count_esg * 30000, // ส่วนเพิ่มอีกคนละ 30,000 (รวมกับก้อนแรก = 60,000/คน)
     })
   }
 
@@ -252,27 +205,29 @@ export function calculateDeductions(
     })
   }
 
-  // กลุ่มเกษียณ (กบข./PVD + RMF + SSF): แต่ละตัวมีเพดานย่อยของตัวเอง แล้วรวมกันทั้งกลุ่มต้องไม่เกิน 500,000
+  // กลุ่มเกษียณ (กบข./PVD 15% + RMF 30% + ประกันชีวิตแบบบำนาญ 15%) แต่ละตัวมีเพดานย่อยของตัวเอง
+  // แล้วรวมกันทั้งกลุ่มต้องไม่เกิน 500,000 — สิทธิซื้อ SSF สิ้นสุดตั้งแต่ปีภาษี 2568 จึงไม่มีในกลุ่มนี้แล้ว
   const pvdCapped = Math.min(d.pvd_contribution, netIncomeAfterExpense * 0.15, 500000)
   const rmfCapped = Math.min(d.rmf_amount, netIncomeAfterExpense * 0.3, 500000)
-  const ssfCapped = Math.min(d.ssf_amount, netIncomeAfterExpense * 0.3, 200000)
-  const retirementGroupTotal = pvdCapped + rmfCapped + ssfCapped
+  const pensionCapped = Math.min(d.pension_insurance, netIncomeAfterExpense * 0.15, 200000)
+  const retirementGroupTotal = pvdCapped + rmfCapped + pensionCapped
   const retirementGroupFinal = Math.min(retirementGroupTotal, 500000)
   if (retirementGroupFinal > 0) {
     items.push({
-      label: 'กลุ่มเกษียณ (กบข./PVD + RMF + SSF รวมกัน)',
+      label: 'กลุ่มเกษียณ (กบข./PVD + RMF + ประกันบำนาญ รวมกัน)',
       amount: retirementGroupFinal,
       capped:
         retirementGroupTotal > 500000 ||
         d.pvd_contribution > pvdCapped ||
         d.rmf_amount > rmfCapped ||
-        d.ssf_amount > ssfCapped,
+        d.pension_insurance > pensionCapped,
     })
   }
 
   if (d.thai_esg_amount > 0) {
-    const amount = Math.min(d.thai_esg_amount, 300000)
-    items.push({ label: 'Thai ESG', amount, capped: d.thai_esg_amount > 300000 })
+    const limit = Math.min(netIncomeAfterExpense * 0.3, 300000)
+    const amount = Math.min(d.thai_esg_amount, limit)
+    items.push({ label: 'Thai ESG / ESGX', amount, capped: d.thai_esg_amount > limit })
   }
 
   if (d.mortgage_interest > 0) {
@@ -280,7 +235,12 @@ export function calculateDeductions(
     items.push({ label: 'ดอกเบี้ยกู้ยืมเพื่อที่อยู่อาศัย', amount, capped: d.mortgage_interest > 100000 })
   }
 
-  // เงินบริจาค: เพดาน 10% ของเงินได้หลังหักค่าใช้จ่ายและค่าลดหย่อนอื่นๆ ทั้งหมดที่คำนวณมาก่อนหน้านี้
+  if (d.easy_e_receipt > 0) {
+    const amount = Math.min(d.easy_e_receipt, 50000)
+    items.push({ label: 'Easy E-Receipt 2.0', amount, capped: d.easy_e_receipt > 50000 })
+  }
+
+  // เงินบริจาค: การศึกษา/กีฬา/รพ.รัฐ นับ 2 เท่า แล้วเพดานรวม 10% ของเงินได้หลังหักค่าใช้จ่ายและค่าลดหย่อนอื่นๆ
   const subtotalBeforeDonation = items.reduce((sum, i) => sum + i.amount, 0)
   const baseForDonationCap = Math.max(0, netIncomeAfterExpense - subtotalBeforeDonation)
   const donationCap = baseForDonationCap * 0.1
@@ -349,10 +309,41 @@ export function calculateProgressiveTax(netTaxableIncome: number): {
   return { brackets, totalTax: Math.round(totalTax) }
 }
 
-// ===== 5) รวมทุกอย่างเป็นผลลัพธ์เดียว =====
+// ===== 5) ภาษีเงินได้ขั้นต่ำ ตามมาตรา 48(2) =====
+// เงินได้ประเภท 40(2)-(8) (ไม่รวมเงินเดือน 40(1)) รวมกันเกิน ฿120,000 ต้องเสียภาษีไม่น้อยกว่า 0.5%
+// ของยอดนั้น (ยกเว้นถ้าคำนวณได้ไม่เกิน ฿5,000) — ใช้ยอดที่สูงกว่าระหว่างนี้กับภาษีขั้นบันได
+export type MinTax = { minTax: number; applies: boolean; note: string | null }
+
+export function calculateMinimumTax(incomes: Income[], progressiveTax: number): MinTax {
+  const nonSalary = incomes
+    .filter((i) => i.income_type !== 'gift' && i.income_type !== '40_1')
+    .reduce((sum, i) => sum + annualForTaxYear(i), 0)
+
+  if (nonSalary <= 120000) return { minTax: 0, applies: false, note: null }
+
+  const half = nonSalary * 0.005
+  if (half <= 5000) {
+    return {
+      minTax: 0,
+      applies: false,
+      note: `เงินได้ 40(2)–(8) เกิน ฿120,000 แต่ภาษีขั้นต่ำ 0.5% คิดได้เพียง ${bt(half)} ซึ่งไม่เกิน ฿5,000 จึงได้รับยกเว้น ไม่ต้องใช้กฎนี้`,
+    }
+  }
+
+  const applies = half > progressiveTax
+  return {
+    minTax: half,
+    applies,
+    note: applies
+      ? `เงินได้ประเภท 40(2)–(8) รวม ${bt(nonSalary)} เกิน ฿120,000 กฎภาษีขั้นต่ำจึงกำหนดให้เสียไม่น้อยกว่า 0.5% ของยอดนั้น = ${bt(half)} ระบบใช้ยอดนี้แทนภาษีขั้นบันได`
+      : `เข้าเกณฑ์ภาษีขั้นต่ำ 0.5% ของเงินได้ 40(2)–(8) = ${bt(half)} แต่ภาษีขั้นบันไดสูงกว่า จึงใช้ยอดขั้นบันได`,
+  }
+}
+
+// ===== 6) รวมทุกอย่างเป็นผลลัพธ์เดียว =====
 
 export type TaxEstimate = {
-  incomeByType: Record<AssessableIncomeType, number>
+  incomeByType: Record<string, number>
   expenseBreakdown: ExpenseBreakdownItem[]
   totalGrossIncome: number
   netIncomeAfterExpense: number
@@ -360,6 +351,8 @@ export type TaxEstimate = {
   totalDeductions: number
   netTaxableIncome: number
   brackets: TaxBracketResult[]
+  progressiveTax: number
+  minTax: MinTax
   totalTax: number
   effectiveRate: number
   exemptGiftTotal: number
@@ -367,7 +360,7 @@ export type TaxEstimate = {
 
 export function calculateTaxEstimate(incomes: Income[], deductions: TaxDeductions): TaxEstimate {
   const incomeByType = groupIncomeByTypeAnnual(incomes)
-  const expenseBreakdown = calculateExpenseBreakdown(incomeByType)
+  const expenseBreakdown = calculateExpenseBreakdown(incomes)
   const totalGrossIncome = expenseBreakdown.reduce((sum, i) => sum + i.grossIncome, 0)
   const netIncomeAfterExpense = expenseBreakdown.reduce((sum, i) => sum + i.netIncome, 0)
   const { items: deductionItems, total: totalDeductions } = calculateDeductions(
@@ -375,7 +368,9 @@ export function calculateTaxEstimate(incomes: Income[], deductions: TaxDeduction
     netIncomeAfterExpense
   )
   const netTaxableIncome = Math.max(0, Math.round(netIncomeAfterExpense - totalDeductions))
-  const { brackets, totalTax } = calculateProgressiveTax(netTaxableIncome)
+  const { brackets, totalTax: progressiveTax } = calculateProgressiveTax(netTaxableIncome)
+  const minTax = calculateMinimumTax(incomes, progressiveTax)
+  const totalTax = Math.max(progressiveTax, minTax.minTax)
   const effectiveRate = totalGrossIncome > 0 ? (totalTax / totalGrossIncome) * 100 : 0
   const exemptGiftTotal = calculateExemptGiftTotal(incomes)
 
@@ -388,6 +383,8 @@ export function calculateTaxEstimate(incomes: Income[], deductions: TaxDeduction
     totalDeductions,
     netTaxableIncome,
     brackets,
+    progressiveTax,
+    minTax,
     totalTax,
     exemptGiftTotal,
     effectiveRate,

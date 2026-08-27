@@ -3,8 +3,7 @@
 import { useState } from 'react'
 import { Check, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import Logo from '@/components/Logo'
-import CatMascot from '@/components/CatMascot'
+import AuthShell from '@/components/AuthShell'
 
 export default function SignupPage() {
   const [email, setEmail] = useState('')
@@ -62,96 +61,83 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="auth-page">
-      <div style={{ marginBottom: 20, position: 'relative', zIndex: 1 }}>
-        <Logo />
+    <AuthShell
+      asideTitle="เริ่มจากเงินเดือนก้อนเดียว"
+      asideBody="กรอกรายรับตามประเภทเงินได้ แล้วเราหักค่าใช้จ่าย คิดลดหย่อน และไล่ขั้นบันไดภาษีให้ทันที"
+    >
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <h2 style={{ margin: 0, fontSize: 28, lineHeight: 1.15 }}>สมัครสมาชิก</h2>
+        <p style={{ margin: 0, font: '400 14px/1.6 "IBM Plex Sans Thai",sans-serif', color: '#6b6355' }}>
+          ใช้เวลาไม่ถึงนาที และไม่มีค่าใช้จ่าย
+        </p>
       </div>
-      <div className="auth-card">
-        <div className="auth-card-cat">
-          <CatMascot size={72} variant="graytabby" />
-        </div>
-        <h1 className="auth-title">สมัครสมาชิก</h1>
-        <p className="auth-subtitle">สร้างบัญชีเพื่อเริ่มติดตามรายจ่ายประจำของคุณ</p>
 
-        {/* noValidate: ปิด popup แจ้งเตือนของ browser เอง (หน้าตาไม่เข้าธีม, เป็นภาษาอังกฤษ)
-            แล้วโชว์ error ของเราเองแทนผ่าน .auth-alert-error ด้านล่างฟอร์ม */}
-        <form onSubmit={handleSignup} noValidate>
-          <div className="form-field">
-            <label className="form-label">Email</label>
-            <input
-              type="email"
-              className="form-input"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-          <div className="form-field">
-            <label className="form-label">Password</label>
+      {/* noValidate: ปิด popup แจ้งเตือนของ browser เอง (หน้าตาไม่เข้าธีม, เป็นภาษาอังกฤษ)
+          แล้วโชว์ error ของเราเองแทนผ่าน .auth-alert-error ด้านล่างฟอร์ม */}
+      <form onSubmit={handleSignup} noValidate>
+        <div className="form-field">
+          <label className="form-label">อีเมล</label>
+          <input
+            type="email"
+            className="form-input"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@email.com"
+          />
+        </div>
+        <div className="form-field">
+          <label className="form-label">รหัสผ่าน</label>
+          <input
+            type="password"
+            className="form-input"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="อย่างน้อย 6 ตัวอักษร"
+          />
+        </div>
+        <div className="form-field">
+          <label className="form-label">ยืนยันรหัสผ่าน</label>
+          {/* wrapper position: relative เพื่อวางไอคอนถูก/ผิดซ้อนในช่องกรอก */}
+          <div style={{ position: 'relative' }}>
             <input
               type="password"
               className="form-input"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
+              style={{
+                paddingRight: 40,
+                borderColor: passwordsMismatch ? '#8a3a22' : passwordsMatch ? '#7a8a5e' : undefined,
+              }}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="พิมพ์อีกครั้ง"
             />
-          </div>
-          <div className="form-field">
-            <label className="form-label">ยืนยันรหัสผ่าน</label>
-            {/* wrapper position: relative เพื่อวางไอคอนถูก/ผิดซ้อนในช่องกรอก */}
-            <div style={{ position: 'relative' }}>
-              <input
-                type="password"
-                className="form-input"
+            {(passwordsMatch || passwordsMismatch) && (
+              <span
                 style={{
-                  paddingRight: 40,
-                  // ใส่กรอบสีเขียว/แดงตามผลตรง เพื่อให้เห็นชัดแม้ไม่มองไอคอน
-                  borderColor: passwordsMismatch ? '#8a3a22' : passwordsMatch ? '#7a8a5e' : undefined,
+                  position: 'absolute',
+                  right: 12,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  display: 'flex',
+                  pointerEvents: 'none',
                 }}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-              />
-              {(passwordsMatch || passwordsMismatch) && (
-                <span
-                  style={{
-                    position: 'absolute',
-                    right: 12,
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    display: 'flex',
-                    pointerEvents: 'none',
-                  }}
-                >
-                  {passwordsMatch ? (
-                    <Check size={18} color="#7a8a5e" />
-                  ) : (
-                    <X size={18} color="#8a3a22" />
-                  )}
-                </span>
-              )}
-            </div>
-            {passwordsMismatch && (
-              <p style={{ margin: '6px 0 0', fontSize: 12, color: '#8a3a22' }}>รหัสผ่านไม่ตรงกัน</p>
+              >
+                {passwordsMatch ? <Check size={18} color="#7a8a5e" /> : <X size={18} color="#8a3a22" />}
+              </span>
             )}
           </div>
-          <button
-            type="submit"
-            className="btn-gradient-primary"
-            disabled={isSubmitting || passwordsMismatch}
-          >
-            {isSubmitting ? 'กำลังสมัครสมาชิก...' : 'สมัครสมาชิก'}
-          </button>
-        </form>
+          {passwordsMismatch && <p style={{ margin: '6px 0 0', fontSize: 12, color: '#8a3a22' }}>รหัสผ่านไม่ตรงกัน</p>}
+        </div>
+        <button type="submit" className="btn-gradient-primary" disabled={isSubmitting || passwordsMismatch}>
+          {isSubmitting ? 'กำลังสมัครสมาชิก...' : 'สร้างบัญชี'}
+        </button>
+      </form>
 
-        {message && <p className="auth-alert-success">{message}</p>}
-        {error && <p className="auth-alert-error">{error}</p>}
+      {message && <p className="auth-alert-success">{message}</p>}
+      {error && <p className="auth-alert-error">{error}</p>}
 
-        <p className="auth-footer-link">
-          มีบัญชีแล้ว? <a href="/login">เข้าสู่ระบบ</a>
-        </p>
-      </div>
-    </div>
+      <p className="auth-footer-link">
+        มีบัญชีแล้ว? <a href="/login">เข้าสู่ระบบ</a>
+      </p>
+    </AuthShell>
   )
 }

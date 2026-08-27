@@ -1,16 +1,17 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { getNextCycleDate } from '@/lib/subscriptionUtils'
-import { IncomeType } from '@/lib/incomeUtils'
+import { getNextCycleDate, IncomeType, IncomeSub, BillingCycle } from '@/lib/incomeUtils'
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 
 export type IncomeInput = {
   name: string
   amount: number
   income_type: IncomeType
+  income_sub: IncomeSub
   is_recurring: boolean
-  billing_cycle: 'monthly' | 'yearly' | null
+  billing_cycle: BillingCycle | null
   next_payment_date: string | null
   received_date: string | null
 }
@@ -36,7 +37,6 @@ export async function addIncome(input: IncomeInput) {
   }
 
   revalidatePath('/income')
-  revalidatePath('/dashboard')
 }
 
 export async function updateIncome(id: string, input: IncomeInput) {
@@ -49,7 +49,6 @@ export async function updateIncome(id: string, input: IncomeInput) {
   }
 
   revalidatePath('/income')
-  revalidatePath('/dashboard')
 }
 
 export async function deleteIncome(id: string) {
@@ -62,11 +61,9 @@ export async function deleteIncome(id: string) {
   }
 
   revalidatePath('/income')
-  revalidatePath('/dashboard')
 }
 
 // ปุ่ม/checkbox "รับแล้ว" สำหรับรายรับประจำ: เลื่อนวันจ่ายถัดไปไปรอบถัดไป
-// ใช้ getNextCycleDate ตัวเดียวกับฝั่งรายจ่าย (บั๊กเดียวกัน, สูตรเดียวกัน จึงรียูสได้เลย)
 export async function markIncomeAsReceived(id: string) {
   const supabase = await createClient()
 
@@ -92,5 +89,10 @@ export async function markIncomeAsReceived(id: string) {
   }
 
   revalidatePath('/income')
-  revalidatePath('/dashboard')
+}
+
+export async function signOut() {
+  const supabase = await createClient()
+  await supabase.auth.signOut()
+  redirect('/login')
 }

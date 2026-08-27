@@ -1,17 +1,7 @@
-import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
 import HomeContent from '@/components/marketing/HomeContent'
 
-export default async function Home() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  // ถ้า login อยู่แล้วเด้งเข้า dashboard ตรงๆ เหมือนเดิม — หน้านี้ (landing page) สำหรับคนที่ยังไม่ login เท่านั้น
-  if (user) {
-    redirect('/dashboard')
-  }
-
+// หน้านี้ดูได้ทั้งคนที่ login อยู่แล้วและยังไม่ได้ login (เช่น กดโลโก้จากหน้ารายรับ/ภาษีกลับมาดู)
+// ไม่บังคับเด้งออกจากหน้านี้เมื่อ login อยู่แล้ว เพื่อให้ "กลับหน้าแรก" ใช้งานได้จริง
+export default function Home() {
   return <HomeContent />
 }

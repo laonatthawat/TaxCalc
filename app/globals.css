@@ -84,7 +84,7 @@ h1, h2, h3, h4, h5, h6 {
 /* หน้า dashboard/income/tax/overview ใช้พื้นหลังโทนเดียวกับหน้า login/signup
    เพื่อให้ธีมเข้ากันทั้งแอป */
 .dashboard-page {
-  min-height: 100vh;
+  flex: 1;
   background: #f5ead8;
   padding: 24px 0 48px;
 }

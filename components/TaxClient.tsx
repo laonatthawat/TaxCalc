@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import Logo from './Logo'
 import HelpTooltip from './HelpTooltip'
-import { signOut } from '@/app/dashboard/actions'
+import { signOut } from '@/app/income/actions'
 import { saveTaxDeductions } from '@/app/tax/actions'
 import { Income } from '@/lib/incomeUtils'
 import { calculateTaxEstimate, DEFAULT_TAX_DEDUCTIONS, TaxDeductions } from '@/lib/taxUtils'
@@ -35,9 +35,10 @@ function toFormState(d: Partial<TaxDeductions> | null): DeductionFormState {
     parent_health_insurance_premium: String(merged.parent_health_insurance_premium),
     pvd_contribution: String(merged.pvd_contribution),
     rmf_amount: String(merged.rmf_amount),
-    ssf_amount: String(merged.ssf_amount),
+    pension_insurance: String(merged.pension_insurance),
     thai_esg_amount: String(merged.thai_esg_amount),
     mortgage_interest: String(merged.mortgage_interest),
+    easy_e_receipt: String(merged.easy_e_receipt),
     donation_general: String(merged.donation_general),
     donation_education_sports: String(merged.donation_education_sports),
   }
@@ -56,9 +57,10 @@ function toNumbers(form: DeductionFormState): TaxDeductions {
     parent_health_insurance_premium: Number(form.parent_health_insurance_premium) || 0,
     pvd_contribution: Number(form.pvd_contribution) || 0,
     rmf_amount: Number(form.rmf_amount) || 0,
-    ssf_amount: Number(form.ssf_amount) || 0,
+    pension_insurance: Number(form.pension_insurance) || 0,
     thai_esg_amount: Number(form.thai_esg_amount) || 0,
     mortgage_interest: Number(form.mortgage_interest) || 0,
+    easy_e_receipt: Number(form.easy_e_receipt) || 0,
     donation_general: Number(form.donation_general) || 0,
     donation_education_sports: Number(form.donation_education_sports) || 0,
   }
@@ -128,20 +130,16 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
     <div className="dashboard-page">
       <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 24px' }}>
         <div style={{ marginBottom: 24 }}>
-          <Logo />
+          <Link href="/" style={{ display: 'inline-block', textDecoration: 'none' }}>
+            <Logo />
+          </Link>
         </div>
 
         <div className="page-tabs">
-          <Link href="/dashboard" className="page-tab">
-            รายจ่าย
-          </Link>
           <Link href="/income" className="page-tab">
             รายรับ
           </Link>
           <span className="page-tab page-tab-active">ภาษี</span>
-          <Link href="/overview" className="page-tab">
-            ภาพรวม
-          </Link>
         </div>
 
         <div
@@ -165,9 +163,9 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
                   &quot;เงินให้&quot; ที่ได้รับยกเว้นภาษี)
                 </p>
                 <p style={{ margin: '0 0 8px' }}>
-                  ขั้นตอน: หักค่าใช้จ่ายตามประเภทเงินได้ → หักค่าลดหย่อนที่คุณกรอกด้านล่าง (มีเพดานตาม
-                  กฎหมาย ระบบจะขึ้นป้าย &quot;ถึงเพดานแล้ว&quot; ให้เห็น) → คำนวณภาษีแบบขั้นบันไดจาก
-                  เงินได้สุทธิที่เหลือ
+                  ขั้นที่ 1: หักค่าใช้จ่ายเหมาตามประเภทเงินได้ → ขั้นที่ 2: หักค่าลดหย่อนที่คุณกรอกด้านล่าง
+                  (มีเพดานตามกฎหมาย ระบบจะขึ้นป้าย &quot;ถึงเพดานแล้ว&quot; ให้เห็น) → ขั้นที่ 3: คำนวณภาษีแบบ
+                  ขั้นบันไดจากเงินได้สุทธิที่เหลือ พร้อมตรวจสอบภาษีขั้นต่ำตามมาตรา 48(2)
                 </p>
                 <p style={{ margin: 0 }}>
                   ตัวเลขทั้งหมดเป็นการประมาณการเบื้องต้นเท่านั้น ไม่ใช่การคำนวณภาษีที่ยื่นจริงกับกรม
@@ -194,12 +192,11 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
           }}
         >
           ⚠️ นี่คือ<strong>การประมาณการเบื้องต้น</strong>จากข้อมูลรายรับในแอปและค่าลดหย่อนที่คุณกรอกเองเท่านั้น
-          ไม่ใช่การยื่นภาษีจริง กฎหมายภาษีมีเงื่อนไข/ข้อยกเว้นปลีกย่อยอีกมาก และอัตราหักค่าใช้จ่ายบางประเภท
-          (40(5)/40(6)/40(8)) ใช้อัตรากลางที่พบบ่อยสุด ไม่ใช่อัตราที่แม่นยำสำหรับทุกกรณี
-          ควรตรวจสอบกับกรมสรรพากรหรือผู้เชี่ยวชาญก่อนยื่นจริงเสมอ
+          ไม่ใช่การยื่นภาษีจริง กฎหมายภาษีมีเงื่อนไข/ข้อยกเว้นปลีกย่อยอีกมาก ควรตรวจสอบกับกรมสรรพากรหรือ
+          ผู้เชี่ยวชาญก่อนยื่นจริงเสมอ
         </div>
 
-        {/* รายรับที่ใช้คำนวณ — ดึงมาจากหน้ารายรับอัตโนมัติ แก้ไขได้ที่หน้านั้นเท่านั้น */}
+        {/* ขั้นที่ 1: หักค่าใช้จ่าย — ดึงรายรับมาจากหน้ารายรับอัตโนมัติ แก้ไขได้ที่หน้านั้นเท่านั้น */}
         <div
           style={{
             background: '#f9f4ed',
@@ -211,7 +208,7 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
             <h3 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: '#201e1d' }}>
-              รายรับที่ใช้คำนวณ (ประมาณการทั้งปี)
+              ขั้นที่ 1 · หักค่าใช้จ่าย (ประมาณการทั้งปี)
             </h3>
             <Link href="/income" style={{ fontSize: 12, fontWeight: 600, color: '#8c491a', textDecoration: 'none' }}>
               แก้ไขที่หน้ารายรับ →
@@ -230,11 +227,13 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
                   <span style={{ color: '#201e1d', fontWeight: 500 }}>{item.label}</span>
-                  <span style={{ color: '#201e1d' }}>฿{item.grossIncome.toLocaleString()}</span>
+                  <span style={{ color: '#201e1d', fontFamily: 'var(--font-number)' }}>
+                    ฿{Math.round(item.grossIncome).toLocaleString()}
+                  </span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, color: '#82796a', fontSize: 12 }}>
-                  <span>หักค่าใช้จ่าย ฿{item.deductibleExpense.toLocaleString()}</span>
-                  <span>เหลือ ฿{item.netIncome.toLocaleString()}</span>
+                  <span>หักค่าใช้จ่าย ฿{Math.round(item.deductibleExpense).toLocaleString()}</span>
+                  <span>เหลือ ฿{Math.round(item.netIncome).toLocaleString()}</span>
                 </div>
                 {item.note && (
                   <p style={{ margin: '4px 0 0', fontSize: 11, color: '#a19786' }}>{item.note}</p>
@@ -243,8 +242,6 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
             ))
           )}
 
-          {/* โชว์ยอด "เงินให้" ที่ตั้งใจไม่เอามารวมคำนวณ เพื่อความโปร่งใส — ผู้ใช้จะได้เห็นว่าไม่ใช่ข้อมูลหาย
-              แต่ระบบจงใจแยกออกเพราะเป็นเงินได้ที่กฎหมายยกเว้นภาษี ไม่ใช่เงินได้ตามมาตรา 40 */}
           {estimate.exemptGiftTotal > 0 && (
             <div
               style={{
@@ -260,7 +257,7 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
           )}
         </div>
 
-        {/* ฟอร์มค่าลดหย่อน */}
+        {/* ขั้นที่ 2: ค่าลดหย่อน — จัดกลุ่มตามหมวดให้หาง่ายขึ้น */}
         <form
           onSubmit={handleSave}
           style={{
@@ -271,10 +268,12 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
             marginBottom: 16,
           }}
         >
-          <h3 style={{ marginTop: 0, fontSize: 15, fontWeight: 600, color: '#201e1d' }}>ค่าลดหย่อนภาษี</h3>
+          <h3 style={{ marginTop: 0, fontSize: 15, fontWeight: 600, color: '#201e1d' }}>
+            ขั้นที่ 2 · ค่าลดหย่อนภาษี
+          </h3>
 
           <h4 style={{ fontSize: 13, fontWeight: 600, color: '#8c491a', margin: '16px 0 8px' }}>
-            ส่วนบุคคล/ครอบครัว
+            ส่วนตัวและครอบครัว
           </h4>
           <label
             style={{
@@ -343,7 +342,7 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
           </div>
 
           <h4 style={{ fontSize: 13, fontWeight: 600, color: '#8c491a', margin: '16px 0 8px' }}>
-            กองทุนเพื่อการเกษียณ/ลงทุน
+            กองทุนเกษียณและการลงทุน
           </h4>
           <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
             <NumberField
@@ -357,23 +356,30 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
               onChange={(v) => updateField('rmf_amount', v)}
             />
             <NumberField
-              label="เงินลงทุน SSF (บาท)"
-              value={form.ssf_amount}
-              onChange={(v) => updateField('ssf_amount', v)}
+              label="ประกันชีวิตแบบบำนาญ (บาท)"
+              value={form.pension_insurance}
+              onChange={(v) => updateField('pension_insurance', v)}
             />
             <NumberField
-              label="เงินลงทุน Thai ESG (บาท)"
+              label="เงินลงทุน Thai ESG / ESGX (บาท)"
               value={form.thai_esg_amount}
               onChange={(v) => updateField('thai_esg_amount', v)}
             />
           </div>
 
-          <h4 style={{ fontSize: 13, fontWeight: 600, color: '#8c491a', margin: '16px 0 8px' }}>อื่นๆ</h4>
+          <h4 style={{ fontSize: 13, fontWeight: 600, color: '#8c491a', margin: '16px 0 8px' }}>
+            บ้าน มาตรการรายปี และบริจาค
+          </h4>
           <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
             <NumberField
               label="ดอกเบี้ยกู้ยืมเพื่อที่อยู่อาศัย (บาท)"
               value={form.mortgage_interest}
               onChange={(v) => updateField('mortgage_interest', v)}
+            />
+            <NumberField
+              label="Easy E-Receipt 2.0 (บาท)"
+              value={form.easy_e_receipt}
+              onChange={(v) => updateField('easy_e_receipt', v)}
             />
             <NumberField
               label="เงินบริจาคทั่วไป (บาท)"
@@ -400,7 +406,7 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
           </div>
         </form>
 
-        {/* การ์ดสรุปผลลัพธ์ — โทนเทาเข้ม/official ให้ต่างจากรายจ่าย(ม่วง)/รายรับ(เขียว) */}
+        {/* การ์ดสรุปผลลัพธ์ */}
         <div
           style={{
             background: 'linear-gradient(135deg, #645c50 0%, #474238 55%, #2e2b25 100%)',
@@ -413,23 +419,25 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
           <p style={{ margin: 0, fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.9)' }}>
             ภาษีที่ต้องจ่ายโดยประมาณ (ทั้งปี)
           </p>
-          <p style={{ margin: '6px 0 20px', fontSize: 34, fontWeight: 700 }}>
+          <p style={{ margin: '6px 0 20px', fontSize: 34, fontWeight: 700, fontFamily: 'var(--font-number)' }}>
             ฿{estimate.totalTax.toLocaleString()}
           </p>
           <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
             <div>
               <p style={{ margin: 0, fontSize: 11, color: 'rgba(255,255,255,0.85)' }}>เงินได้สุทธิ (หลังหักทุกอย่าง)</p>
-              <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>
+              <p style={{ margin: 0, fontSize: 14, fontWeight: 600, fontFamily: 'var(--font-number)' }}>
                 ฿{estimate.netTaxableIncome.toLocaleString()}
               </p>
             </div>
             <div>
               <p style={{ margin: 0, fontSize: 11, color: 'rgba(255,255,255,0.85)' }}>อัตราภาษีเฉลี่ย</p>
-              <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>{estimate.effectiveRate.toFixed(1)}%</p>
+              <p style={{ margin: 0, fontSize: 14, fontWeight: 600, fontFamily: 'var(--font-number)' }}>
+                {estimate.effectiveRate.toFixed(1)}%
+              </p>
             </div>
             <div>
               <p style={{ margin: 0, fontSize: 11, color: 'rgba(255,255,255,0.85)' }}>ค่าลดหย่อนรวม</p>
-              <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>
+              <p style={{ margin: 0, fontSize: 14, fontWeight: 600, fontFamily: 'var(--font-number)' }}>
                 ฿{estimate.totalDeductions.toLocaleString()}
               </p>
             </div>
@@ -479,12 +487,14 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
                   </span>
                 )}
               </span>
-              <span style={{ color: '#201e1d', fontWeight: 500 }}>฿{item.amount.toLocaleString()}</span>
+              <span style={{ color: '#201e1d', fontWeight: 500, fontFamily: 'var(--font-number)' }}>
+                ฿{Math.round(item.amount).toLocaleString()}
+              </span>
             </div>
           ))}
         </div>
 
-        {/* breakdown ขั้นบันไดภาษี */}
+        {/* ขั้นที่ 3: ภาษีขั้นบันได + ตรวจสอบภาษีขั้นต่ำตามมาตรา 48(2) */}
         <div
           style={{
             background: '#f9f4ed',
@@ -494,7 +504,7 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
           }}
         >
           <h3 style={{ marginTop: 0, fontSize: 15, fontWeight: 600, color: '#201e1d' }}>
-            รายละเอียดภาษีขั้นบันได
+            ขั้นที่ 3 · เงินได้สุทธิเข้าขั้นบันได
           </h3>
           {estimate.brackets.length === 0 ? (
             <p style={{ fontSize: 13, color: '#82796a', margin: 0 }}>
@@ -516,9 +526,30 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
                 <span style={{ color: '#201e1d' }}>
                   {b.rangeLabel} <span style={{ color: '#82796a' }}>({(b.rate * 100).toFixed(0)}%)</span>
                 </span>
-                <span style={{ color: '#201e1d', fontWeight: 500 }}>฿{Math.round(b.taxFromBracket).toLocaleString()}</span>
+                <span style={{ color: '#201e1d', fontWeight: 500, fontFamily: 'var(--font-number)' }}>
+                  ฿{Math.round(b.taxFromBracket).toLocaleString()}
+                </span>
               </div>
             ))
+          )}
+
+          {/* กฎภาษีขั้นต่ำมาตรา 48(2) — โชว์เฉพาะตอนที่เข้าเงื่อนไข (เงินได้ 40(2)-(8) เกิน 120,000) */}
+          {estimate.minTax.note && (
+            <div
+              style={{
+                marginTop: 14,
+                padding: '12px 16px',
+                borderRadius: 16,
+                background: estimate.minTax.applies ? '#fbe4dc' : '#f4ead8',
+                color: estimate.minTax.applies ? '#8a3a22' : '#5c4b39',
+                fontSize: 12,
+                lineHeight: 1.6,
+              }}
+            >
+              <strong>{estimate.minTax.applies ? 'ใช้กฎภาษีขั้นต่ำ (มาตรา 48(2))' : 'ตรวจสอบภาษีขั้นต่ำ (มาตรา 48(2))'}</strong>
+              <br />
+              {estimate.minTax.note}
+            </div>
           )}
         </div>
       </div>

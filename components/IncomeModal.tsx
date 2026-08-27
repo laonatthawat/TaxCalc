@@ -1,8 +1,18 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { addIncome, updateIncome, IncomeInput } from '@/app/income/actions'
-import { INCOME_TYPE_OPTIONS, IncomeType, Income } from '@/lib/incomeUtils'
+import {
+  INCOME_TYPES,
+  CYCLE_OPTIONS,
+  getIncomeTypeMeta,
+  expenseRateOf,
+  timesPerYearOf,
+  IncomeType,
+  IncomeSub,
+  BillingCycle,
+  Income,
+} from '@/lib/incomeUtils'
 
 type Props = {
   isOpen: boolean
@@ -10,39 +20,47 @@ type Props = {
   editingIncome: Income | null
 }
 
+const fmt = (n: number) => Math.round(n).toLocaleString('en-US')
+
+// รับ props เริ่มต้นจาก editingIncome ตรงๆ ผ่าน useState initializer — คอมโพเนนต์นี้ต้อง remount ทุกครั้งที่เปิด
+// (ผู้เรียกใส่ key={editingIncome?.id ?? 'new'} ตอนเปิด modal) แทนที่จะ sync ด้วย useEffect+setState
 export default function IncomeModal({ isOpen, onClose, editingIncome }: Props) {
-  const [name, setName] = useState('')
-  const [amount, setAmount] = useState('')
-  const [incomeType, setIncomeType] = useState<IncomeType>('40_1')
-  const [isRecurring, setIsRecurring] = useState(true)
-  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly')
-  const [nextPaymentDate, setNextPaymentDate] = useState('')
-  const [receivedDate, setReceivedDate] = useState('')
+  const [name, setName] = useState(editingIncome?.name ?? '')
+  const [amount, setAmount] = useState(editingIncome ? String(editingIncome.amount) : '')
+  const [incomeType, setIncomeType] = useState<IncomeType>(editingIncome?.income_type ?? '40_1')
+  const [incomeSub, setIncomeSub] = useState<IncomeSub>(editingIncome?.income_sub ?? null)
+  const [isRecurring, setIsRecurring] = useState(editingIncome?.is_recurring ?? true)
+  const [billingCycle, setBillingCycle] = useState<BillingCycle>(
+    (editingIncome?.billing_cycle as BillingCycle) ?? 'monthly'
+  )
+  const [nextPaymentDate, setNextPaymentDate] = useState(editingIncome?.next_payment_date ?? '')
+  const [receivedDate, setReceivedDate] = useState(editingIncome?.received_date ?? '')
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState('')
 
-  useEffect(() => {
-    if (editingIncome) {
-      setName(editingIncome.name)
-      setAmount(String(editingIncome.amount))
-      setIncomeType(editingIncome.income_type)
-      setIsRecurring(editingIncome.is_recurring)
-      setBillingCycle((editingIncome.billing_cycle as 'monthly' | 'yearly') ?? 'monthly')
-      setNextPaymentDate(editingIncome.next_payment_date ?? '')
-      setReceivedDate(editingIncome.received_date ?? '')
-    } else {
-      setName('')
-      setAmount('')
-      setIncomeType('40_1')
-      setIsRecurring(true)
-      setBillingCycle('monthly')
-      setNextPaymentDate('')
-      setReceivedDate('')
-    }
-    setError('')
-  }, [editingIncome, isOpen])
-
   if (!isOpen) return null
+
+  const typeMeta = getIncomeTypeMeta(incomeType)
+  const rate = expenseRateOf(incomeType, incomeSub)
+  const amountNum = parseFloat(amount) || 0
+  const yearPreview = isRecurring ? amountNum * timesPerYearOf(billingCycle) : amountNum
+
+  const handleTypeChange = (value: IncomeType) => {
+    setIncomeType(value)
+    const meta = getIncomeTypeMeta(value)
+    setIncomeSub(meta.subs ? meta.subs[0].id : null)
+  }
+
+  const dedHint = typeMeta.exempt
+    ? 'เงินได้ประเภทนี้ได้รับยกเว้นภาษี ระบบจะไม่นำไปคำนวณ'
+    : rate === 0
+      ? 'ประเภทนี้หักค่าใช้จ่ายแบบเหมาไม่ได้ ทั้งก้อนถูกนำไปคิดภาษี'
+      : `ประเภทนี้หักค่าใช้จ่ายแบบเหมาได้ ${(rate * 100).toFixed(0)}%` +
+        (typeMeta.capGroup === 'salary'
+          ? ' โดยรวมกับ 40(1)(2) อื่นแล้วไม่เกิน ฿100,000'
+          : typeMeta.cap
+            ? ` ไม่เกิน ฿${fmt(typeMeta.cap)}`
+            : ' ตามจริง')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -74,6 +92,7 @@ export default function IncomeModal({ isOpen, onClose, editingIncome }: Props) {
       name,
       amount: parseFloat(amount),
       income_type: incomeType,
+      income_sub: typeMeta.subs ? incomeSub : null,
       is_recurring: isRecurring,
       billing_cycle: isRecurring ? billingCycle : null,
       next_payment_date: isRecurring ? nextPaymentDate : null,
@@ -94,6 +113,8 @@ export default function IncomeModal({ isOpen, onClose, editingIncome }: Props) {
     }
   }
 
+  const saveDisabled = isSaving || !name.trim() || amountNum <= 0
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-card" onClick={(e) => e.stopPropagation()}>
@@ -112,7 +133,7 @@ export default function IncomeModal({ isOpen, onClose, editingIncome }: Props) {
           </div>
 
           <div className="form-field">
-            <label className="form-label">จำนวนเงิน (บาท)</label>
+            <label className="form-label">จำนวนเงิน (บาท) ต่อรอบ</label>
             <input
               type="number"
               step="0.01"
@@ -127,21 +148,47 @@ export default function IncomeModal({ isOpen, onClose, editingIncome }: Props) {
             <select
               className="form-input"
               value={incomeType}
-              onChange={(e) => setIncomeType(e.target.value as IncomeType)}
+              onChange={(e) => handleTypeChange(e.target.value as IncomeType)}
             >
-              {INCOME_TYPE_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
+              {INCOME_TYPES.map((t) => (
+                <option key={t.value} value={t.value}>
+                  {t.label}
                 </option>
               ))}
             </select>
-            {/* คำใบ้พิเศษเมื่อเลือก "เงินให้" — อธิบายว่าทำไมไม่ต้องเสียภาษี กันคนสงสัย/กังวลว่ากรอกผิดหมวด */}
-            {incomeType === 'gift' && (
-              <p style={{ margin: '6px 0 0', fontSize: 11, color: '#82796a', lineHeight: 1.5 }}>
-                เงินให้จากบุพการี/คู่สมรส/บุตร ได้รับยกเว้นภาษีไม่เกิน 20 ล้านบาท/ปี (จากบุคคลอื่นไม่เกิน 10
-                ล้านบาท/ปี) รายการนี้จะไม่ถูกนำไปรวมคำนวณในหน้าภาษี แต่ยังนับเป็นรายรับปกติในหน้านี้
-              </p>
-            )}
+          </div>
+
+          {typeMeta.subs && (
+            <div className="form-field">
+              <label className="form-label">ลักษณะเงินได้ย่อย</label>
+              <select
+                className="form-input"
+                value={incomeSub ?? typeMeta.subs[0].id}
+                onChange={(e) => setIncomeSub(e.target.value)}
+              >
+                {typeMeta.subs.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          <div
+            style={{
+              display: 'flex',
+              gap: 10,
+              alignItems: 'flex-start',
+              background: '#f4ead9',
+              borderRadius: 16,
+              padding: '12px 16px',
+              marginBottom: 16,
+              font: '400 12px/1.6 "IBM Plex Sans Thai",sans-serif',
+              color: '#5c4b39',
+            }}
+          >
+            {dedHint}
           </div>
 
           {/* toggle รายรับประจำ vs ครั้งเดียว — ปุ่มคู่สไตล์ pill กดสลับกันได้ */}
@@ -174,10 +221,13 @@ export default function IncomeModal({ isOpen, onClose, editingIncome }: Props) {
                 <select
                   className="form-input"
                   value={billingCycle}
-                  onChange={(e) => setBillingCycle(e.target.value as 'monthly' | 'yearly')}
+                  onChange={(e) => setBillingCycle(e.target.value as BillingCycle)}
                 >
-                  <option value="monthly">รายเดือน</option>
-                  <option value="yearly">รายปี</option>
+                  {CYCLE_OPTIONS.map((c) => (
+                    <option key={c.value} value={c.value}>
+                      {c.label}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div className="form-field">
@@ -191,7 +241,7 @@ export default function IncomeModal({ isOpen, onClose, editingIncome }: Props) {
               </div>
             </>
           ) : (
-            <div className="form-field" style={{ marginBottom: 20 }}>
+            <div className="form-field">
               <label className="form-label">วันที่ได้รับเงิน</label>
               <input
                 type="date"
@@ -202,10 +252,27 @@ export default function IncomeModal({ isOpen, onClose, editingIncome }: Props) {
             </div>
           )}
 
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              gap: 12,
+              alignItems: 'baseline',
+              padding: '12px 16px',
+              borderRadius: 14,
+              background: '#e6ecd6',
+              marginBottom: 18,
+              color: '#3f5230',
+            }}
+          >
+            <span style={{ font: '500 13px/1.4 "IBM Plex Sans Thai",sans-serif' }}>รวมเป็นรายรับทั้งปี</span>
+            <span style={{ font: '600 17px/1 "Figtree",sans-serif' }}>฿{fmt(yearPreview)}</span>
+          </div>
+
           {error && <p className="auth-alert-error">{error}</p>}
 
           <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
-            <button type="submit" disabled={isSaving} className="btn-gradient-primary">
+            <button type="submit" disabled={saveDisabled} className="btn-gradient-primary">
               {isSaving ? 'กำลังบันทึก...' : 'บันทึก'}
             </button>
             <button type="button" onClick={onClose} className="btn-secondary">
