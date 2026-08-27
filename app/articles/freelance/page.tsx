@@ -40,7 +40,7 @@ export default function FreelanceArticlePage() {
       <div style={{ height: 1, background: "#dcd3c4", margin: "0 0 30px" }} />
 
       <h2 style={{ margin: "0 0 14px", fontSize: 30, lineHeight: 1.2, color: "#201e1d" }}>
-        1. ไม่มีใครหักเงินกันไว้จ่ายภาษีให้อัตโนมัติ
+        <span style={{ fontFamily: "var(--font-number)" }}>1.</span> ไม่มีใครหักเงินกันไว้จ่ายภาษีให้อัตโนมัติ
       </h2>
       <p
         style={{
@@ -56,7 +56,8 @@ export default function FreelanceArticlePage() {
       </p>
 
       <h2 style={{ margin: "0 0 14px", fontSize: 30, lineHeight: 1.2, color: "#201e1d" }}>
-        2. ต้องยื่นภาษี 2 รอบต่อปี ไม่ใช่รอบเดียว
+        <span style={{ fontFamily: "var(--font-number)" }}>2.</span> ต้องยื่นภาษี{" "}
+        <span style={{ fontFamily: "var(--font-number)" }}>2</span> รอบต่อปี ไม่ใช่รอบเดียว
       </h2>
       <p style={{ margin: "0 0 20px", font: "400 17px/1.8 var(--font-body)", color: "#474238" }}>
         พนักงานประจำยื่นปีละครั้ง แต่คนมีเงินได้ประเภทฟรีแลนซ์/อาชีพอิสระต้องยื่นเพิ่มอีกรอบกลางปี:
@@ -92,7 +93,7 @@ export default function FreelanceArticlePage() {
       </div>
 
       <h2 style={{ margin: "0 0 14px", fontSize: 30, lineHeight: 1.2, color: "#201e1d" }}>
-        3. หักค่าใช้จ่ายได้คนละแบบกับเงินเดือน
+        <span style={{ fontFamily: "var(--font-number)" }}>3.</span> หักค่าใช้จ่ายได้คนละแบบกับเงินเดือน
       </h2>
       <p
         style={{
