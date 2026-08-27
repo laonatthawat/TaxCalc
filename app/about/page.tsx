@@ -33,7 +33,7 @@ export default function AboutPage() {
         ทำไมทำแอปนี้
       </p>
       <h1 style={{ margin: "0 0 24px", maxWidth: "22ch", fontSize: 56, lineHeight: 1.08, color: "#201e1d" }}>
-        เราเคยยื่นภาษีผิดมาก่อน
+        เราเป็นนักศึกษาจบใหม่
       </h1>
       <p
         style={{
@@ -43,8 +43,8 @@ export default function AboutPage() {
           textWrap: "pretty",
         }}
       >
-        ปีแรกที่ทำงาน เราเปิดแบบฟอร์มยื่นภาษีแล้วก็ปิดมันไป ไม่ใช่เพราะขี้เกียจ
-        แต่เพราะไม่มีใครเคยอธิบายว่าช่องพวกนั้นหมายถึงอะไร สุดท้ายจ่ายเกินที่ควรจ่ายอยู่หลายปี
+        พึ่งเคยทำงานที่แรก เราเปิดแบบฟอร์มยื่นภาษีแล้วก็ปิดมันไป ไม่ใช่เพราะขี้เกียจ
+        แต่เพราะไม่มีใครเคยอธิบายว่าช่องพวกนั้นหมายถึงอะไร สุดท้ายก็คำนวนภาษีไม่เป็น
       </p>
       <p
         style={{
@@ -68,7 +68,7 @@ export default function AboutPage() {
       >
         เป้าหมายของเราแปลก ๆ หน่อย คือเราอยากให้คุณเข้าใจภาษีดีพอที่จะไม่ต้องใช้แอปเราก็ได้
       </p>
-      <div style={{ display: "flex", flexDirection: "column", gap: 0, marginBottom: 36 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
         {BELIEFS.map((b) => (
           <div
             key={b.title}
@@ -94,24 +94,6 @@ export default function AboutPage() {
             </div>
           </div>
         ))}
-      </div>
-      <div
-        style={{
-          padding: 30,
-          borderRadius: 28,
-          background: "#ebddc5",
-          display: "flex",
-          flexDirection: "column",
-          gap: 9,
-        }}
-      >
-        <span style={{ font: "600 19px/1.35 var(--font-body)", color: "#201e1d" }}>
-          ฟรีแล้วอยู่ได้ยังไง
-        </span>
-        <p style={{ margin: 0, font: "400 15px/1.7 var(--font-body)", color: "#474238" }}>
-          ตอนนี้เราทำกันเองสองคน ค่าเซิร์ฟเวอร์ยังจ่ายไหว ถ้าวันหนึ่งต้องเก็บเงินเราจะบอกล่วงหน้า
-          และของที่คุณใช้ฟรีอยู่จะยังฟรี เราไม่ขายข้อมูลคุณให้ใคร
-        </p>
       </div>
     </div>
   );

@@ -81,7 +81,7 @@ h1, h2, h3, h4, h5, h6 {
   padding: 24px 0 48px;
 }
 
-/* หน้า dashboard/income/investments/tax/overview ใช้พื้นหลังโทนเดียวกับหน้า login/signup
+/* หน้า dashboard/income/tax/overview ใช้พื้นหลังโทนเดียวกับหน้า login/signup
    เพื่อให้ธีมเข้ากันทั้งแอป */
 .dashboard-page {
   min-height: 100vh;
@@ -310,7 +310,7 @@ h1, h2, h3, h4, h5, h6 {
   background: #ffe1d0;
 }
 
-/* ===== Page tabs (สลับ รายจ่าย / รายรับ / การลงทุน / ภาษี) ===== */
+/* ===== Page tabs (สลับ รายจ่าย / รายรับ / ภาษี) ===== */
 
 /* overflow-x: auto แทน flex-wrap — บนจอมือถือแคบๆ ที่ใส่ครบ 4 แท็บ
    ไม่พอดีในบรรทัดเดียว ให้เลื่อนซ้ายขวาได้แบบแท็บบาร์ทั่วไป แทนที่จะตกบรรทัดจนดันเนื้อหาด้านล่างเพี้ยน */

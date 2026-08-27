@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Receipt, Wallet2, TrendingUp, Landmark, ArrowRight } from 'lucide-react'
+import { Receipt, Wallet2, Landmark, ArrowRight } from 'lucide-react'
 import Logo from './Logo'
 import { signOut } from '@/app/dashboard/actions'
 
@@ -12,9 +12,6 @@ type Props = {
   hasIncomeData: boolean
   monthlyIncome: number
   annualIncomeEstimate: number
-  hasInvestmentPlan: boolean
-  investmentFinalValue: number | null
-  investmentYears: number | null
   estimatedTax: number
   effectiveTaxRate: number
 }
@@ -87,9 +84,6 @@ export default function OverviewClient({
   hasIncomeData,
   monthlyIncome,
   annualIncomeEstimate,
-  hasInvestmentPlan,
-  investmentFinalValue,
-  investmentYears,
   estimatedTax,
   effectiveTaxRate,
 }: Props) {
@@ -116,9 +110,6 @@ export default function OverviewClient({
           </Link>
           <Link href="/income" className="page-tab">
             รายรับ
-          </Link>
-          <Link href="/investments" className="page-tab">
-            การลงทุน
           </Link>
           <Link href="/tax" className="page-tab">
             ภาษี
@@ -202,23 +193,6 @@ export default function OverviewClient({
               hasIncomeData
                 ? `ประมาณการรวมทั้งปี ${baht(annualIncomeEstimate)}`
                 : 'เริ่มเพิ่มรายรับได้ที่หน้านี้'
-            }
-          />
-
-          <ModuleCard
-            icon={TrendingUp}
-            gradient="linear-gradient(135deg, #f6a06b, #8c491a)"
-            title="การลงทุน"
-            href="/investments"
-            headline={
-              hasInvestmentPlan && investmentFinalValue !== null
-                ? baht(investmentFinalValue)
-                : 'ยังไม่ได้ตั้งแผน'
-            }
-            subtext={
-              hasInvestmentPlan
-                ? `มูลค่าพอร์ตโดยประมาณเมื่อครบ ${investmentYears} ปี`
-                : 'ลองตั้งแผนดูว่าเงินจะโตไปเท่าไหร่'
             }
           />
 

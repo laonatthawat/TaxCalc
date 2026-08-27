@@ -138,9 +138,6 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
           <Link href="/income" className="page-tab">
             รายรับ
           </Link>
-          <Link href="/investments" className="page-tab">
-            การลงทุน
-          </Link>
           <span className="page-tab page-tab-active">ภาษี</span>
           <Link href="/overview" className="page-tab">
             ภาพรวม
@@ -403,7 +400,7 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
           </div>
         </form>
 
-        {/* การ์ดสรุปผลลัพธ์ — โทนเทาเข้ม/official ให้ต่างจากรายจ่าย(ม่วง)/รายรับ(เขียว)/การลงทุน(น้ำเงิน) */}
+        {/* การ์ดสรุปผลลัพธ์ — โทนเทาเข้ม/official ให้ต่างจากรายจ่าย(ม่วง)/รายรับ(เขียว) */}
         <div
           style={{
             background: 'linear-gradient(135deg, #645c50 0%, #474238 55%, #2e2b25 100%)',

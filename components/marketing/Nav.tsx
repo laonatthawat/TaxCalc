@@ -82,18 +82,6 @@ export default function MarketingNav() {
         })}
       </div>
 
-      <span
-        style={{
-          padding: "5px 11px",
-          borderRadius: 999,
-          background: "#e1eecc",
-          font: "600 11px/1.4 var(--font-body)",
-          color: "#56633f",
-        }}
-      >
-        ใช้ฟรีทั้งหมด
-      </span>
-
       <Link
         href="/login"
         style={{
