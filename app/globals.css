@@ -1,15 +1,46 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f5ead8;
+  --foreground: #201e1d;
+
+  --color-accent: #c67139;
+  --color-accent-dark: #8c491a;
+  --color-accent-100: #fff2eb;
+  --color-accent-200: #ffe1d0;
+  --color-accent-400: #f6a06b;
+  --color-accent-600: #b2622d;
+  --color-accent-700: #8c491a;
+
+  --color-sage: #7a8a5e;
+  --color-sage-100: #f0fae1;
+  --color-sage-200: #e1eecc;
+  --color-sage-500: #8fa073;
+  --color-sage-700: #56633f;
+
+  --color-neutral-100: #f9f4ed;
+  --color-neutral-300: #dcd3c4;
+  --color-neutral-500: #a19786;
+  --color-neutral-600: #82796a;
+  --color-neutral-700: #645c50;
+  --color-neutral-800: #474238;
+  --color-neutral-900: #2e2b25;
+
+  --color-danger-bg: #fbe4dc;
+  --color-danger-bg-strong: #f4c9bd;
+  --color-danger-text: #8a3a22;
+
+  --radius-pill: 999px;
+  --radius-card: 28px;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-caprasimo), var(--font-ibm-plex-sans-thai), sans-serif;
+  --font-body: var(--font-ibm-plex-sans-thai), var(--font-figtree), sans-serif;
+  --font-sans: var(--font-body);
+  --font-number: var(--font-figtree), sans-serif;
 }
 
 /* แอปนี้ยังไม่มีดีไซน์สำหรับ dark mode (การ์ด/พื้นหลังทุกจุดเป็นโทนสว่างตายตัว) จึงตัดการสลับสี
@@ -19,10 +50,15 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
 }
 
-/* ===== Auth pages (login / signup) — pastel theme ===== */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 400;
+}
+
+/* ===== Auth pages (login / signup) ===== */
 
 .auth-page {
   min-height: 100vh;
@@ -32,41 +68,37 @@ body {
   justify-content: center;
   position: relative;
   overflow: hidden;
-  /* สีตกกันเผื่อกรอบแรกก่อน MountainBackdrop (SVG) จะ paint — ตรงกับสีท้องฟ้าบนสุดของ SVG นั้น */
-  background: #efeafb;
+  background: #f5ead8;
   padding: 24px;
 }
 
-/* หน้า landing (`/`) — มีพื้นหลัง MountainBackdrop (SVG ภูเขาซ้อนชั้น) ซ้อนอยู่เหมือนหน้า auth
-   แยก class จาก .dashboard-page เพราะหน้า dashboard/income/investments/tax/overview (ที่ล็อกอินแล้ว)
-   ยังใช้ลวดลายจุดแบบเดิม ไม่ใส่ภูเขา เพราะมีตาราง/ฟอร์มเยอะ พื้นหลังที่มีรายละเอียดจะรกเกินไป */
+/* หน้า landing (`/`) */
 .landing-page {
   min-height: 100vh;
   position: relative;
   overflow: hidden;
-  background: #efeafb;
+  background: #f5ead8;
   padding: 24px 0 48px;
 }
 
-/* หน้า dashboard ใช้ gradient พื้นหลังเดียวกับหน้า login/signup (+ ลวดลายจุดจางๆ เพิ่มความมีชีวิตชีวา)
-   เพื่อให้ธีมเข้ากันทั้งแอป ต่างกันตรงที่ dashboard เนื้อหายาว/สูงไม่เท่ากัน จึงจัดชิดบนแทนการ center แนวตั้งแบบ auth */
+/* หน้า dashboard/income/investments/tax/overview ใช้พื้นหลังโทนเดียวกับหน้า login/signup
+   เพื่อให้ธีมเข้ากันทั้งแอป */
 .dashboard-page {
   min-height: 100vh;
-  background:
-    radial-gradient(circle at 1px 1px, rgba(127, 119, 221, 0.16) 1px, transparent 0) 0 0 / 28px 28px,
-    linear-gradient(135deg, #eeedfe 0%, #e6f1fb 50%, #faece7 100%);
+  background: #f5ead8;
   padding: 24px 0 48px;
 }
 
 .auth-card {
   position: relative;
-  z-index: 1; /* ต้องอยู่เหนือ MountainBackdrop (z-index: 0) เสมอ */
+  z-index: 1;
   width: 100%;
   max-width: 400px;
-  background: #ffffff;
-  border-radius: 20px;
+  background: #f9f4ed;
+  border-radius: var(--radius-card);
   padding: 40px 36px;
-  box-shadow: 0 20px 60px -20px rgba(127, 119, 221, 0.35);
+  box-shadow: 0 20px 60px -20px rgba(46, 43, 37, 0.28);
+  border: 1px solid #dcd3c4;
 }
 
 /* แมวมาสคอตแอบโผล่มุมการ์ด login/signup — ตกแต่งเฉยๆ เลยปิด pointer-events กันบังการคลิก */
@@ -79,15 +111,16 @@ body {
 
 .auth-title {
   margin: 0 0 6px;
-  font-size: 22px;
-  font-weight: 600;
-  color: #2b2b33;
+  font-family: var(--font-heading);
+  font-size: 24px;
+  font-weight: 400;
+  color: #201e1d;
 }
 
 .auth-subtitle {
   margin: 0 0 28px;
   font-size: 13px;
-  color: #47474f;
+  color: #474238;
 }
 
 .form-field {
@@ -98,42 +131,43 @@ body {
   display: block;
   font-size: 13px;
   font-weight: 500;
-  color: #4a4a52;
+  color: #474238;
   margin-bottom: 6px;
 }
 
 .form-input {
   width: 100%;
-  padding: 11px 14px;
+  padding: 11px 18px;
   font-size: 14px;
-  border-radius: 10px;
-  border: 1px solid #e5e5ea;
+  border-radius: var(--radius-pill);
+  border: 1px solid #dcd3c4;
   outline: none;
   box-sizing: border-box;
   font-family: inherit;
-  color: #2b2b33;
-  background: #ffffff;
+  color: #201e1d;
+  background: #f9f4ed;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .form-input::placeholder {
-  color: #a9a9b2;
+  color: #a19786;
 }
 
 .form-input:focus {
-  border-color: #afa9ec;
-  box-shadow: 0 0 0 3px rgba(175, 169, 236, 0.25);
+  border-color: #c67139;
+  box-shadow: 0 0 0 3px rgba(198, 113, 57, 0.2);
 }
 
 .btn-gradient-primary {
   width: 100%;
   padding: 12px;
+  font-family: var(--font-heading);
   font-size: 14px;
-  font-weight: 600;
-  color: #fff;
-  background: linear-gradient(135deg, #afa9ec, #7f77dd);
+  font-weight: 400;
+  color: #f5ead8;
+  background: linear-gradient(135deg, #d67f48, #b2622d);
   border: none;
-  border-radius: 10px;
+  border-radius: var(--radius-pill);
   cursor: pointer;
   transition: opacity 0.15s;
 }
@@ -149,19 +183,19 @@ body {
 
 .auth-alert-error {
   margin-top: 16px;
-  padding: 10px 14px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #f5c4b3, #faece7);
-  color: #993c1d;
+  padding: 10px 16px;
+  border-radius: var(--radius-pill);
+  background: var(--color-danger-bg);
+  color: var(--color-danger-text);
   font-size: 13px;
 }
 
 .auth-alert-success {
   margin-top: 16px;
-  padding: 10px 14px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #9fe1cb, #e1f5ee);
-  color: #0f6e56;
+  padding: 10px 16px;
+  border-radius: var(--radius-pill);
+  background: #e1eecc;
+  color: #56633f;
   font-size: 13px;
 }
 
@@ -169,11 +203,11 @@ body {
   margin: 24px 0 0;
   text-align: center;
   font-size: 13px;
-  color: #47474f;
+  color: #474238;
 }
 
 .auth-footer-link a {
-  color: #6552cc;
+  color: #8c491a;
   font-weight: 600;
   text-decoration: none;
 }
@@ -185,35 +219,35 @@ body {
 /* ===== Buttons ===== */
 
 .btn-secondary {
-  padding: 8px 16px;
+  padding: 8px 18px;
   font-size: 13px;
   font-weight: 500;
-  color: #4a4a52;
-  background: #f5f4f0;
-  border: none;
-  border-radius: 8px;
+  color: #474238;
+  background: transparent;
+  border: 1px solid #dcd3c4;
+  border-radius: var(--radius-pill);
   cursor: pointer;
   transition: background 0.15s;
 }
 
 .btn-secondary:hover {
-  background: #ecead4;
+  background: #ebddc5;
 }
 
 .btn-secondary-danger {
-  padding: 7px;
+  padding: 7px 14px;
   font-size: 13px;
   font-weight: 500;
-  color: #993c1d;
-  background: #faece7;
+  color: var(--color-danger-text);
+  background: var(--color-danger-bg);
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-pill);
   cursor: pointer;
   transition: background 0.15s;
 }
 
 .btn-secondary-danger:hover {
-  background: #f5c4b3;
+  background: var(--color-danger-bg-strong);
 }
 
 /* ===== Modal (add/edit subscription) ===== */
@@ -221,7 +255,7 @@ body {
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(43, 43, 51, 0.45);
+  background: rgba(46, 43, 37, 0.45);
   backdrop-filter: blur(2px);
   display: flex;
   align-items: center;
@@ -231,19 +265,21 @@ body {
 }
 
 .modal-card {
-  background: #ffffff;
-  border-radius: 20px;
+  background: #f9f4ed;
+  border-radius: var(--radius-card);
   padding: 28px 28px 24px;
   width: 400px;
   max-width: 100%;
-  box-shadow: 0 20px 60px -20px rgba(43, 43, 51, 0.45);
+  box-shadow: 0 20px 60px -20px rgba(46, 43, 37, 0.45);
+  border: 1px solid #dcd3c4;
 }
 
 .modal-title {
   margin: 0 0 20px;
-  font-size: 18px;
-  font-weight: 600;
-  color: #2b2b33;
+  font-family: var(--font-heading);
+  font-size: 20px;
+  font-weight: 400;
+  color: #201e1d;
 }
 
 /* dropdown เลือกหมวดหมู่แบบสไตล์เอง (แทน <datalist> ของ browser ที่แก้หน้าตาไม่ได้เลย) */
@@ -252,10 +288,10 @@ body {
   top: calc(100% + 6px);
   left: 0;
   right: 0;
-  background: #ffffff;
-  border: 1px solid #e5e5ea;
-  border-radius: 12px;
-  box-shadow: 0 12px 32px -12px rgba(43, 43, 51, 0.28);
+  background: #f9f4ed;
+  border: 1px solid #dcd3c4;
+  border-radius: 16px;
+  box-shadow: 0 12px 32px -12px rgba(46, 43, 37, 0.28);
   max-height: 220px;
   overflow-y: auto;
   z-index: 20;
@@ -265,18 +301,18 @@ body {
 .select-dropdown-item {
   padding: 9px 12px;
   font-size: 14px;
-  color: #2b2b33;
+  color: #201e1d;
   border-radius: 8px;
   cursor: pointer;
 }
 
 .select-dropdown-item:hover {
-  background: #f1efff;
+  background: #ffe1d0;
 }
 
-/* ===== Page tabs (สลับ รายจ่าย / รายรับ) ===== */
+/* ===== Page tabs (สลับ รายจ่าย / รายรับ / การลงทุน / ภาษี) ===== */
 
-/* overflow-x: auto แทน flex-wrap — บนจอมือถือแคบๆ ที่ใส่ครบ 4 แท็บ (รายจ่าย/รายรับ/การลงทุน/ภาษี)
+/* overflow-x: auto แทน flex-wrap — บนจอมือถือแคบๆ ที่ใส่ครบ 4 แท็บ
    ไม่พอดีในบรรทัดเดียว ให้เลื่อนซ้ายขวาได้แบบแท็บบาร์ทั่วไป แทนที่จะตกบรรทัดจนดันเนื้อหาด้านล่างเพี้ยน */
 .page-tabs {
   display: flex;
@@ -292,17 +328,17 @@ body {
   padding: 8px 16px;
   font-size: 13px;
   font-weight: 600;
-  color: #6552cc;
-  background: #ffffff;
-  border-radius: 999px;
+  color: #8c491a;
+  background: #f9f4ed;
+  border-radius: var(--radius-pill);
   text-decoration: none;
-  border: 1px solid #e5e5ea;
+  border: 1px solid #dcd3c4;
   white-space: nowrap;
 }
 
 .page-tab-active {
-  color: #ffffff;
-  background: linear-gradient(135deg, #afa9ec, #7f77dd);
+  color: #f5ead8;
+  background: linear-gradient(135deg, #d67f48, #b2622d);
   border: none;
 }
 
@@ -315,16 +351,16 @@ body {
   font-size: 11px;
   font-weight: 600;
   padding: 3px 9px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   white-space: nowrap;
 }
 
 .renewal-badge-urgent {
-  background: linear-gradient(135deg, #f5c4b3, #faece7);
-  color: #993c1d;
+  background: var(--color-danger-bg);
+  color: var(--color-danger-text);
 }
 
 .renewal-badge-normal {
-  background: #f1efe8;
-  color: #47474f;
+  background: #ebddc5;
+  color: #474238;
 }

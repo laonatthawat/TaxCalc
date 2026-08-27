@@ -1,15 +1,24 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Caprasimo, Figtree, IBM_Plex_Sans_Thai } from "next/font/google";
 import "./globals.css";
+import ChromeGate from "@/components/marketing/ChromeGate";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const caprasimo = Caprasimo({
+  weight: "400",
   subsets: ["latin"],
+  variable: "--font-caprasimo",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const figtree = Figtree({
+  weight: ["400", "500", "600", "700"],
   subsets: ["latin"],
+  variable: "--font-figtree",
+});
+
+const ibmPlexSansThai = IBM_Plex_Sans_Thai({
+  weight: ["400", "500", "600", "700"],
+  subsets: ["thai", "latin"],
+  variable: "--font-ibm-plex-sans-thai",
 });
 
 export const metadata: Metadata = {
@@ -22,9 +31,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="th"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${caprasimo.variable} ${figtree.variable} ${ibmPlexSansThai.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <ChromeGate>{children}</ChromeGate>
+      </body>
     </html>
   );
 }

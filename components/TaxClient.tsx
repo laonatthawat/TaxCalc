@@ -159,7 +159,7 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
         >
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-              <h1 style={{ margin: 0, fontSize: 22, color: '#2b2b33' }}>
+              <h1 style={{ margin: 0, fontSize: 22, color: '#201e1d' }}>
                 ประมาณการภาษีเงินได้บุคคลธรรมดา
               </h1>
               <HelpTooltip title="วิธีใช้หน้าภาษี">
@@ -178,7 +178,7 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
                 </p>
               </HelpTooltip>
             </div>
-            <p style={{ color: '#47474f', margin: '4px 0 0' }}>{userEmail}</p>
+            <p style={{ color: '#474238', margin: '4px 0 0' }}>{userEmail}</p>
           </div>
           <button onClick={handleLogout} className="btn-secondary">
             ออกจากระบบ
@@ -187,11 +187,11 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
 
         <div
           style={{
-            background: 'linear-gradient(135deg, #f5c4b3, #faece7)',
-            borderRadius: 14,
+            background: 'linear-gradient(135deg, #f4c9bd, #fbe4dc)',
+            borderRadius: 28,
             padding: '14px 20px',
             marginBottom: 20,
-            color: '#993c1d',
+            color: '#8a3a22',
             fontSize: 12,
             lineHeight: 1.6,
           }}
@@ -205,42 +205,42 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
         {/* รายรับที่ใช้คำนวณ — ดึงมาจากหน้ารายรับอัตโนมัติ แก้ไขได้ที่หน้านั้นเท่านั้น */}
         <div
           style={{
-            background: '#ffffff',
-            border: '0.5px solid #ececE5',
-            borderRadius: 14,
+            background: '#f9f4ed',
+            border: '0.5px solid #dcd3c4',
+            borderRadius: 28,
             padding: 20,
             marginBottom: 16,
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-            <h3 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: '#2b2b33' }}>
+            <h3 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: '#201e1d' }}>
               รายรับที่ใช้คำนวณ (ประมาณการทั้งปี)
             </h3>
-            <Link href="/income" style={{ fontSize: 12, fontWeight: 600, color: '#6552cc', textDecoration: 'none' }}>
+            <Link href="/income" style={{ fontSize: 12, fontWeight: 600, color: '#8c491a', textDecoration: 'none' }}>
               แก้ไขที่หน้ารายรับ →
             </Link>
           </div>
 
           {estimate.expenseBreakdown.length === 0 ? (
-            <p style={{ fontSize: 13, color: '#8a8a94', margin: 0 }}>
+            <p style={{ fontSize: 13, color: '#82796a', margin: 0 }}>
               ยังไม่มีข้อมูลรายรับ — ไปเพิ่มรายรับก่อนเพื่อให้คำนวณภาษีได้
             </p>
           ) : (
             estimate.expenseBreakdown.map((item) => (
               <div
                 key={item.label}
-                style={{ padding: '10px 0', borderTop: '1px solid #f1f0f5', fontSize: 13 }}
+                style={{ padding: '10px 0', borderTop: '1px solid #dcd3c4', fontSize: 13 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
-                  <span style={{ color: '#2b2b33', fontWeight: 500 }}>{item.label}</span>
-                  <span style={{ color: '#2b2b33' }}>฿{item.grossIncome.toLocaleString()}</span>
+                  <span style={{ color: '#201e1d', fontWeight: 500 }}>{item.label}</span>
+                  <span style={{ color: '#201e1d' }}>฿{item.grossIncome.toLocaleString()}</span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, color: '#8a8a94', fontSize: 12 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, color: '#82796a', fontSize: 12 }}>
                   <span>หักค่าใช้จ่าย ฿{item.deductibleExpense.toLocaleString()}</span>
                   <span>เหลือ ฿{item.netIncome.toLocaleString()}</span>
                 </div>
                 {item.note && (
-                  <p style={{ margin: '4px 0 0', fontSize: 11, color: '#a9a9b2' }}>{item.note}</p>
+                  <p style={{ margin: '4px 0 0', fontSize: 11, color: '#a19786' }}>{item.note}</p>
                 )}
               </div>
             ))
@@ -253,9 +253,9 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
               style={{
                 marginTop: 8,
                 padding: '10px 0 0',
-                borderTop: '1px solid #f1f0f5',
+                borderTop: '1px solid #dcd3c4',
                 fontSize: 12,
-                color: '#8a8a94',
+                color: '#82796a',
               }}
             >
               เงินให้ (ยกเว้นภาษี) ฿{estimate.exemptGiftTotal.toLocaleString()} — ไม่นำมาคำนวณในหน้านี้
@@ -267,16 +267,16 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
         <form
           onSubmit={handleSave}
           style={{
-            background: '#ffffff',
-            border: '0.5px solid #ececE5',
-            borderRadius: 14,
+            background: '#f9f4ed',
+            border: '0.5px solid #dcd3c4',
+            borderRadius: 28,
             padding: 20,
             marginBottom: 16,
           }}
         >
-          <h3 style={{ marginTop: 0, fontSize: 15, fontWeight: 600, color: '#2b2b33' }}>ค่าลดหย่อนภาษี</h3>
+          <h3 style={{ marginTop: 0, fontSize: 15, fontWeight: 600, color: '#201e1d' }}>ค่าลดหย่อนภาษี</h3>
 
-          <h4 style={{ fontSize: 13, fontWeight: 600, color: '#6552cc', margin: '16px 0 8px' }}>
+          <h4 style={{ fontSize: 13, fontWeight: 600, color: '#8c491a', margin: '16px 0 8px' }}>
             ส่วนบุคคล/ครอบครัว
           </h4>
           <label
@@ -285,7 +285,7 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
               alignItems: 'center',
               gap: 8,
               fontSize: 13,
-              color: '#2b2b33',
+              color: '#201e1d',
               marginBottom: 12,
               cursor: 'pointer',
             }}
@@ -294,7 +294,7 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
               type="checkbox"
               checked={form.has_spouse}
               onChange={(e) => updateField('has_spouse', e.target.checked)}
-              style={{ width: 16, height: 16, accentColor: '#7F77DD' }}
+              style={{ width: 16, height: 16, accentColor: '#c67139' }}
             />
             มีคู่สมรสที่ไม่มีเงินได้ (+60,000)
           </label>
@@ -321,7 +321,7 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
             />
           </div>
 
-          <h4 style={{ fontSize: 13, fontWeight: 600, color: '#6552cc', margin: '16px 0 8px' }}>ประกัน</h4>
+          <h4 style={{ fontSize: 13, fontWeight: 600, color: '#8c491a', margin: '16px 0 8px' }}>ประกัน</h4>
           <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
             <NumberField
               label="ประกันสังคมที่จ่ายจริง (บาท)"
@@ -345,7 +345,7 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
             />
           </div>
 
-          <h4 style={{ fontSize: 13, fontWeight: 600, color: '#6552cc', margin: '16px 0 8px' }}>
+          <h4 style={{ fontSize: 13, fontWeight: 600, color: '#8c491a', margin: '16px 0 8px' }}>
             กองทุนเพื่อการเกษียณ/ลงทุน
           </h4>
           <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
@@ -371,7 +371,7 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
             />
           </div>
 
-          <h4 style={{ fontSize: 13, fontWeight: 600, color: '#6552cc', margin: '16px 0 8px' }}>อื่นๆ</h4>
+          <h4 style={{ fontSize: 13, fontWeight: 600, color: '#8c491a', margin: '16px 0 8px' }}>อื่นๆ</h4>
           <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
             <NumberField
               label="ดอกเบี้ยกู้ยืมเพื่อที่อยู่อาศัย (บาท)"
@@ -399,18 +399,18 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
             >
               {isSaving ? 'กำลังบันทึก...' : 'บันทึกค่าลดหย่อน'}
             </button>
-            {saveMessage && <span style={{ fontSize: 12, color: '#47474f' }}>{saveMessage}</span>}
+            {saveMessage && <span style={{ fontSize: 12, color: '#474238' }}>{saveMessage}</span>}
           </div>
         </form>
 
         {/* การ์ดสรุปผลลัพธ์ — โทนเทาเข้ม/official ให้ต่างจากรายจ่าย(ม่วง)/รายรับ(เขียว)/การลงทุน(น้ำเงิน) */}
         <div
           style={{
-            background: 'linear-gradient(135deg, #64748b 0%, #475569 55%, #334155 100%)',
-            borderRadius: 20,
+            background: 'linear-gradient(135deg, #645c50 0%, #474238 55%, #2e2b25 100%)',
+            borderRadius: 28,
             padding: '22px 24px',
             marginBottom: 16,
-            color: '#ffffff',
+            color: '#f9f4ed',
           }}
         >
           <p style={{ margin: 0, fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.9)' }}>
@@ -442,14 +442,14 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
         {/* breakdown ค่าลดหย่อนที่ใช้จริง (หลังหักเพดานแล้ว) */}
         <div
           style={{
-            background: '#ffffff',
-            border: '0.5px solid #ececE5',
-            borderRadius: 14,
+            background: '#f9f4ed',
+            border: '0.5px solid #dcd3c4',
+            borderRadius: 28,
             padding: 20,
             marginBottom: 16,
           }}
         >
-          <h3 style={{ marginTop: 0, fontSize: 15, fontWeight: 600, color: '#2b2b33' }}>
+          <h3 style={{ marginTop: 0, fontSize: 15, fontWeight: 600, color: '#201e1d' }}>
             ค่าลดหย่อนที่ใช้จริง (หลังหักเพดานแล้ว)
           </h3>
           {estimate.deductionItems.map((item) => (
@@ -460,11 +460,11 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 padding: '8px 0',
-                borderTop: '1px solid #f1f0f5',
+                borderTop: '1px solid #dcd3c4',
                 fontSize: 13,
               }}
             >
-              <span style={{ color: '#2b2b33' }}>
+              <span style={{ color: '#201e1d' }}>
                 {item.label}
                 {item.capped && (
                   <span
@@ -472,8 +472,8 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
                       marginLeft: 6,
                       fontSize: 10,
                       fontWeight: 600,
-                      color: '#993c1d',
-                      background: '#faece7',
+                      color: '#8a3a22',
+                      background: '#fbe4dc',
                       padding: '1px 6px',
                       borderRadius: 999,
                     }}
@@ -482,7 +482,7 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
                   </span>
                 )}
               </span>
-              <span style={{ color: '#2b2b33', fontWeight: 500 }}>฿{item.amount.toLocaleString()}</span>
+              <span style={{ color: '#201e1d', fontWeight: 500 }}>฿{item.amount.toLocaleString()}</span>
             </div>
           ))}
         </div>
@@ -490,17 +490,17 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
         {/* breakdown ขั้นบันไดภาษี */}
         <div
           style={{
-            background: '#ffffff',
-            border: '0.5px solid #ececE5',
-            borderRadius: 14,
+            background: '#f9f4ed',
+            border: '0.5px solid #dcd3c4',
+            borderRadius: 28,
             padding: 20,
           }}
         >
-          <h3 style={{ marginTop: 0, fontSize: 15, fontWeight: 600, color: '#2b2b33' }}>
+          <h3 style={{ marginTop: 0, fontSize: 15, fontWeight: 600, color: '#201e1d' }}>
             รายละเอียดภาษีขั้นบันได
           </h3>
           {estimate.brackets.length === 0 ? (
-            <p style={{ fontSize: 13, color: '#8a8a94', margin: 0 }}>
+            <p style={{ fontSize: 13, color: '#82796a', margin: 0 }}>
               เงินได้สุทธิอยู่ในเกณฑ์ได้รับยกเว้นภาษี (ไม่เกิน 150,000 บาท)
             </p>
           ) : (
@@ -512,14 +512,14 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
                   justifyContent: 'space-between',
                   alignItems: 'center',
                   padding: '8px 0',
-                  borderTop: '1px solid #f1f0f5',
+                  borderTop: '1px solid #dcd3c4',
                   fontSize: 13,
                 }}
               >
-                <span style={{ color: '#2b2b33' }}>
-                  {b.rangeLabel} <span style={{ color: '#8a8a94' }}>({(b.rate * 100).toFixed(0)}%)</span>
+                <span style={{ color: '#201e1d' }}>
+                  {b.rangeLabel} <span style={{ color: '#82796a' }}>({(b.rate * 100).toFixed(0)}%)</span>
                 </span>
-                <span style={{ color: '#2b2b33', fontWeight: 500 }}>฿{Math.round(b.taxFromBracket).toLocaleString()}</span>
+                <span style={{ color: '#201e1d', fontWeight: 500 }}>฿{Math.round(b.taxFromBracket).toLocaleString()}</span>
               </div>
             ))
           )}

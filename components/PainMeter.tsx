@@ -15,27 +15,27 @@ type Props = {
 const LEVEL_COPY: Record<PainLevel, { label: string; barColor: string; bg: string; text: string }> = {
   happy: {
     label: 'สบายๆ ยังไม่เจ็บ',
-    barColor: 'linear-gradient(90deg, #9fe1cb, #6fd1af)',
-    bg: '#eafaf3',
-    text: '#0f6e56',
+    barColor: 'linear-gradient(90deg, #ccdbb2, #8fa073)',
+    bg: '#f0fae1',
+    text: '#3d472b',
   },
   okay: {
     label: 'เริ่มใช้ไปพอสมควรแล้ว',
-    barColor: 'linear-gradient(90deg, #ffe08a, #ffc94d)',
-    bg: '#fff8e6',
-    text: '#8a6300',
+    barColor: 'linear-gradient(90deg, #ffc6a5, #f6a06b)',
+    bg: '#fff2eb',
+    text: '#8c491a',
   },
   worried: {
     label: 'ใกล้เต็มงบแล้วนะ',
-    barColor: 'linear-gradient(90deg, #f5c4b3, #f0a37f)',
-    bg: '#fdefe8',
-    text: '#993c1d',
+    barColor: 'linear-gradient(90deg, #f6a06b, #d67f48)',
+    bg: '#ffe1d0',
+    text: '#643312',
   },
   pain: {
     label: 'จ่ายจนเจ็บแล้ว! เกินงบที่ตั้งไว้',
-    barColor: 'linear-gradient(90deg, #f28b82, #e05555)',
-    bg: '#fdeceb',
-    text: '#a3271b',
+    barColor: 'linear-gradient(90deg, #e0a58f, #8a3a22)',
+    bg: '#f4c9bd',
+    text: '#8a3a22',
   },
 }
 
@@ -71,9 +71,9 @@ export default function PainMeter({ monthlyBudget, totalMonthly }: Props) {
     return (
       <div
         style={{
-          background: '#ffffff',
-          border: '0.5px solid #ececE5',
-          borderRadius: 14,
+          background: '#f9f4ed',
+          border: '0.5px solid #dcd3c4',
+          borderRadius: 28,
           padding: 16,
           marginBottom: 16,
         }}
@@ -81,8 +81,8 @@ export default function PainMeter({ monthlyBudget, totalMonthly }: Props) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
           <PainMeterCat level="okay" size={44} />
           <div>
-            <h3 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: '#2b2b33' }}>มิเตอร์ความเจ็บ</h3>
-            <p style={{ margin: 0, fontSize: 12, color: '#47474f' }}>
+            <h3 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: '#201e1d' }}>มิเตอร์ความเจ็บ</h3>
+            <p style={{ margin: 0, fontSize: 12, color: '#474238' }}>
               ตั้งงบรายจ่ายต่อเดือน เพื่อดูว่าตอนนี้ใช้ไปเท่าไหร่แล้ว
             </p>
           </div>
@@ -126,7 +126,7 @@ export default function PainMeter({ monthlyBudget, totalMonthly }: Props) {
     <div
       style={{
         background: copy.bg,
-        borderRadius: 14,
+        borderRadius: 28,
         padding: 16,
         marginBottom: 16,
       }}
@@ -143,7 +143,7 @@ export default function PainMeter({ monthlyBudget, totalMonthly }: Props) {
               gap: 4,
             }}
           >
-            <h3 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: '#2b2b33' }}>มิเตอร์ความเจ็บ</h3>
+            <h3 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: '#201e1d' }}>มิเตอร์ความเจ็บ</h3>
             <button
               onClick={() => {
                 setBudgetInput(String(monthlyBudget))
@@ -153,7 +153,7 @@ export default function PainMeter({ monthlyBudget, totalMonthly }: Props) {
                 background: 'none',
                 border: 'none',
                 fontSize: 12,
-                color: '#6552cc',
+                color: '#8c491a',
                 fontWeight: 600,
                 cursor: 'pointer',
                 padding: 0,
@@ -178,7 +178,7 @@ export default function PainMeter({ monthlyBudget, totalMonthly }: Props) {
         />
       </div>
 
-      <p style={{ margin: '8px 0 0', fontSize: 12, color: '#47474f' }}>
+      <p style={{ margin: '8px 0 0', fontSize: 12, color: '#474238' }}>
         ใช้ไป ฿{totalMonthly.toLocaleString(undefined, { maximumFractionDigits: 2 })} จากงบ ฿
         {monthlyBudget!.toLocaleString()} ({percent}%)
       </p>

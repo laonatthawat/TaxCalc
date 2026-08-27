@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Logo from '@/components/Logo'
-import MountainBackdrop from '@/components/MountainBackdrop'
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
@@ -43,7 +42,6 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="auth-page">
-      <MountainBackdrop />
       <div style={{ marginBottom: 20, position: 'relative', zIndex: 1 }}>
         <Logo />
       </div>

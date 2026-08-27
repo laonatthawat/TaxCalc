@@ -40,48 +40,48 @@ export default function PainMeterCat({ level, size = 64 }: Props) {
   return (
     <svg width={size} height={size} viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
       {/* หู */}
-      <path d="M58 55 L42 12 L82 45 Z" fill="#AFA9EC" />
-      <path d="M142 55 L158 12 L118 45 Z" fill="#AFA9EC" />
-      <path d="M60 47 L50 21 L75 41 Z" fill="#F5C4B3" />
-      <path d="M140 47 L150 21 L125 41 Z" fill="#F5C4B3" />
+      <path d="M58 55 L42 12 L82 45 Z" fill="#d67f48" />
+      <path d="M142 55 L158 12 L118 45 Z" fill="#d67f48" />
+      <path d="M60 47 L50 21 L75 41 Z" fill="#ffe1d0" />
+      <path d="M140 47 L150 21 L125 41 Z" fill="#ffe1d0" />
       {/* หัว */}
-      <circle cx="100" cy="90" r="58" fill="#AFA9EC" />
+      <circle cx="100" cy="90" r="58" fill="#d67f48" />
       {/* แก้ม */}
-      <circle cx="66" cy="104" r="10" fill="#F5C4B3" opacity="0.6" />
-      <circle cx="134" cy="104" r="10" fill="#F5C4B3" opacity="0.6" />
+      <circle cx="66" cy="104" r="10" fill="#ffe1d0" opacity="0.6" />
+      <circle cx="134" cy="104" r="10" fill="#ffe1d0" opacity="0.6" />
 
       {face.brow && (
-        <path d={face.brow} stroke="#2b2b33" strokeWidth="3" strokeLinecap="round" />
+        <path d={face.brow} stroke="#201e1d" strokeWidth="3" strokeLinecap="round" />
       )}
 
       {/* ตา */}
       {face.eyeType === 'curve' ? (
         <>
-          <path d="M72 90 Q80 82 88 90" stroke="#2b2b33" strokeWidth="4" strokeLinecap="round" fill="none" />
-          <path d="M112 90 Q120 82 128 90" stroke="#2b2b33" strokeWidth="4" strokeLinecap="round" fill="none" />
+          <path d="M72 90 Q80 82 88 90" stroke="#201e1d" strokeWidth="4" strokeLinecap="round" fill="none" />
+          <path d="M112 90 Q120 82 128 90" stroke="#201e1d" strokeWidth="4" strokeLinecap="round" fill="none" />
         </>
       ) : face.eyeType === 'squint' ? (
         <>
-          <path d="M72 90 L88 90" stroke="#2b2b33" strokeWidth="4" strokeLinecap="round" />
-          <path d="M112 90 L128 90" stroke="#2b2b33" strokeWidth="4" strokeLinecap="round" />
+          <path d="M72 90 L88 90" stroke="#201e1d" strokeWidth="4" strokeLinecap="round" />
+          <path d="M112 90 L128 90" stroke="#201e1d" strokeWidth="4" strokeLinecap="round" />
         </>
       ) : (
         <>
-          <circle cx="80" cy="90" r="7" fill="#2b2b33" />
-          <circle cx="120" cy="90" r="7" fill="#2b2b33" />
+          <circle cx="80" cy="90" r="7" fill="#201e1d" />
+          <circle cx="120" cy="90" r="7" fill="#201e1d" />
           <circle cx="82.5" cy="87.5" r="2.2" fill="#ffffff" />
           <circle cx="122.5" cy="87.5" r="2.2" fill="#ffffff" />
         </>
       )}
 
       {/* จมูก */}
-      <path d="M96 100 L104 100 L100 106 Z" fill="#6a5fd0" />
+      <path d="M96 100 L104 100 L100 106 Z" fill="#8c491a" />
       {/* ปาก */}
-      <path d={face.mouth} stroke="#2b2b33" strokeWidth="2" strokeLinecap="round" fill="none" />
+      <path d={face.mouth} stroke="#201e1d" strokeWidth="2" strokeLinecap="round" fill="none" />
       {/* หนวด */}
       <path
         d="M55 96 L28 92 M55 102 L27 104 M145 96 L172 92 M145 102 L173 104"
-        stroke="#6a5fd0"
+        stroke="#8c491a"
         strokeWidth="2"
         strokeLinecap="round"
       />

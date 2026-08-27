@@ -5,7 +5,6 @@ import { Check, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import Logo from '@/components/Logo'
 import CatMascot from '@/components/CatMascot'
-import MountainBackdrop from '@/components/MountainBackdrop'
 
 export default function SignupPage() {
   const [email, setEmail] = useState('')
@@ -64,7 +63,6 @@ export default function SignupPage() {
 
   return (
     <div className="auth-page">
-      <MountainBackdrop />
       <div style={{ marginBottom: 20, position: 'relative', zIndex: 1 }}>
         <Logo />
       </div>
@@ -109,7 +107,7 @@ export default function SignupPage() {
                 style={{
                   paddingRight: 40,
                   // ใส่กรอบสีเขียว/แดงตามผลตรง เพื่อให้เห็นชัดแม้ไม่มองไอคอน
-                  borderColor: passwordsMismatch ? '#e05555' : passwordsMatch ? '#4CAF80' : undefined,
+                  borderColor: passwordsMismatch ? '#8a3a22' : passwordsMatch ? '#7a8a5e' : undefined,
                 }}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
@@ -127,15 +125,15 @@ export default function SignupPage() {
                   }}
                 >
                   {passwordsMatch ? (
-                    <Check size={18} color="#4CAF80" />
+                    <Check size={18} color="#7a8a5e" />
                   ) : (
-                    <X size={18} color="#e05555" />
+                    <X size={18} color="#8a3a22" />
                   )}
                 </span>
               )}
             </div>
             {passwordsMismatch && (
-              <p style={{ margin: '6px 0 0', fontSize: 12, color: '#e05555' }}>รหัสผ่านไม่ตรงกัน</p>
+              <p style={{ margin: '6px 0 0', fontSize: 12, color: '#8a3a22' }}>รหัสผ่านไม่ตรงกัน</p>
             )}
           </div>
           <button

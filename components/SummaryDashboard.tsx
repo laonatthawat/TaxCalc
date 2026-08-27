@@ -33,7 +33,7 @@ type Props = {
   monthlyIncome: number
 }
 
-const COLORS = ['#6366f1', '#ec4899', '#f59e0b', '#10b981', '#3b82f6', '#ef4444', '#8b5cf6']
+const COLORS = ['#c67139', '#7a8a5e', '#b2622d', '#8fa073', '#8c491a', '#56633f', '#a19786']
 const RENEWAL_ALERT_DAYS = 3
 
 // จุดกลมประดับมุมการ์ด hero — ตกแต่งเฉยๆ ไม่ใช่ข้อความ จึงใช้ opacity ต่ำได้โดยไม่กระทบการอ่าน
@@ -72,11 +72,11 @@ export default function SummaryDashboard({ subscriptions, monthlyBudget, monthly
       {upcomingRenewals.length > 0 && (
         <div
           style={{
-            background: 'linear-gradient(135deg, #F5C4B3, #FAECE7)',
-            borderRadius: 14,
+            background: 'linear-gradient(135deg, #f4c9bd, #fbe4dc)',
+            borderRadius: 28,
             padding: '16px 20px',
             marginBottom: 28,
-            color: '#993C1D',
+            color: '#8a3a22',
           }}
         >
           <strong>⚠️ ใกล้ถึง/เลยกำหนดจ่าย (ภายใน {RENEWAL_ALERT_DAYS} วัน หรือค้างจ่ายอยู่)</strong>
@@ -103,8 +103,8 @@ export default function SummaryDashboard({ subscriptions, monthlyBudget, monthly
         style={{
           position: 'relative',
           overflow: 'hidden',
-          background: 'linear-gradient(135deg, #948bf3 0%, #7f77dd 55%, #6a5fd0 100%)',
-          borderRadius: 20,
+          background: 'linear-gradient(135deg, #d67f48 0%, #c67139 55%, #8c491a 100%)',
+          borderRadius: 28,
           padding: '22px 24px',
           marginBottom: 16,
           color: '#ffffff',
@@ -202,13 +202,13 @@ export default function SummaryDashboard({ subscriptions, monthlyBudget, monthly
             style={{
               flex: 1,
               minWidth: 300,
-              background: '#ffffff',
-              border: '0.5px solid #ececE5',
-              borderRadius: 14,
+              background: '#f9f4ed',
+              border: '0.5px solid #dcd3c4',
+              borderRadius: 28,
               padding: 16,
             }}
           >
-            <h3 style={{ marginTop: 0, fontSize: 15, fontWeight: 600, color: '#2b2b33' }}>
+            <h3 style={{ marginTop: 0, fontSize: 15, fontWeight: 600, color: '#201e1d' }}>
               สัดส่วนค่าใช้จ่ายตามหมวดหมู่
             </h3>
             {/* ตัดป้ายชื่อรอบวงกลมออก (เดิมทับกัน/ล้นขอบเวลามีหมวดหมู่เล็กหลายอัน)
@@ -225,7 +225,7 @@ export default function SummaryDashboard({ subscriptions, monthlyBudget, monthly
                   verticalAlign="bottom"
                   height={48}
                   iconType="circle"
-                  wrapperStyle={{ fontSize: 12, color: '#47474f' }}
+                  wrapperStyle={{ fontSize: 12, color: '#474238' }}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -236,13 +236,13 @@ export default function SummaryDashboard({ subscriptions, monthlyBudget, monthly
             style={{
               flex: 1,
               minWidth: 300,
-              background: '#ffffff',
-              border: '0.5px solid #ececE5',
-              borderRadius: 14,
+              background: '#f9f4ed',
+              border: '0.5px solid #dcd3c4',
+              borderRadius: 28,
               padding: 16,
             }}
           >
-            <h3 style={{ marginTop: 0, fontSize: 15, fontWeight: 600, color: '#2b2b33' }}>
+            <h3 style={{ marginTop: 0, fontSize: 15, fontWeight: 600, color: '#201e1d' }}>
               เทียบค่าใช้จ่ายรายเดือน
             </h3>
             {/* เพิ่มตัวเลขบนหัวแท่งไว้เลย เพราะถ้ามีตัวที่ยอดสูงกว่าตัวอื่นมากๆ
@@ -257,11 +257,11 @@ export default function SummaryDashboard({ subscriptions, monthlyBudget, monthly
                 />
                 <YAxis tick={{ fontSize: 11 }} />
                 <Tooltip formatter={(value: any) => `฿${value.toLocaleString()}`} />
-                <Bar dataKey="monthlyPrice" fill="#7F77DD" radius={[6, 6, 0, 0]}>
+                <Bar dataKey="monthlyPrice" fill="#c67139" radius={[6, 6, 0, 0]}>
                   <LabelList
                     dataKey="monthlyPrice"
                     position="top"
-                    style={{ fontSize: 11, fill: '#2b2b33' }}
+                    style={{ fontSize: 11, fill: '#201e1d' }}
                     formatter={(value: any) => `฿${Number(value).toLocaleString()}`}
                   />
                 </Bar>
@@ -275,16 +275,16 @@ export default function SummaryDashboard({ subscriptions, monthlyBudget, monthly
             style={{
               flex: '1 1 100%',
               minWidth: 300,
-              background: '#ffffff',
-              border: '0.5px solid #ececE5',
-              borderRadius: 14,
+              background: '#f9f4ed',
+              border: '0.5px solid #dcd3c4',
+              borderRadius: 28,
               padding: 16,
             }}
           >
-            <h3 style={{ marginTop: 0, fontSize: 15, fontWeight: 600, color: '#2b2b33' }}>
+            <h3 style={{ marginTop: 0, fontSize: 15, fontWeight: 600, color: '#201e1d' }}>
               รายจ่ายตามวันที่ในเดือน
             </h3>
-            <p style={{ margin: '0 0 12px', fontSize: 12, color: '#47474f' }}>
+            <p style={{ margin: '0 0 12px', fontSize: 12, color: '#474238' }}>
               ดูว่าแต่ละเดือนเงินไหลออกกองวันไหนเยอะสุด (ตามวันที่ต่ออายุของแต่ละ subscription)
             </p>
             <ResponsiveContainer width="100%" height={220}>
@@ -295,7 +295,7 @@ export default function SummaryDashboard({ subscriptions, monthlyBudget, monthly
                   formatter={(value: any) => [`฿${value.toLocaleString()}`, 'รวม']}
                   labelFormatter={(day) => `วันที่ ${day}`}
                 />
-                <Bar dataKey="total" fill="#948bf3" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="total" fill="#d67f48" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>

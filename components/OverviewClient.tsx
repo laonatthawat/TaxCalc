@@ -40,9 +40,9 @@ function ModuleCard({
       href={href}
       style={{
         display: 'block',
-        background: '#ffffff',
-        border: '0.5px solid #ececF5',
-        borderRadius: 16,
+        background: '#f9f4ed',
+        border: '0.5px solid #dcd3c4',
+        borderRadius: 28,
         padding: '20px 20px 18px',
         textDecoration: 'none',
       }}
@@ -59,11 +59,11 @@ function ModuleCard({
           marginBottom: 14,
         }}
       >
-        <Icon size={19} color="#ffffff" />
+        <Icon size={19} color="#f9f4ed" />
       </div>
-      <p style={{ margin: '0 0 4px', fontSize: 13, fontWeight: 600, color: '#6b6b76' }}>{title}</p>
-      <p style={{ margin: '0 0 6px', fontSize: 22, fontWeight: 700, color: '#2b2b33' }}>{headline}</p>
-      <p style={{ margin: '0 0 14px', fontSize: 12.5, color: '#7a7a85', lineHeight: 1.6 }}>{subtext}</p>
+      <p style={{ margin: '0 0 4px', fontSize: 13, fontWeight: 600, color: '#645c50' }}>{title}</p>
+      <p style={{ margin: '0 0 6px', fontSize: 22, fontWeight: 700, color: '#201e1d' }}>{headline}</p>
+      <p style={{ margin: '0 0 14px', fontSize: 12.5, color: '#82796a', lineHeight: 1.6 }}>{subtext}</p>
       <span
         style={{
           display: 'inline-flex',
@@ -71,7 +71,7 @@ function ModuleCard({
           gap: 4,
           fontSize: 12.5,
           fontWeight: 600,
-          color: '#6a5fd0',
+          color: '#8c491a',
         }}
       >
         ดูรายละเอียด <ArrowRight size={13} />
@@ -138,8 +138,8 @@ export default function OverviewClient({
           }}
         >
           <div>
-            <h1 style={{ margin: 0, fontSize: 22, color: '#2b2b33' }}>ภาพรวมการเงินของคุณ</h1>
-            <p style={{ color: '#47474f', margin: '4px 0 0' }}>{userEmail}</p>
+            <h1 style={{ margin: 0, fontSize: 22, color: '#201e1d' }}>ภาพรวมการเงินของคุณ</h1>
+            <p style={{ color: '#474238', margin: '4px 0 0' }}>{userEmail}</p>
           </div>
           <button onClick={handleLogout} className="btn-secondary">
             ออกจากระบบ
@@ -150,12 +150,12 @@ export default function OverviewClient({
         <div
           style={{
             background: isPositiveCashflow
-              ? 'linear-gradient(135deg, #9fe1cb, #4CAF80)'
-              : 'linear-gradient(135deg, #f3a6a6, #e05555)',
-            borderRadius: 18,
+              ? 'linear-gradient(135deg, #e1eecc, #7a8a5e)'
+              : 'linear-gradient(135deg, #e0a58f, #8a3a22)',
+            borderRadius: 28,
             padding: '22px 24px',
             marginBottom: 20,
-            color: '#ffffff',
+            color: '#f9f4ed',
           }}
         >
           <p style={{ margin: '0 0 6px', fontSize: 13, opacity: 0.9 }}>
@@ -181,7 +181,7 @@ export default function OverviewClient({
         >
           <ModuleCard
             icon={Receipt}
-            gradient="linear-gradient(135deg, #AFA9EC, #7F77DD)"
+            gradient="linear-gradient(135deg, #d67f48, #c67139)"
             title="รายจ่ายประจำ"
             href="/dashboard"
             headline={hasExpenseData ? `${baht(monthlyExpense)}/เดือน` : 'ยังไม่มีข้อมูล'}
@@ -194,7 +194,7 @@ export default function OverviewClient({
 
           <ModuleCard
             icon={Wallet2}
-            gradient="linear-gradient(135deg, #9fe1cb, #4CAF80)"
+            gradient="linear-gradient(135deg, #e1eecc, #7a8a5e)"
             title="รายรับ"
             href="/income"
             headline={hasIncomeData ? `${baht(monthlyIncome)}/เดือน` : 'ยังไม่มีข้อมูล'}
@@ -207,7 +207,7 @@ export default function OverviewClient({
 
           <ModuleCard
             icon={TrendingUp}
-            gradient="linear-gradient(135deg, #7cc4fa, #4a90d9)"
+            gradient="linear-gradient(135deg, #f6a06b, #8c491a)"
             title="การลงทุน"
             href="/investments"
             headline={
@@ -224,7 +224,7 @@ export default function OverviewClient({
 
           <ModuleCard
             icon={Landmark}
-            gradient="linear-gradient(135deg, #64748b, #334155)"
+            gradient="linear-gradient(135deg, #645c50, #2e2b25)"
             title="ภาษี"
             href="/tax"
             headline={hasIncomeData ? `${baht(estimatedTax)}/ปี` : 'ยังไม่มีข้อมูล'}
@@ -236,7 +236,7 @@ export default function OverviewClient({
           />
         </div>
 
-        <p style={{ fontSize: 11, color: '#a9a9b2', lineHeight: 1.6, marginBottom: 40 }}>
+        <p style={{ fontSize: 11, color: '#a19786', lineHeight: 1.6, marginBottom: 40 }}>
           ตัวเลขในหน้านี้เป็นการประมาณการจากข้อมูลที่คุณกรอกไว้ในแต่ละหน้าเท่านั้น ไม่ใช่คำแนะนำทาง
           การเงิน/ภาษีอย่างเป็นทางการ กดที่การ์ดแต่ละอันเพื่อดูรายละเอียดและแก้ไขข้อมูลได้
         </p>

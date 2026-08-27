@@ -166,7 +166,7 @@ export default function DashboardClient({
         >
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <h1 style={{ margin: 0, fontSize: 22, color: '#2b2b33' }}>สวัสดี 👋</h1>
+              <h1 style={{ margin: 0, fontSize: 22, color: '#201e1d' }}>สวัสดี 👋</h1>
               <HelpTooltip title="วิธีใช้หน้ารายจ่าย">
                 <p style={{ margin: '0 0 8px' }}>
                   หน้านี้แสดงค่าใช้จ่ายประจำที่คุณเพิ่มไว้ (ค่าเช่า ค่าน้ำค่าไฟ ค่าผ่อน subscription ฯลฯ)
@@ -180,7 +180,7 @@ export default function DashboardClient({
                 </p>
               </HelpTooltip>
             </div>
-            <p style={{ color: '#47474f', margin: '4px 0 0' }}>{userEmail}</p>
+            <p style={{ color: '#474238', margin: '4px 0 0' }}>{userEmail}</p>
           </div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             <button
@@ -208,10 +208,10 @@ export default function DashboardClient({
           monthlyIncome={monthlyIncome}
         />
 
-        <h2 style={{ fontSize: 16, fontWeight: 600, color: '#2b2b33', margin: '0 0 14px' }}>
+        <h2 style={{ fontSize: 16, fontWeight: 600, color: '#201e1d', margin: '0 0 14px' }}>
           รายการรายจ่ายประจำ
           {initialSubscriptions.length > 0 && (
-            <span style={{ fontWeight: 400, color: '#8a8a94', fontSize: 13 }}>
+            <span style={{ fontWeight: 400, color: '#82796a', fontSize: 13 }}>
               {' '}
               ({visibleSubscriptions.length} รายการ)
             </span>
@@ -224,7 +224,7 @@ export default function DashboardClient({
             <div style={{ position: 'relative', flex: '1 1 220px' }}>
               <Search
                 size={15}
-                style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#a9a9b2' }}
+                style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#a19786' }}
               />
               <input
                 type="text"
@@ -234,10 +234,10 @@ export default function DashboardClient({
                 style={{
                   width: '100%',
                   padding: '9px 12px 9px 34px',
-                  borderRadius: 10,
-                  border: '1px solid #e5e5ea',
+                  borderRadius: 999,
+                  border: '1px solid #dcd3c4',
                   fontSize: 13,
-                  background: '#ffffff',
+                  background: '#f9f4ed',
                   boxSizing: 'border-box',
                 }}
               />
@@ -247,11 +247,11 @@ export default function DashboardClient({
               onChange={(e) => setSortBy(e.target.value as SortOption)}
               style={{
                 padding: '9px 10px',
-                borderRadius: 10,
-                border: '1px solid #e5e5ea',
+                borderRadius: 999,
+                border: '1px solid #dcd3c4',
                 fontSize: 13,
-                background: '#ffffff',
-                color: '#2b2b33',
+                background: '#f9f4ed',
+                color: '#201e1d',
               }}
             >
               {SORT_OPTIONS.map((opt) => (
@@ -268,19 +268,19 @@ export default function DashboardClient({
             style={{
               textAlign: 'center',
               padding: '56px 24px',
-              background: '#ffffff',
-              borderRadius: 14,
-              border: '0.5px solid #ececE5',
+              background: '#f9f4ed',
+              borderRadius: 28,
+              border: '0.5px solid #dcd3c4',
             }}
           >
             {/* แมวมาสคอตนั่งเฉาๆ แทนไอคอนวงกลมเดิม — สื่อว่า "ยังไม่มีอะไรให้ดูเลย" น่ารักกว่าเดิม */}
             <div style={{ margin: '0 auto 8px', display: 'flex', justifyContent: 'center' }}>
               <CatMascot size={110} variant="charcoal" />
             </div>
-            <p style={{ margin: '0 0 4px', fontWeight: 500, color: '#2b2b33' }}>
+            <p style={{ margin: '0 0 4px', fontWeight: 500, color: '#201e1d' }}>
               ยังไม่มีรายจ่ายประจำเลย
             </p>
-            <p style={{ margin: '0 0 20px', fontSize: 13, color: '#47474f' }}>
+            <p style={{ margin: '0 0 20px', fontSize: 13, color: '#474238' }}>
               เริ่มเพิ่มรายจ่ายประจำแรกของคุณเพื่อเริ่มติดตามค่าใช้จ่าย
             </p>
             <button
@@ -303,10 +303,10 @@ export default function DashboardClient({
             style={{
               textAlign: 'center',
               padding: '40px 24px',
-              background: '#ffffff',
-              borderRadius: 14,
-              border: '0.5px solid #ececE5',
-              color: '#47474f',
+              background: '#f9f4ed',
+              borderRadius: 28,
+              border: '0.5px solid #dcd3c4',
+              color: '#474238',
               fontSize: 13,
             }}
           >
@@ -330,9 +330,9 @@ export default function DashboardClient({
                 <div
                   key={sub.id}
                   style={{
-                    background: 'white',
-                    border: '0.5px solid #e5e5e5',
-                    borderRadius: 14,
+                    background: '#f9f4ed',
+                    border: '0.5px solid #dcd3c4',
+                    borderRadius: 28,
                     padding: '1.25rem 1.5rem',
                   }}
                 >
@@ -352,16 +352,16 @@ export default function DashboardClient({
                       <Icon size={19} color={theme.iconColor} />
                     </div>
                     <div>
-                      <p style={{ fontSize: 15, fontWeight: 500, margin: 0, color: '#2b2b33' }}>{sub.name}</p>
+                      <p style={{ fontSize: 15, fontWeight: 500, margin: 0, color: '#201e1d' }}>{sub.name}</p>
                       {sub.category && (
-                        <p style={{ fontSize: 12, color: '#47474f', margin: 0 }}>{sub.category}</p>
+                        <p style={{ fontSize: 12, color: '#474238', margin: 0 }}>{sub.category}</p>
                       )}
                     </div>
                   </div>
 
-                  <p style={{ fontSize: 20, fontWeight: 500, margin: 0, color: '#2b2b33' }}>
+                  <p style={{ fontSize: 20, fontWeight: 500, margin: 0, color: '#201e1d' }}>
                     ฿{sub.price.toLocaleString()}
-                    <span style={{ fontSize: 12, fontWeight: 400, color: '#47474f' }}>
+                    <span style={{ fontSize: 12, fontWeight: 400, color: '#474238' }}>
                       {' '}
                       /{sub.billing_cycle === 'monthly' ? 'เดือน' : 'ปี'}
                     </span>
@@ -378,7 +378,7 @@ export default function DashboardClient({
                     <p
                       style={{
                         fontSize: 12,
-                        color: '#47474f',
+                        color: '#474238',
                         margin: 0,
                         display: 'flex',
                         alignItems: 'center',
@@ -403,7 +403,7 @@ export default function DashboardClient({
                       alignItems: 'center',
                       gap: 8,
                       fontSize: 12,
-                      color: '#47474f',
+                      color: '#474238',
                       margin: '0 0 12px',
                       cursor: markingPaidId === sub.id ? 'wait' : 'pointer',
                     }}
@@ -413,7 +413,7 @@ export default function DashboardClient({
                       checked={markingPaidId === sub.id}
                       disabled={markingPaidId === sub.id}
                       onChange={() => handleMarkAsPaid(sub.id)}
-                      style={{ width: 16, height: 16, accentColor: '#7F77DD', cursor: 'inherit' }}
+                      style={{ width: 16, height: 16, accentColor: '#c67139', cursor: 'inherit' }}
                     />
                     {markingPaidId === sub.id ? 'กำลังบันทึก...' : 'จ่ายแล้ว (เลื่อนรอบถัดไป)'}
                   </label>

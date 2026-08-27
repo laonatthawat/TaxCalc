@@ -31,7 +31,7 @@ export default function ConfirmDialog({
         <h2 className="modal-title" style={{ fontSize: 17, marginBottom: 10 }}>
           {title}
         </h2>
-        <p style={{ fontSize: 13, color: '#47474f', margin: '0 0 22px', lineHeight: 1.6 }}>{message}</p>
+        <p style={{ fontSize: 13, color: '#474238', margin: '0 0 22px', lineHeight: 1.6 }}>{message}</p>
         <div style={{ display: 'flex', gap: 8 }}>
           <button onClick={onCancel} className="btn-secondary" style={{ flex: 1 }}>
             {cancelLabel}

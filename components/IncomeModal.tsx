@@ -137,7 +137,7 @@ export default function IncomeModal({ isOpen, onClose, editingIncome }: Props) {
             </select>
             {/* คำใบ้พิเศษเมื่อเลือก "เงินให้" — อธิบายว่าทำไมไม่ต้องเสียภาษี กันคนสงสัย/กังวลว่ากรอกผิดหมวด */}
             {incomeType === 'gift' && (
-              <p style={{ margin: '6px 0 0', fontSize: 11, color: '#8a8a94', lineHeight: 1.5 }}>
+              <p style={{ margin: '6px 0 0', fontSize: 11, color: '#82796a', lineHeight: 1.5 }}>
                 เงินให้จากบุพการี/คู่สมรส/บุตร ได้รับยกเว้นภาษีไม่เกิน 20 ล้านบาท/ปี (จากบุคคลอื่นไม่เกิน 10
                 ล้านบาท/ปี) รายการนี้จะไม่ถูกนำไปรวมคำนวณในหน้าภาษี แต่ยังนับเป็นรายรับปกติในหน้านี้
               </p>

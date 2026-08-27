@@ -120,7 +120,7 @@ export default function IncomeClient({ initialIncomes, userEmail }: Props) {
         >
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <h1 style={{ margin: 0, fontSize: 22, color: '#2b2b33' }}>รายรับของคุณ</h1>
+              <h1 style={{ margin: 0, fontSize: 22, color: '#201e1d' }}>รายรับของคุณ</h1>
               <HelpTooltip title="วิธีใช้หน้ารายรับ">
                 <p style={{ margin: '0 0 8px' }}>
                   แบ่งเป็น <b>รายรับประจำ</b> (recurring เช่น เงินเดือน) กับ <b>ครั้งเดียว</b> (one-time
@@ -136,7 +136,7 @@ export default function IncomeClient({ initialIncomes, userEmail }: Props) {
                 </p>
               </HelpTooltip>
             </div>
-            <p style={{ color: '#47474f', margin: '4px 0 0' }}>{userEmail}</p>
+            <p style={{ color: '#474238', margin: '4px 0 0' }}>{userEmail}</p>
           </div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             <button
@@ -161,11 +161,11 @@ export default function IncomeClient({ initialIncomes, userEmail }: Props) {
         {/* การ์ดสรุปรายรับ — โทนเขียวเพื่อให้ต่างจากการ์ดรายจ่าย (โทนม่วง) ให้แยกความหมายได้ทันทีที่มอง */}
         <div
           style={{
-            background: 'linear-gradient(135deg, #6fd1af 0%, #4CAF80 55%, #2f9d6b 100%)',
-            borderRadius: 20,
+            background: 'linear-gradient(135deg, #8fa073 0%, #7a8a5e 55%, #56633f 100%)',
+            borderRadius: 28,
             padding: '22px 24px',
             marginBottom: 28,
-            color: '#ffffff',
+            color: '#f9f4ed',
           }}
         >
           <p style={{ margin: 0, fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.9)' }}>
@@ -199,16 +199,16 @@ export default function IncomeClient({ initialIncomes, userEmail }: Props) {
             style={{
               textAlign: 'center',
               padding: '56px 24px',
-              background: '#ffffff',
-              borderRadius: 14,
-              border: '0.5px solid #ececE5',
+              background: '#f9f4ed',
+              borderRadius: 28,
+              border: '0.5px solid #dcd3c4',
             }}
           >
             <div style={{ margin: '0 auto 8px', display: 'flex', justifyContent: 'center' }}>
               <CatMascot size={110} variant="cream" />
             </div>
-            <p style={{ margin: '0 0 4px', fontWeight: 500, color: '#2b2b33' }}>ยังไม่มีรายรับเลย</p>
-            <p style={{ margin: '0 0 20px', fontSize: 13, color: '#47474f' }}>
+            <p style={{ margin: '0 0 4px', fontWeight: 500, color: '#201e1d' }}>ยังไม่มีรายรับเลย</p>
+            <p style={{ margin: '0 0 20px', fontSize: 13, color: '#474238' }}>
               เริ่มเพิ่มรายรับแรกของคุณ ไม่ว่าจะเป็นเงินเดือนหรือรายได้พิเศษ
             </p>
             <button
@@ -231,7 +231,7 @@ export default function IncomeClient({ initialIncomes, userEmail }: Props) {
             <div style={{ position: 'relative', marginBottom: 20, maxWidth: 340 }}>
               <Search
                 size={15}
-                style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#a9a9b2' }}
+                style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#a19786' }}
               />
               <input
                 type="text"
@@ -241,10 +241,10 @@ export default function IncomeClient({ initialIncomes, userEmail }: Props) {
                 style={{
                   width: '100%',
                   padding: '9px 12px 9px 34px',
-                  borderRadius: 10,
-                  border: '1px solid #e5e5ea',
+                  borderRadius: 999,
+                  border: '1px solid #dcd3c4',
                   fontSize: 13,
-                  background: '#ffffff',
+                  background: '#f9f4ed',
                   boxSizing: 'border-box',
                 }}
               />
@@ -255,10 +255,10 @@ export default function IncomeClient({ initialIncomes, userEmail }: Props) {
                 style={{
                   textAlign: 'center',
                   padding: '40px 24px',
-                  background: '#ffffff',
-                  borderRadius: 14,
-                  border: '0.5px solid #ececE5',
-                  color: '#47474f',
+                  background: '#f9f4ed',
+                  borderRadius: 28,
+                  border: '0.5px solid #dcd3c4',
+                  color: '#474238',
                   fontSize: 13,
                 }}
               >
@@ -268,9 +268,9 @@ export default function IncomeClient({ initialIncomes, userEmail }: Props) {
               <>
             {visibleRecurring.length > 0 && (
               <>
-                <h2 style={{ fontSize: 16, fontWeight: 600, color: '#2b2b33', margin: '0 0 14px' }}>
+                <h2 style={{ fontSize: 16, fontWeight: 600, color: '#201e1d', margin: '0 0 14px' }}>
                   รายรับประจำ{' '}
-                  <span style={{ fontWeight: 400, color: '#8a8a94', fontSize: 13 }}>
+                  <span style={{ fontWeight: 400, color: '#82796a', fontSize: 13 }}>
                     ({visibleRecurring.length} รายการ)
                   </span>
                 </h2>
@@ -289,9 +289,9 @@ export default function IncomeClient({ initialIncomes, userEmail }: Props) {
                       <div
                         key={income.id}
                         style={{
-                          background: 'white',
-                          border: '0.5px solid #e5e5e5',
-                          borderRadius: 14,
+                          background: '#f9f4ed',
+                          border: '0.5px solid #dcd3c4',
+                          borderRadius: 28,
                           padding: '1.25rem 1.5rem',
                         }}
                       >
@@ -301,28 +301,28 @@ export default function IncomeClient({ initialIncomes, userEmail }: Props) {
                               width: 40,
                               height: 40,
                               borderRadius: '50%',
-                              background: 'linear-gradient(135deg, #9fe1cb, #4CAF80)',
+                              background: 'linear-gradient(135deg, #e1eecc, #7a8a5e)',
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
                               flexShrink: 0,
                             }}
                           >
-                            <Wallet2 size={19} color="#ffffff" />
+                            <Wallet2 size={19} color="#f9f4ed" />
                           </div>
                           <div>
-                            <p style={{ fontSize: 15, fontWeight: 500, margin: 0, color: '#2b2b33' }}>
+                            <p style={{ fontSize: 15, fontWeight: 500, margin: 0, color: '#201e1d' }}>
                               {income.name}
                             </p>
-                            <p style={{ fontSize: 12, color: '#47474f', margin: 0 }}>
+                            <p style={{ fontSize: 12, color: '#474238', margin: 0 }}>
                               {getIncomeTypeLabel(income.income_type)}
                             </p>
                           </div>
                         </div>
 
-                        <p style={{ fontSize: 20, fontWeight: 500, margin: 0, color: '#2b2b33' }}>
+                        <p style={{ fontSize: 20, fontWeight: 500, margin: 0, color: '#201e1d' }}>
                           ฿{income.amount.toLocaleString()}
-                          <span style={{ fontSize: 12, fontWeight: 400, color: '#47474f' }}>
+                          <span style={{ fontSize: 12, fontWeight: 400, color: '#474238' }}>
                             {' '}
                             /{income.billing_cycle === 'monthly' ? 'เดือน' : 'ปี'}
                           </span>
@@ -339,7 +339,7 @@ export default function IncomeClient({ initialIncomes, userEmail }: Props) {
                           <p
                             style={{
                               fontSize: 12,
-                              color: '#47474f',
+                              color: '#474238',
                               margin: 0,
                               display: 'flex',
                               alignItems: 'center',
@@ -360,7 +360,7 @@ export default function IncomeClient({ initialIncomes, userEmail }: Props) {
                             alignItems: 'center',
                             gap: 8,
                             fontSize: 12,
-                            color: '#47474f',
+                            color: '#474238',
                             margin: '0 0 12px',
                             cursor: markingReceivedId === income.id ? 'wait' : 'pointer',
                           }}
@@ -370,7 +370,7 @@ export default function IncomeClient({ initialIncomes, userEmail }: Props) {
                             checked={markingReceivedId === income.id}
                             disabled={markingReceivedId === income.id}
                             onChange={() => handleMarkAsReceived(income.id)}
-                            style={{ width: 16, height: 16, accentColor: '#4CAF80', cursor: 'inherit' }}
+                            style={{ width: 16, height: 16, accentColor: '#7a8a5e', cursor: 'inherit' }}
                           />
                           {markingReceivedId === income.id ? 'กำลังบันทึก...' : 'รับแล้ว (เลื่อนรอบถัดไป)'}
                         </label>
@@ -400,9 +400,9 @@ export default function IncomeClient({ initialIncomes, userEmail }: Props) {
 
             {visibleOneTime.length > 0 && (
               <>
-                <h2 style={{ fontSize: 16, fontWeight: 600, color: '#2b2b33', margin: '0 0 14px' }}>
+                <h2 style={{ fontSize: 16, fontWeight: 600, color: '#201e1d', margin: '0 0 14px' }}>
                   รายรับที่ได้รับแล้ว (ครั้งเดียว){' '}
-                  <span style={{ fontWeight: 400, color: '#8a8a94', fontSize: 13 }}>
+                  <span style={{ fontWeight: 400, color: '#82796a', fontSize: 13 }}>
                     ({visibleOneTime.length} รายการ)
                   </span>
                 </h2>
@@ -417,9 +417,9 @@ export default function IncomeClient({ initialIncomes, userEmail }: Props) {
                     <div
                       key={income.id}
                       style={{
-                        background: 'white',
-                        border: '0.5px solid #e5e5e5',
-                        borderRadius: 14,
+                        background: '#f9f4ed',
+                        border: '0.5px solid #dcd3c4',
+                        borderRadius: 28,
                         padding: '1.25rem 1.5rem',
                       }}
                     >
@@ -429,33 +429,33 @@ export default function IncomeClient({ initialIncomes, userEmail }: Props) {
                             width: 40,
                             height: 40,
                             borderRadius: '50%',
-                            background: 'linear-gradient(135deg, #9fe1cb, #4CAF80)',
+                            background: 'linear-gradient(135deg, #e1eecc, #7a8a5e)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             flexShrink: 0,
                           }}
                         >
-                          <Wallet2 size={19} color="#ffffff" />
+                          <Wallet2 size={19} color="#f9f4ed" />
                         </div>
                         <div>
-                          <p style={{ fontSize: 15, fontWeight: 500, margin: 0, color: '#2b2b33' }}>
+                          <p style={{ fontSize: 15, fontWeight: 500, margin: 0, color: '#201e1d' }}>
                             {income.name}
                           </p>
-                          <p style={{ fontSize: 12, color: '#47474f', margin: 0 }}>
+                          <p style={{ fontSize: 12, color: '#474238', margin: 0 }}>
                             {getIncomeTypeLabel(income.income_type)}
                           </p>
                         </div>
                       </div>
 
-                      <p style={{ fontSize: 20, fontWeight: 500, margin: 0, color: '#2b2b33' }}>
+                      <p style={{ fontSize: 20, fontWeight: 500, margin: 0, color: '#201e1d' }}>
                         ฿{income.amount.toLocaleString()}
                       </p>
 
                       <p
                         style={{
                           fontSize: 12,
-                          color: '#47474f',
+                          color: '#474238',
                           margin: '8px 0 14px',
                           display: 'flex',
                           alignItems: 'center',

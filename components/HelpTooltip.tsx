@@ -52,9 +52,9 @@ export default function HelpTooltip({ title, children, align = 'left' }: Props) 
           width: 22,
           height: 22,
           borderRadius: '50%',
-          border: '1px solid #d8d6f5',
-          background: isOpen ? '#7F77DD' : '#ffffff',
-          color: isOpen ? '#ffffff' : '#7F77DD',
+          border: '1px solid #dcd3c4',
+          background: isOpen ? '#c67139' : '#f9f4ed',
+          color: isOpen ? '#f5ead8' : '#c67139',
           cursor: 'pointer',
           flexShrink: 0,
           padding: 0,
@@ -73,17 +73,17 @@ export default function HelpTooltip({ title, children, align = 'left' }: Props) 
             zIndex: 50,
             width: 300,
             maxWidth: '82vw',
-            background: '#ffffff',
-            border: '0.5px solid #ececF5',
-            borderRadius: 14,
-            boxShadow: '0 8px 28px rgba(40, 30, 90, 0.16)',
+            background: '#f9f4ed',
+            border: '1px solid #dcd3c4',
+            borderRadius: 16,
+            boxShadow: '0 8px 28px rgba(46, 43, 37, 0.2)',
             padding: '14px 16px',
           }}
         >
-          <p style={{ margin: '0 0 8px', fontSize: 13, fontWeight: 700, color: '#2b2b33' }}>
+          <p style={{ margin: '0 0 8px', fontSize: 13, fontWeight: 700, color: '#201e1d' }}>
             {title}
           </p>
-          <div style={{ fontSize: 12.5, color: '#47474f', lineHeight: 1.7 }}>{children}</div>
+          <div style={{ fontSize: 12.5, color: '#474238', lineHeight: 1.7 }}>{children}</div>
         </div>
       )}
     </div>

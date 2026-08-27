@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Logo from '@/components/Logo'
 import CatMascot from '@/components/CatMascot'
-import MountainBackdrop from '@/components/MountainBackdrop'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -44,7 +43,6 @@ export default function LoginPage() {
 
   return (
     <div className="auth-page">
-      <MountainBackdrop />
       <div style={{ marginBottom: 20, position: 'relative', zIndex: 1 }}>
         <Logo />
       </div>
@@ -82,7 +80,7 @@ export default function LoginPage() {
               </label>
               <a
                 href="/forgot-password"
-                style={{ fontSize: 12, fontWeight: 600, color: '#6552cc', textDecoration: 'none' }}
+                style={{ fontSize: 12, fontWeight: 600, color: '#8c491a', textDecoration: 'none' }}
               >
                 ลืมรหัสผ่าน?
               </a>

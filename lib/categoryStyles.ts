@@ -8,20 +8,22 @@ type CategoryTheme = {
 }
 
 // ชุดธีมสี+ไอคอน วนลูปใช้ซ้ำ ไม่ผูกตายตัวกับชื่อหมวดหมู่ใดหมวดหมู่หนึ่ง
+// ทุกสีมาจาก scale เดียวกันของธีม Organic (accent ส้ม / sage เขียว / neutral น้ำตาลอุ่น)
+// แยกความต่างด้วย "ขั้น" ความเข้มบน scale เดียวกัน แทนที่จะสุ่มสีนอกธีม
 const THEMES: CategoryTheme[] = [
-  { gradientFrom: '#F5C4B3', gradientTo: '#FAECE7', iconColor: '#993C1D', icon: Tv },
-  { gradientFrom: '#C0DD97', gradientTo: '#EAF3DE', iconColor: '#3B6D11', icon: Music },
-  { gradientFrom: '#B5D4F4', gradientTo: '#E6F1FB', iconColor: '#185FA5', icon: Cloud },
-  { gradientFrom: '#CECBF6', gradientTo: '#EEEDFE', iconColor: '#3C3489', icon: Briefcase },
-  { gradientFrom: '#F4C0D1', gradientTo: '#FBEAF0', iconColor: '#993556', icon: Dumbbell },
-  { gradientFrom: '#FAC775', gradientTo: '#FAEEDA', iconColor: '#854F0B', icon: Gamepad2 },
-  { gradientFrom: '#9FE1CB', gradientTo: '#E1F5EE', iconColor: '#0F6E56', icon: BookOpen },
+  { gradientFrom: '#ffc6a5', gradientTo: '#fff2eb', iconColor: '#8c491a', icon: Tv },
+  { gradientFrom: '#ccdbb2', gradientTo: '#f0fae1', iconColor: '#3d472b', icon: Music },
+  { gradientFrom: '#dcd3c4', gradientTo: '#f9f4ed', iconColor: '#474238', icon: Cloud },
+  { gradientFrom: '#d67f48', gradientTo: '#ffc6a5', iconColor: '#402310', icon: Briefcase },
+  { gradientFrom: '#8fa073', gradientTo: '#ccdbb2', iconColor: '#272e1b', icon: Dumbbell },
+  { gradientFrom: '#f6a06b', gradientTo: '#ffe1d0', iconColor: '#643312', icon: Gamepad2 },
+  { gradientFrom: '#aebf92', gradientTo: '#e1eecc', iconColor: '#56633f', icon: BookOpen },
 ]
 
 const FALLBACK_THEME: CategoryTheme = {
-  gradientFrom: '#D3D1C7',
-  gradientTo: '#F1EFE8',
-  iconColor: '#5F5E5A',
+  gradientFrom: '#c0b6a5',
+  gradientTo: '#eee7db',
+  iconColor: '#645c50',
   icon: Sparkles,
 }
 

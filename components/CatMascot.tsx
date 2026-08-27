@@ -15,36 +15,36 @@ const PALETTES: Record<
   CatVariant,
   { fur: string; belly: string; earInner: string; nose: string; whisker: string; points?: string; stripe?: string }
 > = {
-  // ค่า default เดิมของแอป — สีม่วงพาสเทลซิกเนเจอร์ ใช้เป็นหน้าตาหลักของแบรนด์
-  lavender: { fur: '#AFA9EC', belly: '#F1EFFE', earInner: '#F5C4B3', nose: '#6a5fd0', whisker: '#6a5fd0' },
-  // แมวส้ม-ขาว ลายเสือจางๆ บนหน้าผาก
+  // ค่า default เดิมของแอป — โทนส้ม-อบเชยซิกเนเจอร์ ใช้เป็นหน้าตาหลักของแบรนด์
+  lavender: { fur: '#d67f48', belly: '#fff2eb', earInner: '#ffe1d0', nose: '#8c491a', whisker: '#8c491a' },
+  // แมวส้มเข้ม-ครีม ลายเสือจางๆ บนหน้าผาก
   tabby: {
-    fur: '#e3a765',
-    belly: '#fbeee0',
-    earInner: '#f2c9a0',
-    nose: '#8a5a34',
-    whisker: '#8a5a34',
-    stripe: '#c98544',
+    fur: '#c67139',
+    belly: '#fff2eb',
+    earInner: '#ffc6a5',
+    nose: '#643312',
+    whisker: '#643312',
+    stripe: '#8c491a',
   },
-  // แมวดำ-เทาเข้ม
-  charcoal: { fur: '#54545f', belly: '#dcdce2', earInner: '#8f8f9c', nose: '#2b2b33', whisker: '#8f8f9c' },
+  // แมวน้ำตาลเข้ม-เทาอุ่น
+  charcoal: { fur: '#645c50', belly: '#dcd3c4', earInner: '#a19786', nose: '#201e1d', whisker: '#a19786' },
   // แมวครีม แต้มสีน้ำตาลที่หู/หาง แบบแมวสยาม
   cream: {
     fur: '#f3e6cf',
-    belly: '#fdf8ef',
-    earInner: '#a9765a',
-    nose: '#7a5138',
-    whisker: '#a9765a',
-    points: '#9c7154',
+    belly: '#fffaf0',
+    earInner: '#8c491a',
+    nose: '#643312',
+    whisker: '#8c491a',
+    points: '#8c491a',
   },
-  // แมวเทาลายเสือ
+  // แมวเขียวเซจลายเสือ
   graytabby: {
-    fur: '#aab0bd',
-    belly: '#eef0f4',
-    earInner: '#c7ccd6',
-    nose: '#5c6270',
-    whisker: '#5c6270',
-    stripe: '#8b93a3',
+    fur: '#8fa073',
+    belly: '#f0fae1',
+    earInner: '#ccdbb2',
+    nose: '#3d472b',
+    whisker: '#3d472b',
+    stripe: '#728157',
   },
 }
 
@@ -95,8 +95,8 @@ export default function CatMascot({ size = 140, className, variant = 'lavender' 
       <circle cx="69" cy="95" r="9" fill={p.earInner} opacity="0.6" />
       <circle cx="131" cy="95" r="9" fill={p.earInner} opacity="0.6" />
       {/* ตา */}
-      <circle cx="80" cy="80" r="7" fill="#2b2b33" />
-      <circle cx="120" cy="80" r="7" fill="#2b2b33" />
+      <circle cx="80" cy="80" r="7" fill="#201e1d" />
+      <circle cx="120" cy="80" r="7" fill="#201e1d" />
       <circle cx="82.5" cy="77.5" r="2.2" fill="#ffffff" />
       <circle cx="122.5" cy="77.5" r="2.2" fill="#ffffff" />
       {/* จมูก */}
@@ -104,7 +104,7 @@ export default function CatMascot({ size = 140, className, variant = 'lavender' 
       {/* ปาก */}
       <path
         d="M100 100 C 96 106, 88 106, 85 101 M100 100 C 104 106, 112 106, 115 101"
-        stroke="#2b2b33"
+        stroke="#201e1d"
         strokeWidth="2"
         strokeLinecap="round"
         fill="none"

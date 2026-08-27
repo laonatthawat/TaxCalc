@@ -156,7 +156,7 @@ export default function InvestmentClient({ initialPlan, userEmail }: Props) {
         >
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <h1 style={{ margin: 0, fontSize: 22, color: '#2b2b33' }}>เครื่องคำนวณการลงทุน</h1>
+              <h1 style={{ margin: 0, fontSize: 22, color: '#201e1d' }}>เครื่องคำนวณการลงทุน</h1>
               <HelpTooltip title="วิธีใช้หน้าการลงทุน">
                 <p style={{ margin: '0 0 8px' }}>
                   กรอกเงินต้นเริ่มต้น เงินลงทุนเพิ่มต่อเดือน อัตราผลตอบแทนต่อปีที่คาดหวัง และระยะเวลา
@@ -172,14 +172,14 @@ export default function InvestmentClient({ initialPlan, userEmail }: Props) {
                 </p>
               </HelpTooltip>
             </div>
-            <p style={{ color: '#47474f', margin: '4px 0 0' }}>{userEmail}</p>
+            <p style={{ color: '#474238', margin: '4px 0 0' }}>{userEmail}</p>
           </div>
           <button onClick={handleLogout} className="btn-secondary">
             ออกจากระบบ
           </button>
         </div>
 
-        <p style={{ fontSize: 12, color: '#8a8a94', margin: '0 0 20px', lineHeight: 1.6 }}>
+        <p style={{ fontSize: 12, color: '#82796a', margin: '0 0 20px', lineHeight: 1.6 }}>
           ⚠️ นี่คือ<strong>การประมาณการ</strong>จากผลตอบแทนคงที่ที่คุณกำหนดเอง ไม่ใช่การพยากรณ์ผลตอบแทนจริง
           ตลาดจริงมีความผันผวนขึ้นลง ใช้เพื่อดูภาพรวมและวางแผนคร่าวๆ เท่านั้น
         </p>
@@ -188,9 +188,9 @@ export default function InvestmentClient({ initialPlan, userEmail }: Props) {
         <form
           onSubmit={handleSave}
           style={{
-            background: '#ffffff',
-            border: '0.5px solid #ececE5',
-            borderRadius: 14,
+            background: '#f9f4ed',
+            border: '0.5px solid #dcd3c4',
+            borderRadius: 28,
             padding: 20,
             marginBottom: 16,
           }}
@@ -240,7 +240,7 @@ export default function InvestmentClient({ initialPlan, userEmail }: Props) {
               />
               {/* เพดาน 50 ปีถูก clamp ไว้ในโค้ดอยู่แล้ว (yearsNum) แต่ถ้าไม่บอกผู้ใช้ พอพิมพ์เกินแล้วกราฟ
                   เงียบๆ ไม่ขยับตามที่พิมพ์ จะดูเหมือนแอปค้าง — ข้อความนี้เลยอธิบายไว้ตรงๆ */}
-              <p style={{ margin: '6px 0 0', fontSize: 11, color: isYearsClamped ? '#e05555' : '#8a8a94', lineHeight: 1.5 }}>
+              <p style={{ margin: '6px 0 0', fontSize: 11, color: isYearsClamped ? '#8a3a22' : '#82796a', lineHeight: 1.5 }}>
                 {isYearsClamped
                   ? `กรอกได้สูงสุด 50 ปี — ระบบปรับให้เป็น 50 ปีให้อัตโนมัติ`
                   : 'คำนวณให้ได้สูงสุด 50 ปี'}
@@ -257,18 +257,18 @@ export default function InvestmentClient({ initialPlan, userEmail }: Props) {
             >
               {isSaving ? 'กำลังบันทึก...' : 'บันทึกแผน'}
             </button>
-            {saveMessage && <span style={{ fontSize: 12, color: '#47474f' }}>{saveMessage}</span>}
+            {saveMessage && <span style={{ fontSize: 12, color: '#474238' }}>{saveMessage}</span>}
           </div>
         </form>
 
         {/* การ์ดสรุปผลลัพธ์ปีสุดท้าย — โทนน้ำเงินให้ต่างจากรายจ่าย(ม่วง)/รายรับ(เขียว) */}
         <div
           style={{
-            background: 'linear-gradient(135deg, #7cc4fa 0%, #4a90d9 55%, #3a75c4 100%)',
-            borderRadius: 20,
+            background: 'linear-gradient(135deg, #f6a06b 0%, #8c491a 55%, #643312 100%)',
+            borderRadius: 28,
             padding: '22px 24px',
             marginBottom: 16,
-            color: '#ffffff',
+            color: '#f9f4ed',
           }}
         >
           <p style={{ margin: 0, fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.9)' }}>
@@ -303,11 +303,11 @@ export default function InvestmentClient({ initialPlan, userEmail }: Props) {
         {crossoverPoints.length > 0 ? (
           <div
             style={{
-              background: 'linear-gradient(135deg, #9fe1cb, #e1f5ee)',
-              borderRadius: 14,
+              background: 'linear-gradient(135deg, #e1eecc, #f0fae1)',
+              borderRadius: 28,
               padding: '14px 20px',
               marginBottom: 16,
-              color: '#0f6e56',
+              color: '#56633f',
               fontSize: 13,
               lineHeight: 1.6,
             }}
@@ -328,11 +328,11 @@ export default function InvestmentClient({ initialPlan, userEmail }: Props) {
         ) : (
           <div
             style={{
-              background: '#f5f4f0',
-              borderRadius: 14,
+              background: '#ebddc5',
+              borderRadius: 28,
               padding: '14px 20px',
               marginBottom: 16,
-              color: '#47474f',
+              color: '#474238',
               fontSize: 13,
             }}
           >
@@ -343,13 +343,13 @@ export default function InvestmentClient({ initialPlan, userEmail }: Props) {
         {/* กราฟเปรียบเทียบเงินลงทุนสะสม vs ดอกเบี้ยสะสม แบบ exponential */}
         <div
           style={{
-            background: '#ffffff',
-            border: '0.5px solid #ececE5',
-            borderRadius: 14,
+            background: '#f9f4ed',
+            border: '0.5px solid #dcd3c4',
+            borderRadius: 28,
             padding: 16,
           }}
         >
-          <h3 style={{ marginTop: 0, fontSize: 15, fontWeight: 600, color: '#2b2b33' }}>
+          <h3 style={{ marginTop: 0, fontSize: 15, fontWeight: 600, color: '#201e1d' }}>
             เงินที่ลงทุนไปเอง เทียบกับ ดอกเบี้ย/ผลตอบแทนที่งอกเงย
           </h3>
           <ResponsiveContainer width="100%" height={320}>
@@ -357,7 +357,7 @@ export default function InvestmentClient({ initialPlan, userEmail }: Props) {
                 XAxis type="number" (ไม่ใช่ category ที่เป็นค่า default) เพื่อให้ตำแหน่งจุดตัดที่เป็นเลขทศนิยม
                 (เช่น ปีที่ 5.3) วางอยู่ตรงตำแหน่งจริงบนแกน ไม่ใช่แค่ปัดไปที่ช่องปีที่ใกล้ที่สุด */}
             <LineChart data={chartData} margin={{ top: 20, right: 16, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f0f5" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#dcd3c4" />
               <XAxis
                 dataKey="year"
                 type="number"
@@ -373,13 +373,13 @@ export default function InvestmentClient({ initialPlan, userEmail }: Props) {
               />
               <Legend wrapperStyle={{ fontSize: 12 }} />
               {crossoverPoints.map((cp, i) => (
-                <ReferenceLine key={`line-${i}`} x={cp.year} stroke="#e05555" strokeDasharray="4 4" strokeOpacity={0.5} />
+                <ReferenceLine key={`line-${i}`} x={cp.year} stroke="#8a3a22" strokeDasharray="4 4" strokeOpacity={0.5} />
               ))}
               <Line
                 type="monotone"
                 dataKey="totalContributed"
                 name="เงินที่ลงทุนไปเอง (สะสม)"
-                stroke="#7f77dd"
+                stroke="#b2622d"
                 strokeWidth={2.5}
                 dot={false}
               />
@@ -387,7 +387,7 @@ export default function InvestmentClient({ initialPlan, userEmail }: Props) {
                 type="monotone"
                 dataKey="totalInterestEarned"
                 name="ดอกเบี้ย/ผลตอบแทนสะสม"
-                stroke="#4CAF80"
+                stroke="#7a8a5e"
                 strokeWidth={2.5}
                 dot={false}
               />
@@ -398,8 +398,8 @@ export default function InvestmentClient({ initialPlan, userEmail }: Props) {
                   x={cp.year}
                   y={cp.value}
                   r={6}
-                  fill="#e05555"
-                  stroke="#ffffff"
+                  fill="#8a3a22"
+                  stroke="#f9f4ed"
                   strokeWidth={2}
                 />
               ))}

@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Logo from '@/components/Logo'
-import MountainBackdrop from '@/components/MountainBackdrop'
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState('')
@@ -64,7 +63,6 @@ export default function ResetPasswordPage() {
 
   return (
     <div className="auth-page">
-      <MountainBackdrop />
       <div style={{ marginBottom: 20, position: 'relative', zIndex: 1 }}>
         <Logo />
       </div>
