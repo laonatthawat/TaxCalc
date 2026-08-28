@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { TaxDeductions } from '@/lib/taxUtils'
 import { revalidatePath } from 'next/cache'
 
-// upsert ค่าลดหย่อนภาษี — 1 คนมีได้แค่ 1 ชุด (user_id เป็น primary key เหมือน user_settings/investment_plans)
+// upsert ค่าลดหย่อนภาษี — 1 คนมีได้แค่ 1 ชุด (user_id เป็น primary key ของ tax_deductions)
 export async function saveTaxDeductions(input: TaxDeductions) {
   const supabase = await createClient()
 

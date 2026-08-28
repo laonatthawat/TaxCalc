@@ -1,6 +1,23 @@
 import Link from "next/link";
 import Icon from "@/components/Icon";
 
+// ตัวเลขในหัวข้อการ์ด (h3) ต้องแยก font เป็น var(--font-number) เอง ไม่งั้นจะดันไปใช้ฟอนต์หัวข้อ (Caprasimo) แทน
+function TitleWithNumberFont({ text }: { text: string }) {
+  return (
+    <>
+      {text.split(/(\d+)/).map((part, i) =>
+        /^\d+$/.test(part) ? (
+          <span key={i} style={{ fontFamily: "var(--font-number)" }}>
+            {part}
+          </span>
+        ) : (
+          part
+        )
+      )}
+    </>
+  );
+}
+
 const FEATURES = [
   {
     icon: "wallet",
@@ -24,7 +41,7 @@ const FEATURES = [
     icon: "download",
     title: "ส่งออกข้อมูลได้ตลอด",
     body: "ดาวน์โหลดเป็นไฟล์ตารางไปให้นักบัญชีหรือเก็บไว้เอง ข้อมูลเป็นของคุณ ไม่ได้ติดอยู่ในแอปเรา",
-    note: "ลบบัญชีได้จริงในหนึ่งคลิก",
+    note: "ได้จัดการตัวเลข",
   },
 ];
 
@@ -82,7 +99,9 @@ export default function FeaturesPage() {
             >
               <Icon name={f.icon} style={{ width: 22, height: 22, color: "#8c491a" }} />
             </span>
-            <h3 style={{ margin: 0, fontSize: 24, lineHeight: 1.2, color: "#201e1d" }}>{f.title}</h3>
+            <h3 style={{ margin: 0, fontSize: 24, lineHeight: 1.2, color: "#201e1d" }}>
+              <TitleWithNumberFont text={f.title} />
+            </h3>
             <p style={{ margin: 0, font: "400 15px/1.7 var(--font-body)", color: "#474238" }}>
               {f.body}
             </p>
@@ -123,7 +142,7 @@ export default function FeaturesPage() {
             cursor: "pointer",
           }}
         >
-          ลองใช้เลย ฟรี
+          ลองใช้เลย
         </Link>
       </div>
     </div>

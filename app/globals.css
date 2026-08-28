@@ -58,69 +58,11 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 400;
 }
 
-/* ===== Auth pages (login / signup) ===== */
-
-.auth-page {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-  background: #f5ead8;
-  padding: 24px;
-}
-
-/* หน้า landing (`/`) */
-.landing-page {
-  min-height: 100vh;
-  position: relative;
-  overflow: hidden;
-  background: #f5ead8;
-  padding: 24px 0 48px;
-}
-
-/* หน้า dashboard/income/tax/overview ใช้พื้นหลังโทนเดียวกับหน้า login/signup
-   เพื่อให้ธีมเข้ากันทั้งแอป */
+/* หน้า income/tax ใช้พื้นหลังโทนเดียวกับหน้า login/signup เพื่อให้ธีมเข้ากันทั้งแอป */
 .dashboard-page {
   flex: 1;
   background: #f5ead8;
   padding: 24px 0 48px;
-}
-
-.auth-card {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  max-width: 400px;
-  background: #f9f4ed;
-  border-radius: var(--radius-card);
-  padding: 40px 36px;
-  box-shadow: 0 20px 60px -20px rgba(46, 43, 37, 0.28);
-  border: 1px solid #dcd3c4;
-}
-
-/* แมวมาสคอตแอบโผล่มุมการ์ด login/signup — ตกแต่งเฉยๆ เลยปิด pointer-events กันบังการคลิก */
-.auth-card-cat {
-  position: absolute;
-  top: -44px;
-  right: 22px;
-  pointer-events: none;
-}
-
-.auth-title {
-  margin: 0 0 6px;
-  font-family: var(--font-heading);
-  font-size: 24px;
-  font-weight: 400;
-  color: #201e1d;
-}
-
-.auth-subtitle {
-  margin: 0 0 28px;
-  font-size: 13px;
-  color: #474238;
 }
 
 .form-field {
@@ -283,65 +225,6 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* dropdown เลือกหมวดหมู่แบบสไตล์เอง (แทน <datalist> ของ browser ที่แก้หน้าตาไม่ได้เลย) */
-.select-dropdown {
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
-  right: 0;
-  background: #f9f4ed;
-  border: 1px solid #dcd3c4;
-  border-radius: 16px;
-  box-shadow: 0 12px 32px -12px rgba(46, 43, 37, 0.28);
-  max-height: 220px;
-  overflow-y: auto;
-  z-index: 20;
-  padding: 6px;
-}
-
-.select-dropdown-item {
-  padding: 9px 12px;
-  font-size: 14px;
-  color: #201e1d;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.select-dropdown-item:hover {
-  background: #ffe1d0;
-}
-
-/* ===== Page tabs (สลับ รายจ่าย / รายรับ / ภาษี) ===== */
-
-/* overflow-x: auto แทน flex-wrap — บนจอมือถือแคบๆ ที่ใส่ครบ 4 แท็บ
-   ไม่พอดีในบรรทัดเดียว ให้เลื่อนซ้ายขวาได้แบบแท็บบาร์ทั่วไป แทนที่จะตกบรรทัดจนดันเนื้อหาด้านล่างเพี้ยน */
-.page-tabs {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 20px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  padding-bottom: 2px;
-}
-
-.page-tab {
-  flex-shrink: 0;
-  padding: 8px 16px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #8c491a;
-  background: #f9f4ed;
-  border-radius: var(--radius-pill);
-  text-decoration: none;
-  border: 1px solid #dcd3c4;
-  white-space: nowrap;
-}
-
-.page-tab-active {
-  color: #f5ead8;
-  background: linear-gradient(135deg, #d67f48, #b2622d);
-  border: none;
-}
-
 /* ===== Renewal countdown badge ===== */
 
 .renewal-badge {

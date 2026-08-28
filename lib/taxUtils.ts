@@ -118,6 +118,7 @@ export type TaxDeductions = {
   easy_e_receipt: number
   donation_general: number
   donation_education_sports: number
+  withholding_tax: number
 }
 
 export const DEFAULT_TAX_DEDUCTIONS: TaxDeductions = {
@@ -138,6 +139,7 @@ export const DEFAULT_TAX_DEDUCTIONS: TaxDeductions = {
   easy_e_receipt: 0,
   donation_general: 0,
   donation_education_sports: 0,
+  withholding_tax: 0,
 }
 
 export type DeductionBreakdownItem = {
@@ -146,14 +148,31 @@ export type DeductionBreakdownItem = {
   capped?: boolean
 }
 
+// กลุ่มลดหย่อนรวมกัน 5 ก้อน ตรงกับที่การ์ด "สรุปการคำนวณ" (ladder) ฝั่งหน้าภาษีใช้โชว์เป็นขั้นบันไดหักทีละก้อน
+export type DeductionGroups = {
+  personalFamily: number
+  insurance: number
+  retirementAndEsg: number
+  houseAndAnnual: number
+  donation: number
+}
+
 export function calculateDeductions(
   d: TaxDeductions,
   netIncomeAfterExpense: number
-): { items: DeductionBreakdownItem[]; total: number } {
+): { items: DeductionBreakdownItem[]; total: number; groups: DeductionGroups; capNotes: string[] } {
   const items: DeductionBreakdownItem[] = [{ label: 'ค่าลดหย่อนส่วนตัว', amount: 60000 }]
+  const capNotes: string[] = []
+  // เก็บ note ไว้เมื่อกรอกเกินเพดาน — ใช้โชว์เตือนในการ์ดสรุปการคำนวณฝั่งหน้าภาษี
+  const noteIfCapped = (label: string, raw: number, limit: number) => {
+    if (raw > limit) capNotes.push(`${label} กรอก ${bt(raw)} นับได้ ${bt(limit)}`)
+  }
 
+  const dPersonal = 60000
+  const dSpouse = d.has_spouse ? 60000 : 0
   if (d.has_spouse) items.push({ label: 'คู่สมรส (ไม่มีเงินได้)', amount: 60000 })
 
+  const dKids = d.children_count * 30000 + d.children_count_esg * 30000
   if (d.children_count > 0) {
     items.push({ label: `บุตร ${d.children_count} คน`, amount: d.children_count * 30000 })
   }
@@ -164,43 +183,50 @@ export function calculateDeductions(
     })
   }
 
+  const parentsCountCapped = Math.min(d.parents_count, 4)
+  const dParents = parentsCountCapped * 30000
   if (d.parents_count > 0) {
-    const count = Math.min(d.parents_count, 4)
+    noteIfCapped('อุปการะบิดามารดา', d.parents_count * 30000, 4 * 30000)
     items.push({
-      label: `อุปการะบิดามารดา ${count} คน`,
-      amount: count * 30000,
+      label: `อุปการะบิดามารดา ${parentsCountCapped} คน`,
+      amount: dParents,
       capped: d.parents_count > 4,
     })
   }
 
+  const dDisabled = d.disabled_dependents_count * 60000
   if (d.disabled_dependents_count > 0) {
     items.push({
       label: `อุปการะผู้พิการ/ทุพพลภาพ ${d.disabled_dependents_count} คน`,
-      amount: d.disabled_dependents_count * 60000,
+      amount: dDisabled,
     })
   }
 
+  const dSso = Math.min(d.social_security_paid, 9000)
   if (d.social_security_paid > 0) {
-    const amount = Math.min(d.social_security_paid, 9000)
-    items.push({ label: 'ประกันสังคม', amount, capped: d.social_security_paid > 9000 })
+    noteIfCapped('ประกันสังคม', d.social_security_paid, 9000)
+    items.push({ label: 'ประกันสังคม', amount: dSso, capped: d.social_security_paid > 9000 })
   }
 
   // ประกันชีวิต + ประกันสุขภาพตนเอง: สุขภาพเดี่ยวๆ ไม่เกิน 25,000 แล้วรวมกับชีวิตไม่เกิน 100,000
   const healthCapped = Math.min(d.health_insurance_premium, 25000)
-  const lifeAndHealth = Math.min(d.life_insurance_premium + healthCapped, 100000)
-  if (lifeAndHealth > 0) {
+  const dLifeHealth = Math.min(d.life_insurance_premium + healthCapped, 100000)
+  if (dLifeHealth > 0) {
+    noteIfCapped('ประกันสุขภาพตนเอง', d.health_insurance_premium, 25000)
+    noteIfCapped('ประกันชีวิต + สุขภาพรวมกัน', d.life_insurance_premium + healthCapped, 100000)
     items.push({
       label: 'ประกันชีวิต + ประกันสุขภาพตนเอง',
-      amount: lifeAndHealth,
+      amount: dLifeHealth,
       capped: d.life_insurance_premium + healthCapped > 100000 || d.health_insurance_premium > 25000,
     })
   }
 
+  const dParentHealth = Math.min(d.parent_health_insurance_premium, 15000)
   if (d.parent_health_insurance_premium > 0) {
-    const amount = Math.min(d.parent_health_insurance_premium, 15000)
+    noteIfCapped('ประกันสุขภาพบิดามารดา', d.parent_health_insurance_premium, 15000)
     items.push({
       label: 'ประกันสุขภาพบิดามารดา',
-      amount,
+      amount: dParentHealth,
       capped: d.parent_health_insurance_premium > 15000,
     })
   }
@@ -211,11 +237,12 @@ export function calculateDeductions(
   const rmfCapped = Math.min(d.rmf_amount, netIncomeAfterExpense * 0.3, 500000)
   const pensionCapped = Math.min(d.pension_insurance, netIncomeAfterExpense * 0.15, 200000)
   const retirementGroupTotal = pvdCapped + rmfCapped + pensionCapped
-  const retirementGroupFinal = Math.min(retirementGroupTotal, 500000)
-  if (retirementGroupFinal > 0) {
+  const dRetire = Math.min(retirementGroupTotal, 500000)
+  if (dRetire > 0) {
+    noteIfCapped('กลุ่มเกษียณรวมกัน (เพดาน ฿500,000)', retirementGroupTotal, 500000)
     items.push({
       label: 'กลุ่มเกษียณ (กบข./PVD + RMF + ประกันบำนาญ รวมกัน)',
-      amount: retirementGroupFinal,
+      amount: dRetire,
       capped:
         retirementGroupTotal > 500000 ||
         d.pvd_contribution > pvdCapped ||
@@ -224,20 +251,23 @@ export function calculateDeductions(
     })
   }
 
+  const esgLimit = Math.min(netIncomeAfterExpense * 0.3, 300000)
+  const dEsg = Math.min(d.thai_esg_amount, esgLimit)
   if (d.thai_esg_amount > 0) {
-    const limit = Math.min(netIncomeAfterExpense * 0.3, 300000)
-    const amount = Math.min(d.thai_esg_amount, limit)
-    items.push({ label: 'Thai ESG / ESGX', amount, capped: d.thai_esg_amount > limit })
+    noteIfCapped('Thai ESG / ESGX', d.thai_esg_amount, esgLimit)
+    items.push({ label: 'Thai ESG / ESGX', amount: dEsg, capped: d.thai_esg_amount > esgLimit })
   }
 
+  const dMortgage = Math.min(d.mortgage_interest, 100000)
   if (d.mortgage_interest > 0) {
-    const amount = Math.min(d.mortgage_interest, 100000)
-    items.push({ label: 'ดอกเบี้ยกู้ยืมเพื่อที่อยู่อาศัย', amount, capped: d.mortgage_interest > 100000 })
+    noteIfCapped('ดอกเบี้ยที่อยู่อาศัย', d.mortgage_interest, 100000)
+    items.push({ label: 'ดอกเบี้ยกู้ยืมเพื่อที่อยู่อาศัย', amount: dMortgage, capped: d.mortgage_interest > 100000 })
   }
 
+  const dEReceipt = Math.min(d.easy_e_receipt, 50000)
   if (d.easy_e_receipt > 0) {
-    const amount = Math.min(d.easy_e_receipt, 50000)
-    items.push({ label: 'Easy E-Receipt 2.0', amount, capped: d.easy_e_receipt > 50000 })
+    noteIfCapped('Easy E-Receipt', d.easy_e_receipt, 50000)
+    items.push({ label: 'Easy E-Receipt 2.0', amount: dEReceipt, capped: d.easy_e_receipt > 50000 })
   }
 
   // เงินบริจาค: การศึกษา/กีฬา/รพ.รัฐ นับ 2 เท่า แล้วเพดานรวม 10% ของเงินได้หลังหักค่าใช้จ่ายและค่าลดหย่อนอื่นๆ
@@ -245,13 +275,21 @@ export function calculateDeductions(
   const baseForDonationCap = Math.max(0, netIncomeAfterExpense - subtotalBeforeDonation)
   const donationCap = baseForDonationCap * 0.1
   const totalDonationRequested = d.donation_general + d.donation_education_sports * 2
-  const donationFinal = Math.min(totalDonationRequested, donationCap)
-  if (donationFinal > 0) {
-    items.push({ label: 'เงินบริจาค', amount: donationFinal, capped: totalDonationRequested > donationCap })
+  const dDonate = Math.min(totalDonationRequested, donationCap)
+  if (dDonate > 0) {
+    noteIfCapped('เงินบริจาค (เพดาน 10% ของเงินได้หลังหักลดหย่อนอื่น)', totalDonationRequested, donationCap)
+    items.push({ label: 'เงินบริจาค', amount: dDonate, capped: totalDonationRequested > donationCap })
   }
 
   const total = items.reduce((sum, i) => sum + i.amount, 0)
-  return { items, total }
+  const groups: DeductionGroups = {
+    personalFamily: dPersonal + dSpouse + dKids + dParents + dDisabled,
+    insurance: dSso + dLifeHealth + dParentHealth,
+    retirementAndEsg: dRetire + dEsg,
+    houseAndAnnual: dMortgage + dEReceipt,
+    donation: dDonate,
+  }
+  return { items, total, groups, capNotes }
 }
 
 // ===== 4) อัตราภาษีขั้นบันได =====
@@ -356,6 +394,10 @@ export type TaxEstimate = {
   totalTax: number
   effectiveRate: number
   exemptGiftTotal: number
+  deductionGroups: DeductionGroups
+  capNotes: string[]
+  ladder: { label: string; note: string; value: number }[]
+  settlement: { amount: number; isRefund: boolean }
 }
 
 export function calculateTaxEstimate(incomes: Income[], deductions: TaxDeductions): TaxEstimate {
@@ -363,16 +405,32 @@ export function calculateTaxEstimate(incomes: Income[], deductions: TaxDeduction
   const expenseBreakdown = calculateExpenseBreakdown(incomes)
   const totalGrossIncome = expenseBreakdown.reduce((sum, i) => sum + i.grossIncome, 0)
   const netIncomeAfterExpense = expenseBreakdown.reduce((sum, i) => sum + i.netIncome, 0)
-  const { items: deductionItems, total: totalDeductions } = calculateDeductions(
-    deductions,
-    netIncomeAfterExpense
-  )
+  const {
+    items: deductionItems,
+    total: totalDeductions,
+    groups: deductionGroups,
+    capNotes,
+  } = calculateDeductions(deductions, netIncomeAfterExpense)
   const netTaxableIncome = Math.max(0, Math.round(netIncomeAfterExpense - totalDeductions))
   const { brackets, totalTax: progressiveTax } = calculateProgressiveTax(netTaxableIncome)
   const minTax = calculateMinimumTax(incomes, progressiveTax)
   const totalTax = Math.max(progressiveTax, minTax.minTax)
   const effectiveRate = totalGrossIncome > 0 ? (totalTax / totalGrossIncome) * 100 : 0
   const exemptGiftTotal = calculateExemptGiftTotal(incomes)
+
+  // ขั้นบันไดหักทีละก้อนจากเงินได้พึงประเมิน — โชว์ในการ์ด "สรุปการคำนวณ" ฝั่งหน้าภาษี
+  const ladder = [
+    { label: 'เงินได้พึงประเมินที่ต้องเสียภาษี', note: 'ไม่รวมเงินได้ยกเว้น', value: totalGrossIncome },
+    { label: 'หักค่าใช้จ่ายตามประเภทเงินได้', note: 'แบบเหมา', value: -(totalGrossIncome - netIncomeAfterExpense) },
+    { label: 'หักส่วนตัว + ครอบครัว', note: 'ส่วนตัว คู่สมรส บุตร บิดามารดา ผู้พิการ', value: -deductionGroups.personalFamily },
+    { label: 'หักประกัน', note: 'ประกันสังคม ชีวิต สุขภาพ', value: -deductionGroups.insurance },
+    { label: 'หักกลุ่มเกษียณ + Thai ESG', note: 'เพดานรวม ฿500,000 และ ESG แยก ฿300,000', value: -deductionGroups.retirementAndEsg },
+    { label: 'หักบ้าน + มาตรการรายปี', note: 'ดอกเบี้ยบ้าน Easy E-Receipt', value: -deductionGroups.houseAndAnnual },
+    { label: 'หักเงินบริจาค', note: 'เพดาน 10% ของเงินได้หลังหักลดหย่อนอื่น', value: -deductionGroups.donation },
+  ]
+
+  const settlementAmount = deductions.withholding_tax - totalTax
+  const settlement = { amount: settlementAmount, isRefund: settlementAmount >= 0 }
 
   return {
     incomeByType,
@@ -388,5 +446,9 @@ export function calculateTaxEstimate(incomes: Income[], deductions: TaxDeduction
     totalTax,
     exemptGiftTotal,
     effectiveRate,
+    deductionGroups,
+    capNotes,
+    ladder,
+    settlement,
   }
 }

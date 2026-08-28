@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Icon from "@/components/Icon";
+import { signOut } from "@/app/income/actions";
 
-const NAV = [
+const MARKETING_NAV = [
   { label: "หน้าแรก", href: "/" },
   { label: "ฟีเจอร์", href: "/features" },
   { label: "คลังบทความ", href: "/articles" },
@@ -12,8 +13,20 @@ const NAV = [
   { label: "คำถามที่พบบ่อย", href: "/faq" },
 ];
 
-export default function MarketingNav() {
+const APP_NAV = [
+  { label: "รายรับ", href: "/income" },
+  { label: "ภาษี", href: "/tax" },
+];
+
+type Props = {
+  userEmail: string | null;
+};
+
+export default function MarketingNav({ userEmail }: Props) {
   const pathname = usePathname();
+  const isLoggedIn = !!userEmail;
+  // login แล้ว: ต่อแท็บรายรับ/ภาษีท้ายลิงก์ marketing เดิม ไม่ใช่แทนที่ทั้งหมด
+  const navItems = isLoggedIn ? [...MARKETING_NAV, ...APP_NAV] : MARKETING_NAV;
 
   return (
     <nav
@@ -61,7 +74,7 @@ export default function MarketingNav() {
       </Link>
 
       <div style={{ flex: 1, display: "flex", gap: 4 }}>
-        {NAV.map((n) => {
+        {navItems.map((n) => {
           const active = pathname === n.href;
           return (
             <Link
@@ -82,32 +95,55 @@ export default function MarketingNav() {
         })}
       </div>
 
-      <Link
-        href="/login"
-        style={{
-          padding: "8px 14px",
-          borderRadius: 999,
-          font: "500 14px/1 var(--font-body)",
-          color: "#474238",
-          cursor: "pointer",
-        }}
-      >
-        เข้าสู่ระบบ
-      </Link>
+      {isLoggedIn ? (
+        <>
+          <span style={{ font: "400 13px/1 var(--font-body)", color: "#6b6355" }}>{userEmail}</span>
+          <button
+            type="button"
+            onClick={() => signOut()}
+            style={{
+              padding: "8px 14px",
+              borderRadius: 999,
+              border: "1px solid #c0b6a5",
+              background: "transparent",
+              font: "500 13px/1 var(--font-body)",
+              color: "#474238",
+              cursor: "pointer",
+            }}
+          >
+            ออกจากระบบ
+          </button>
+        </>
+      ) : (
+        <>
+          <Link
+            href="/login"
+            style={{
+              padding: "8px 14px",
+              borderRadius: 999,
+              font: "500 14px/1 var(--font-body)",
+              color: "#474238",
+              cursor: "pointer",
+            }}
+          >
+            เข้าสู่ระบบ
+          </Link>
 
-      <Link
-        href="/signup"
-        style={{
-          padding: "11px 22px",
-          borderRadius: 999,
-          background: "#c67139",
-          font: "600 14px/1 var(--font-body)",
-          color: "#f5ead8",
-          cursor: "pointer",
-        }}
-      >
-        เริ่มใช้เลย
-      </Link>
+          <Link
+            href="/signup"
+            style={{
+              padding: "11px 22px",
+              borderRadius: 999,
+              background: "#c67139",
+              font: "600 14px/1 var(--font-body)",
+              color: "#f5ead8",
+              cursor: "pointer",
+            }}
+          >
+            เริ่มใช้เลย
+          </Link>
+        </>
+      )}
     </nav>
   );
 }

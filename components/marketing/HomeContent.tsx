@@ -7,14 +7,15 @@ import { ACC, ACC_D, SAGE, fmt, num, taxOf } from "@/lib/tax";
 import { ARTICLES } from "@/lib/content";
 
 export default function HomeContent() {
-  const [salary, setSalary] = useState("15000");
+  const [salary, setSalary] = useState("20000");
   const [audience, setAudience] = useState<"new" | "pro" | null>(null);
 
   const sal = num(salary);
   const annual = sal * 12;
   const expDed = Math.min(annual * 0.5, 100000);
-  const sso = Math.min(sal * 0.05, 750) * 12;
-  const netInc = Math.max(0, annual - expDed - 60000 - sso);
+  // ไม่หักประกันสังคมอัตโนมัติ — บางคนเงินเดือนมาโดยไม่มีประกันสังคม (เช่น ไม่ใช่ลูกจ้าง ม.33)
+  // ตัวเลขคำนวณเร็วนี้เลยโชว์แค่ค่าลดหย่อนที่ทุกคนได้แน่ๆ ไม่เดาเรื่องเฉพาะบุคคล
+  const netInc = Math.max(0, annual - expDed - 60000);
   const heroTax = taxOf(netInc).tax;
   const afterTax = Math.max(0, annual - heroTax);
 
@@ -32,7 +33,7 @@ export default function HomeContent() {
       no: "2",
       title: "รัฐหักค่าใช้จ่ายให้ก่อนโดยไม่ต้องขอ",
       body: "กฎหมายถือว่าการทำงานมีต้นทุน จึงหักให้ 50% ของรายได้ (ไม่เกิน ฿100,000) บวกค่าลดหย่อนส่วนตัวอีก ฿60,000 อัตโนมัติ",
-      num: "−฿" + fmt(expDed + 60000 + sso),
+      num: "−฿" + fmt(expDed + 60000),
       numLabel: "หักให้ก่อนคิดภาษี",
       dot: SAGE,
       numFg: "#56633f",
@@ -86,11 +87,11 @@ export default function HomeContent() {
   const audienceBtn = audience === "pro" ? "ไปหน้าฟีเจอร์" : "อ่านบทความแรก";
   const audienceHref = audience === "pro" ? "/features" : "/articles/ladder";
 
-  const teaser = ARTICLES.slice(0, 3);
+  const teaser = ARTICLES;
 
   return (
     <div>
-      <section style={{ padding: "88px 42px 64px", maxWidth: 1120 }}>
+      <section style={{ padding: "88px 42px 64px", maxWidth: 1400 }}>
         <p
           style={{
             margin: "0 0 18px",
@@ -168,145 +169,162 @@ export default function HomeContent() {
           borderBottom: "1px solid #dcd3c4",
         }}
       >
-        <div style={{ maxWidth: 1120, display: "flex", flexDirection: "column", gap: 40 }}>
+        <div style={{ maxWidth: 1400, display: "flex", flexDirection: "column", gap: 32 }}>
           <div style={{ maxWidth: "60ch", display: "flex", flexDirection: "column", gap: 12 }}>
             <h2 style={{ margin: 0, fontSize: 38, lineHeight: 1.15, color: "#201e1d" }}>
               เรื่องของเล็ก เงินเดือน{" "}
-              <span style={{ fontFamily: "var(--font-number)" }}>฿15,000</span>
+              <span style={{ fontFamily: "var(--font-number)" }}>฿{fmt(sal)}</span>
             </h2>
             <p style={{ margin: 0, font: "400 17px/1.7 var(--font-body)", color: "#474238" }}>
               เล็กเพิ่งเรียนจบมาทำงานแรกได้ไม่กี่เดือน ยื่นภาษีไม่เป็นเลย
               ปีนี้เลยลองไล่ดูทีละขั้นว่าเงินของตัวเองหายไปตรงไหน
             </p>
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-            {story.map((s) => (
-              <div
-                key={s.no}
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "64px 1fr 240px",
-                  gap: 26,
-                  alignItems: "start",
-                  padding: "26px 0",
-                  borderTop: "1px solid #dcd3c4",
-                }}
-              >
-                <span
+
+          {/* เดิมกล่อง "แล้วของคุณล่ะ" อยู่ล่างสุดแบบเต็มความกว้าง ดูโล่งด้านขวาของลิสต์ขั้นตอนด้านบน
+              ย้ายมาเป็น sticky sidebar ขวา วิ่งคู่กับลิสต์แทน ให้ใช้พื้นที่แนวนอนเต็มขึ้น */}
+          <div className="narrative-grid" style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 32, alignItems: "start" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+              {story.map((s) => (
+                <div
+                  key={s.no}
                   style={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: 999,
-                    background: s.dot,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    font: "600 16px/1 var(--font-number)",
-                    color: "#f9f4ed",
+                    display: "grid",
+                    gridTemplateColumns: "64px 1fr 200px",
+                    gap: 22,
+                    alignItems: "start",
+                    padding: "26px 0",
+                    borderTop: "1px solid #dcd3c4",
                   }}
                 >
-                  {s.no}
-                </span>
-                <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
-                  <h3 style={{ margin: 0, fontSize: 24, lineHeight: 1.2, color: "#201e1d" }}>
-                    {s.title}
-                  </h3>
-                  <p
+                  <span
                     style={{
-                      margin: 0,
-                      maxWidth: "58ch",
-                      font: "400 15px/1.7 var(--font-body)",
-                      color: "#474238",
-                      textWrap: "pretty",
+                      width: 44,
+                      height: 44,
+                      borderRadius: 999,
+                      background: s.dot,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      font: "600 16px/1 var(--font-number)",
+                      color: "#f9f4ed",
                     }}
                   >
-                    {s.body}
-                  </p>
-                </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 3, textAlign: "right" }}>
-                  <span style={{ font: "600 30px/1.1 var(--font-number)", color: s.numFg }}>
-                    {s.num}
+                    {s.no}
                   </span>
-                  <span style={{ font: "400 13px/1.4 var(--font-body)", color: "#645c50" }}>
-                    {s.numLabel}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div
-            style={{
-              background: "#f5ead8",
-              border: "1px solid #dcd3c4",
-              borderRadius: 28,
-              padding: 32,
-              display: "flex",
-              gap: 36,
-              flexWrap: "wrap",
-              alignItems: "center",
-            }}
-          >
-            <div style={{ flex: "1 1 300px", display: "flex", flexDirection: "column", gap: 10 }}>
-              <h3 style={{ margin: 0, fontSize: 24, lineHeight: 1.2, color: "#201e1d" }}>
-                แล้วของคุณล่ะ
-              </h3>
-              <p style={{ margin: 0, font: "400 15px/1.65 var(--font-body)", color: "#474238" }}>
-                ใส่เงินเดือนดูเลย ไม่ต้องสมัคร ไม่ต้องกรอกอะไรอีก
-              </p>
-              <input
-                value={salary}
-                onChange={(e) => setSalary(e.target.value)}
-                inputMode="numeric"
-                placeholder="15000"
-                style={{
-                  maxWidth: 230,
-                  padding: "14px 20px",
-                  borderRadius: 999,
-                  border: "1px solid #c0b6a5",
-                  background: "#f9f4ed",
-                  font: "600 17px/1 var(--font-number)",
-                  color: "#201e1d",
-                  outline: "none",
-                }}
-              />
-            </div>
-            <div style={{ flex: "1 1 340px", display: "flex", flexDirection: "column", gap: 14 }}>
-              <div
-                style={{
-                  display: "flex",
-                  height: 32,
-                  borderRadius: 999,
-                  overflow: "hidden",
-                  background: "#dcd3c4",
-                }}
-              >
-                {prop.map((p) => (
-                  <div
-                    key={p.label}
-                    style={{ width: `${p.w}%`, background: p.bg, transition: "width .3s ease" }}
-                  />
-                ))}
-              </div>
-              {prop.map((p) => (
-                <div key={p.label} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <span
-                    style={{ width: 11, height: 11, borderRadius: 999, background: p.bg }}
-                  />
-                  <span style={{ flex: 1, font: "500 14px/1 var(--font-body)", color: "#474238" }}>
-                    {p.label}
-                  </span>
-                  <span style={{ font: "600 15px/1 var(--font-number)", color: "#201e1d" }}>
-                    {p.value}
-                  </span>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
+                    <h3 style={{ margin: 0, fontSize: 24, lineHeight: 1.2, color: "#201e1d" }}>
+                      {s.title}
+                    </h3>
+                    <p
+                      style={{
+                        margin: 0,
+                        maxWidth: "58ch",
+                        font: "400 15px/1.7 var(--font-body)",
+                        color: "#474238",
+                        textWrap: "pretty",
+                      }}
+                    >
+                      {s.body}
+                    </p>
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 3, textAlign: "right" }}>
+                    <span style={{ font: "600 26px/1.1 var(--font-number)", color: s.numFg }}>
+                      {s.num}
+                    </span>
+                    <span style={{ font: "400 13px/1.4 var(--font-body)", color: "#645c50" }}>
+                      {s.numLabel}
+                    </span>
+                  </div>
                 </div>
               ))}
             </div>
+
+            <div
+              className="narrative-sidebar"
+              style={{
+                position: "sticky",
+                top: 90,
+                background: "#f5ead8",
+                border: "1px solid #dcd3c4",
+                borderRadius: 28,
+                padding: 28,
+                display: "flex",
+                flexDirection: "column",
+                gap: 18,
+              }}
+            >
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                <h3 style={{ margin: 0, fontSize: 22, lineHeight: 1.2, color: "#201e1d" }}>
+                  แล้วของคุณล่ะ
+                </h3>
+                <p style={{ margin: 0, font: "400 14px/1.6 var(--font-body)", color: "#474238" }}>
+                  ใส่เงินเดือนดูเลย ไม่ต้องสมัคร ไม่ต้องกรอกอะไรอีก
+                </p>
+                <input
+                  value={salary}
+                  onChange={(e) => setSalary(e.target.value)}
+                  inputMode="numeric"
+                  placeholder="20000"
+                  style={{
+                    width: "100%",
+                    boxSizing: "border-box",
+                    padding: "14px 20px",
+                    borderRadius: 999,
+                    border: "1px solid #c0b6a5",
+                    background: "#f9f4ed",
+                    font: "600 17px/1 var(--font-number)",
+                    color: "#201e1d",
+                    outline: "none",
+                  }}
+                />
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                <div
+                  style={{
+                    display: "flex",
+                    height: 32,
+                    borderRadius: 999,
+                    overflow: "hidden",
+                    background: "#dcd3c4",
+                  }}
+                >
+                  {prop.map((p) => (
+                    <div
+                      key={p.label}
+                      style={{ width: `${p.w}%`, background: p.bg, transition: "width .3s ease" }}
+                    />
+                  ))}
+                </div>
+                {prop.map((p) => (
+                  <div key={p.label} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <span
+                      style={{ width: 11, height: 11, borderRadius: 999, background: p.bg, flexShrink: 0 }}
+                    />
+                    <span style={{ flex: 1, font: "500 14px/1 var(--font-body)", color: "#474238" }}>
+                      {p.label}
+                    </span>
+                    <span style={{ font: "600 15px/1 var(--font-number)", color: "#201e1d" }}>
+                      {p.value}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
+
+        <style>{`
+          @media (max-width: 860px) {
+            .narrative-grid { grid-template-columns: 1fr !important; }
+            .narrative-sidebar { position: static !important; }
+          }
+        `}</style>
       </section>
 
       {/* audience split */}
-      <section style={{ padding: "72px 42px", maxWidth: 1120 }}>
+      <section style={{ padding: "72px 42px", maxWidth: 1400 }}>
         <h2 style={{ margin: "0 0 10px", fontSize: 38, lineHeight: 1.15, color: "#201e1d" }}>
           คุณมาแบบไหน
         </h2>
@@ -398,7 +416,7 @@ export default function HomeContent() {
       </section>
 
       {/* articles teaser */}
-      <section style={{ padding: "0 42px 80px", maxWidth: 1120 }}>
+      <section style={{ padding: "0 42px 80px", maxWidth: 1400 }}>
         <div
           style={{
             display: "flex",
@@ -418,7 +436,7 @@ export default function HomeContent() {
             ดูคลังบทความทั้งหมด →
           </Link>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 18 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 18 }}>
           {teaser.map((a) => (
             <Link
               key={a.id}

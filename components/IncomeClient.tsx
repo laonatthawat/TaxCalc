@@ -1,6 +1,5 @@
 'use client'
 
-import Link from 'next/link'
 import {
   Plus,
   Calendar,
@@ -18,12 +17,11 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Logo from './Logo'
 import CatMascot from './CatMascot'
 import IncomeModal from './IncomeModal'
 import HelpTooltip from './HelpTooltip'
 import ConfirmDialog from './ConfirmDialog'
-import { deleteIncome, markIncomeAsReceived, signOut } from '@/app/income/actions'
+import { deleteIncome, markIncomeAsReceived } from '@/app/income/actions'
 import {
   Income,
   INCOME_TYPES,
@@ -64,7 +62,7 @@ function daysUntil(dateStr: string): number {
 
 const fmt = (n: number) => Math.round(n).toLocaleString('en-US')
 
-export default function IncomeClient({ initialIncomes, userEmail }: Props) {
+export default function IncomeClient({ initialIncomes }: Props) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingIncome, setEditingIncome] = useState<Income | null>(null)
   const [markingReceivedId, setMarkingReceivedId] = useState<string | null>(null)
@@ -121,10 +119,6 @@ export default function IncomeClient({ initialIncomes, userEmail }: Props) {
     router.refresh()
   }
 
-  const handleLogout = async () => {
-    await signOut()
-  }
-
   const handleMarkAsReceived = async (id: string) => {
     setMarkingReceivedId(id)
     try {
@@ -150,7 +144,7 @@ export default function IncomeClient({ initialIncomes, userEmail }: Props) {
           padding: '1.25rem 1.5rem',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 12 }}>
           <div
             style={{
               width: 40,
@@ -165,13 +159,26 @@ export default function IncomeClient({ initialIncomes, userEmail }: Props) {
           >
             <Icon size={19} color="#f9f4ed" />
           </div>
-          <div>
+          <div style={{ flex: 1, minWidth: 0 }}>
             <p style={{ fontSize: 15, fontWeight: 500, margin: 0, color: '#201e1d' }}>{income.name}</p>
             <p style={{ fontSize: 12, color: '#474238', margin: 0 }}>
               {typeMeta.shortLabel}
               {subLabel ? ` · ${subLabel}` : ''}
             </p>
           </div>
+          <span
+            style={{
+              padding: '5px 10px',
+              borderRadius: 999,
+              background: kind === 'recurring' ? '#e6ecd6' : '#f2e0cb',
+              font: '600 11px/1.3 "IBM Plex Sans Thai",sans-serif',
+              color: kind === 'recurring' ? '#4e5640' : '#8c491a',
+              whiteSpace: 'nowrap',
+              flexShrink: 0,
+            }}
+          >
+            {kind === 'recurring' ? 'ประจำ' : 'ครั้งเดียว'}
+          </span>
         </div>
 
         <p style={{ fontSize: 20, fontWeight: 500, margin: 0, color: '#201e1d' }}>
@@ -276,20 +283,7 @@ export default function IncomeClient({ initialIncomes, userEmail }: Props) {
 
   return (
     <div className="dashboard-page">
-      <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 24px' }}>
-        <div style={{ marginBottom: 24 }}>
-          <Link href="/" style={{ display: 'inline-block', textDecoration: 'none' }}>
-            <Logo />
-          </Link>
-        </div>
-
-        <div className="page-tabs">
-          <span className="page-tab page-tab-active">รายรับ</span>
-          <Link href="/tax" className="page-tab">
-            ภาษี
-          </Link>
-        </div>
-
+      <div style={{ maxWidth: 1180, margin: '0 auto', padding: '24px 24px 0' }}>
         <div
           style={{
             display: 'flex',
@@ -318,7 +312,6 @@ export default function IncomeClient({ initialIncomes, userEmail }: Props) {
                 </p>
               </HelpTooltip>
             </div>
-            <p style={{ color: '#474238', margin: '4px 0 0' }}>{userEmail}</p>
           </div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             <button
@@ -333,9 +326,6 @@ export default function IncomeClient({ initialIncomes, userEmail }: Props) {
               }}
             >
               <Plus size={16} /> เพิ่มรายรับ
-            </button>
-            <button onClick={handleLogout} className="btn-secondary">
-              ออกจากระบบ
             </button>
           </div>
         </div>
@@ -389,7 +379,7 @@ export default function IncomeClient({ initialIncomes, userEmail }: Props) {
             }}
           >
             <h3 style={{ marginTop: 0, fontSize: 14, fontWeight: 600, color: '#201e1d' }}>
-              แจกแจงตามประเภทเงินได้ (มาตรา 40)
+              แจกแจงตามประเภทเงินได้ (มาตรา <span style={{ fontFamily: 'var(--font-number)' }}>40</span>)
             </h3>
             {typeRows.map(({ type, total }) => {
               const Icon = ICONS[type.icon] ?? Wallet2
