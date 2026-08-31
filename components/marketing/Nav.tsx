@@ -34,116 +34,144 @@ export default function MarketingNav({ userEmail }: Props) {
         position: "sticky",
         top: 0,
         zIndex: 20,
-        display: "flex",
-        alignItems: "center",
-        gap: 26,
-        padding: "14px 42px",
-        background: "rgba(245,234,216,.92)",
+        background: "rgba(245,234,216,.94)",
         backdropFilter: "blur(10px)",
         borderBottom: "1px solid #dcd3c4",
       }}
     >
-      <Link
-        href="/"
+      <div
         style={{
+          maxWidth: 1600,
+          padding: "12px clamp(16px,4vw,44px)",
           display: "flex",
+          flexWrap: "wrap",
           alignItems: "center",
-          gap: 9,
-          background: "none",
-          border: "none",
-          padding: 0,
-          cursor: "pointer",
+          gap: "10px 20px",
         }}
       >
-        <span
+        <Link
+          href="/"
           style={{
-            width: 30,
-            height: 30,
-            borderRadius: 999,
-            background: "#c67139",
             display: "flex",
             alignItems: "center",
-            justifyContent: "center",
+            gap: 9,
+            flex: "0 0 auto",
+            order: 1,
+            cursor: "pointer",
           }}
         >
-          <Icon name="sprout" style={{ width: 17, height: 17, color: "#f5ead8" }} />
-        </span>
-        <span style={{ font: "600 17px/1 var(--font-body)", color: "#201e1d" }}>
-          จ่ายจนเจ็บ
-        </span>
-      </Link>
-
-      <div style={{ flex: 1, display: "flex", gap: 4 }}>
-        {navItems.map((n) => {
-          const active = pathname === n.href;
-          return (
-            <Link
-              key={n.href}
-              href={n.href}
-              style={{
-                padding: "8px 14px",
-                borderRadius: 999,
-                background: active ? "#ebddc5" : "transparent",
-                font: "500 14px/1 var(--font-body)",
-                color: active ? "#201e1d" : "#645c50",
-                cursor: "pointer",
-              }}
-            >
-              {n.label}
-            </Link>
-          );
-        })}
-      </div>
-
-      {isLoggedIn ? (
-        <>
-          <span style={{ font: "400 13px/1 var(--font-body)", color: "#6b6355" }}>{userEmail}</span>
-          <button
-            type="button"
-            onClick={() => signOut()}
+          <span
             style={{
-              padding: "8px 14px",
-              borderRadius: 999,
-              border: "1px solid #c0b6a5",
-              background: "transparent",
-              font: "500 13px/1 var(--font-body)",
-              color: "#474238",
-              cursor: "pointer",
-            }}
-          >
-            ออกจากระบบ
-          </button>
-        </>
-      ) : (
-        <>
-          <Link
-            href="/login"
-            style={{
-              padding: "8px 14px",
-              borderRadius: 999,
-              font: "500 14px/1 var(--font-body)",
-              color: "#474238",
-              cursor: "pointer",
-            }}
-          >
-            เข้าสู่ระบบ
-          </Link>
-
-          <Link
-            href="/signup"
-            style={{
-              padding: "11px 22px",
+              width: 30,
+              height: 30,
               borderRadius: 999,
               background: "#c67139",
-              font: "600 14px/1 var(--font-body)",
-              color: "#f5ead8",
-              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
             }}
           >
-            เริ่มใช้เลย
-          </Link>
-        </>
-      )}
+            <Icon name="sprout" style={{ width: 17, height: 17, color: "#f5ead8" }} />
+          </span>
+          <span style={{ font: "600 17px/1 var(--font-body)", color: "#201e1d" }}>
+            จ่ายจนเจ็บ
+          </span>
+        </Link>
+
+        <div
+          style={{
+            flex: "0 0 auto",
+            marginLeft: "auto",
+            order: 3,
+            display: "flex",
+            gap: 6,
+            alignItems: "center",
+            flexWrap: "wrap",
+          }}
+        >
+          {isLoggedIn ? (
+            <>
+              <span style={{ font: "400 13px/1 var(--font-body)", color: "#6b6355" }}>{userEmail}</span>
+              <button
+                type="button"
+                onClick={() => signOut()}
+                style={{
+                  padding: "8px 14px",
+                  borderRadius: 999,
+                  border: "1px solid #c0b6a5",
+                  background: "transparent",
+                  font: "500 13px/1 var(--font-body)",
+                  color: "#474238",
+                  cursor: "pointer",
+                }}
+              >
+                ออกจากระบบ
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/login?mode=login"
+                style={{
+                  padding: "8px 12px",
+                  borderRadius: 999,
+                  font: "500 14px/1 var(--font-body)",
+                  color: "#645c50",
+                  cursor: "pointer",
+                }}
+              >
+                เข้าสู่ระบบ
+              </Link>
+              <Link
+                href="/login?mode=signup"
+                style={{
+                  padding: "11px 22px",
+                  borderRadius: 999,
+                  background: "#c67139",
+                  font: "600 14px/1 var(--font-body)",
+                  color: "#f5ead8",
+                  cursor: "pointer",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                เริ่มใช้เลย
+              </Link>
+            </>
+          )}
+        </div>
+
+        <div
+          style={{
+            flex: "1 1 340px",
+            minWidth: 0,
+            display: "flex",
+            gap: 4,
+            overflowX: "auto",
+            order: 2,
+          }}
+        >
+          {navItems.map((n) => {
+            const active = pathname === n.href;
+            return (
+              <Link
+                key={n.href}
+                href={n.href}
+                style={{
+                  padding: "8px 14px",
+                  borderRadius: 999,
+                  background: active ? "#ebddc5" : "transparent",
+                  font: "500 14px/1 var(--font-body)",
+                  color: active ? "#201e1d" : "#645c50",
+                  cursor: "pointer",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {n.label}
+              </Link>
+            );
+          })}
+        </div>
+      </div>
     </nav>
   );
 }

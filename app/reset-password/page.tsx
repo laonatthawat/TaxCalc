@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import AuthShell from '@/components/AuthShell'
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState('')
@@ -62,63 +61,113 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <AuthShell
-      asideTitle="ตั้งรหัสใหม่ได้เลย"
-      asideBody="ลิงก์ที่ส่งไปใช้ได้ครั้งเดียวและหมดอายุใน 30 นาที เพื่อความปลอดภัยของข้อมูลการเงินคุณ"
+    <div
+      style={{
+        maxWidth: 1600,
+        minHeight: 'calc(100vh - 260px)',
+        padding: 'clamp(40px,5vw,64px) clamp(20px,4vw,44px) clamp(48px,6vw,72px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        <h2 style={{ margin: 0, fontSize: 28, lineHeight: 1.15 }}>ตั้งรหัสผ่านใหม่</h2>
-        {!isLinkInvalid && (
-          <p style={{ margin: 0, font: '400 14px/1.6 "IBM Plex Sans Thai",sans-serif', color: '#6b6355' }}>
-            กรอกรหัสผ่านใหม่ที่ต้องการใช้
-          </p>
-        )}
-      </div>
+      <div
+        style={{
+          width: '100%',
+          maxWidth: 460,
+          minHeight: 420,
+          padding: 'clamp(24px,3vw,32px)',
+          borderRadius: 28,
+          background: '#f9f4ed',
+          border: '1px solid #dcd3c4',
+          boxShadow: '0 3px 10px rgba(46,43,37,.16)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 16,
+          justifyContent: 'center',
+        }}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <h1 style={{ margin: 0, fontSize: 28, lineHeight: 1.15, color: '#201e1d' }}>ตั้งรหัสผ่านใหม่</h1>
+          {!isLinkInvalid && (
+            <p style={{ margin: 0, font: '400 14px/1.6 "IBM Plex Sans Thai",sans-serif', color: '#6b6355' }}>
+              กรอกรหัสผ่านใหม่ที่ต้องการใช้
+            </p>
+          )}
+        </div>
 
-      {isLinkInvalid ? (
-        <>
-          <p style={{ margin: 0, font: '400 14px/1.6 "IBM Plex Sans Thai",sans-serif', color: '#6b6355' }}>
-            ลิงก์นี้หมดอายุหรือถูกใช้ไปแล้ว กรุณาขอลิงก์รีเซ็ตรหัสผ่านใหม่อีกครั้ง
-          </p>
-          <p className="auth-footer-link">
-            <a href="/forgot-password">ขอลิงก์ใหม่</a>
-          </p>
-        </>
-      ) : (
-        <>
-          {/* noValidate: ปิด popup แจ้งเตือนของ browser เอง (หน้าตาไม่เข้าธีม, เป็นภาษาอังกฤษ)
-              แล้วโชว์ error ของเราเองแทนผ่าน .auth-alert-error ด้านล่างฟอร์ม */}
-          <form onSubmit={handleSubmit} noValidate>
-            <div className="form-field">
-              <label className="form-label">รหัสผ่านใหม่</label>
+        {isLinkInvalid ? (
+          <>
+            <p style={{ margin: 0, font: '400 14px/1.6 "IBM Plex Sans Thai",sans-serif', color: '#6b6355' }}>
+              ลิงก์นี้หมดอายุหรือถูกใช้ไปแล้ว กรุณาขอลิงก์รีเซ็ตรหัสผ่านใหม่อีกครั้ง
+            </p>
+            <a href="/login?mode=forgot" style={{ font: '600 14px/1 "IBM Plex Sans Thai",sans-serif', color: '#8c491a', textDecoration: 'none' }}>
+              ขอลิงก์ใหม่
+            </a>
+          </>
+        ) : (
+          <form onSubmit={handleSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+              <span style={{ font: '500 13px/1 "IBM Plex Sans Thai",sans-serif', color: '#474238' }}>รหัสผ่านใหม่</span>
               <input
                 type="password"
-                className="form-input"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="อย่างน้อย 6 ตัวอักษร"
                 disabled={!isSessionReady}
+                style={{
+                  width: '100%',
+                  boxSizing: 'border-box',
+                  padding: '14px 18px',
+                  borderRadius: 999,
+                  border: '1px solid #c0b6a5',
+                  background: '#f5ead8',
+                  font: '400 15px/1 "IBM Plex Sans Thai",sans-serif',
+                  color: '#201e1d',
+                  outline: 'none',
+                }}
               />
-            </div>
-            <div className="form-field">
-              <label className="form-label">ยืนยันรหัสผ่านใหม่</label>
+            </label>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+              <span style={{ font: '500 13px/1 "IBM Plex Sans Thai",sans-serif', color: '#474238' }}>ยืนยันรหัสผ่านใหม่</span>
               <input
                 type="password"
-                className="form-input"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="พิมพ์อีกครั้ง"
                 disabled={!isSessionReady}
+                style={{
+                  width: '100%',
+                  boxSizing: 'border-box',
+                  padding: '14px 18px',
+                  borderRadius: 999,
+                  border: '1px solid #c0b6a5',
+                  background: '#f5ead8',
+                  font: '400 15px/1 "IBM Plex Sans Thai",sans-serif',
+                  color: '#201e1d',
+                  outline: 'none',
+                }}
               />
-            </div>
-            <button type="submit" className="btn-gradient-primary" disabled={isSubmitting || !isSessionReady}>
+            </label>
+            <button
+              type="submit"
+              disabled={isSubmitting || !isSessionReady}
+              style={{
+                padding: 16,
+                borderRadius: 999,
+                border: 'none',
+                background: isSubmitting || !isSessionReady ? '#dcd3c4' : '#c67139',
+                font: '600 15px/1 "IBM Plex Sans Thai",sans-serif',
+                color: isSubmitting || !isSessionReady ? '#82796a' : '#f5ead8',
+                cursor: 'pointer',
+              }}
+            >
               {isSubmitting ? 'กำลังบันทึก...' : isSessionReady ? 'บันทึกรหัสผ่านใหม่' : 'กำลังตรวจสอบลิงก์...'}
             </button>
+            {error && <p className="auth-alert-error">{error}</p>}
           </form>
-
-          {error && <p className="auth-alert-error">{error}</p>}
-        </>
-      )}
-    </AuthShell>
+        )}
+      </div>
+    </div>
   )
 }

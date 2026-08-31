@@ -1,19 +1,7 @@
 import type { Metadata } from "next";
-import { Caprasimo, Figtree, IBM_Plex_Sans_Thai } from "next/font/google";
+import { IBM_Plex_Sans_Thai } from "next/font/google";
 import "./globals.css";
 import ChromeGate from "@/components/marketing/ChromeGate";
-
-const caprasimo = Caprasimo({
-  weight: "400",
-  subsets: ["latin"],
-  variable: "--font-caprasimo",
-});
-
-const figtree = Figtree({
-  weight: ["400", "500", "600", "700"],
-  subsets: ["latin"],
-  variable: "--font-figtree",
-});
 
 const ibmPlexSansThai = IBM_Plex_Sans_Thai({
   weight: ["400", "500", "600", "700"],
@@ -29,10 +17,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html
-      lang="th"
-      className={`${caprasimo.variable} ${figtree.variable} ${ibmPlexSansThai.variable} h-full antialiased`}
-    >
+    <html lang="th" className={`${ibmPlexSansThai.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
         <ChromeGate>{children}</ChromeGate>
       </body>
