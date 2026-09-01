@@ -6,7 +6,7 @@ import Icon from "@/components/Icon";
 import { ACC, ACC_D } from "@/lib/tax";
 import { ARTICLES, FAQS } from "@/lib/content";
 
-const TAGS = ["ทั้งหมด", "พื้นฐาน", "ลดหย่อน", "โบนัส", "ฟรีแลนซ์"];
+const TAGS = ["ทั้งหมด", "พื้นฐาน", "ลดหย่อน", "โบนัส", "ฟรีแลนซ์", "เงินเดือน"];
 const FAQ_PEEK = [FAQS[0].q, FAQS[1].q, FAQS[5].q];
 
 export default function ArticlesPage() {

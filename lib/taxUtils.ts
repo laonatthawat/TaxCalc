@@ -301,7 +301,7 @@ export type TaxBracketResult = {
   taxFromBracket: number
 }
 
-const TAX_BRACKETS = [
+export const TAX_BRACKETS = [
   { upTo: 150000, rate: 0 },
   { upTo: 300000, rate: 0.05 },
   { upTo: 500000, rate: 0.1 },

@@ -88,6 +88,18 @@ export default function HomeContent() {
   const audienceHref = audience === "pro" ? "/features" : "/articles/ladder";
 
   const teaser = ARTICLES;
+  const teaserVisible = 5;
+  const teaserMaxPage = Math.max(0, teaser.length - teaserVisible);
+  const [teaserPage, setTeaserPage] = useState(0);
+
+  function goTeaser(dir: 1 | -1) {
+    setTeaserPage((p) => {
+      const next = p + dir;
+      if (next < 0) return teaserMaxPage;
+      if (next > teaserMaxPage) return 0;
+      return next;
+    });
+  }
 
   return (
     <div>
@@ -409,48 +421,99 @@ export default function HomeContent() {
           <h2 style={{ margin: 0, fontSize: "clamp(27px,3.4vw,38px)", lineHeight: 1.15, color: "#201e1d" }}>
             อ่านก่อนก็ได้
           </h2>
-          <Link href="/articles" style={{ font: "600 15px/1 var(--font-body)", color: "#8c491a", cursor: "pointer" }}>
-            ดูคลังบทความทั้งหมด →
-          </Link>
-        </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(210px,1fr))", gap: 16 }}>
-          {teaser.map((a) => (
-            <Link
-              key={a.id}
-              href={`/articles/${a.id}`}
-              style={{
-                textAlign: "left",
-                padding: 24,
-                borderRadius: 28,
-                border: "1px solid #dcd3c4",
-                background: "#f9f4ed",
-                cursor: "pointer",
-                display: "flex",
-                flexDirection: "column",
-                gap: 10,
-                height: "100%",
-                textDecoration: "none",
-              }}
-            >
-              <span
+          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+            <Link href="/articles" style={{ font: "600 15px/1 var(--font-body)", color: "#8c491a", cursor: "pointer" }}>
+              ดูคลังบทความทั้งหมด →
+            </Link>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button
+                type="button"
+                onClick={() => goTeaser(-1)}
+                aria-label="บทความก่อนหน้า"
                 style={{
-                  padding: "5px 11px",
+                  width: 38,
+                  height: 38,
                   borderRadius: 999,
-                  background: "#ffe1d0",
-                  font: "600 11px/1.4 var(--font-body)",
-                  color: "#8c491a",
-                  alignSelf: "flex-start",
+                  border: "1px solid #c0b6a5",
+                  background: "#f9f4ed",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
                 }}
               >
-                {a.tag}
-              </span>
-              <span style={{ font: "600 19px/1.35 var(--font-body)", color: "#201e1d" }}>{a.title}</span>
-              <span style={{ font: "400 14px/1.6 var(--font-body)", color: "#645c50" }}>{a.blurb}</span>
-              <span style={{ marginTop: "auto", paddingTop: 10, font: "500 12px/1 var(--font-body)", color: "#82796a" }}>
-                อ่าน {a.mins} นาที
-              </span>
-            </Link>
-          ))}
+                <Icon name="chevron-left" style={{ width: 18, height: 18, color: "#474238" }} />
+              </button>
+              <button
+                type="button"
+                onClick={() => goTeaser(1)}
+                aria-label="บทความถัดไป"
+                style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: 999,
+                  border: "1px solid #c0b6a5",
+                  background: "#f9f4ed",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                }}
+              >
+                <Icon name="chevron-right" style={{ width: 18, height: 18, color: "#474238" }} />
+              </button>
+            </div>
+          </div>
+        </div>
+        <div style={{ overflow: "hidden" }}>
+          <div
+            style={{
+              display: "flex",
+              width: `${(teaser.length / teaserVisible) * 100}%`,
+              transform: `translateX(-${teaserPage * (100 / teaser.length)}%)`,
+              transition: "transform .5s cubic-bezier(.4,0,.2,1)",
+            }}
+          >
+            {teaser.map((a) => (
+              <div key={a.id} style={{ flex: `0 0 ${100 / teaser.length}%`, boxSizing: "border-box", padding: "0 8px" }}>
+                <Link
+                  href={`/articles/${a.id}`}
+                  style={{
+                    textAlign: "left",
+                    padding: 24,
+                    borderRadius: 28,
+                    border: "1px solid #dcd3c4",
+                    background: "#f9f4ed",
+                    cursor: "pointer",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 10,
+                    height: "100%",
+                    boxSizing: "border-box",
+                    textDecoration: "none",
+                  }}
+                >
+                  <span
+                    style={{
+                      padding: "5px 11px",
+                      borderRadius: 999,
+                      background: "#ffe1d0",
+                      font: "600 11px/1.4 var(--font-body)",
+                      color: "#8c491a",
+                      alignSelf: "flex-start",
+                    }}
+                  >
+                    {a.tag}
+                  </span>
+                  <span style={{ font: "600 19px/1.35 var(--font-body)", color: "#201e1d" }}>{a.title}</span>
+                  <span style={{ font: "400 14px/1.6 var(--font-body)", color: "#645c50" }}>{a.blurb}</span>
+                  <span style={{ marginTop: "auto", paddingTop: 10, font: "500 12px/1 var(--font-body)", color: "#82796a" }}>
+                    อ่าน {a.mins} นาที
+                  </span>
+                </Link>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     </div>

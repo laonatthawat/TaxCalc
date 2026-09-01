@@ -1,6 +1,10 @@
+import { Fragment } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ARTICLES, ARTICLE_BODY } from "@/lib/content";
+import { calculateProgressiveTax, TAX_BRACKETS } from "@/lib/taxUtils";
+
+const fmtBaht = (n: number) => "฿" + Math.round(n).toLocaleString("en-US");
 
 export function generateStaticParams() {
   return ARTICLES.map((a) => ({ id: a.id }));
@@ -15,7 +19,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
   const related = ARTICLES.filter((a) => a.id !== id).slice(0, 3);
 
   return (
-    <div style={{ maxWidth: 760, padding: "clamp(32px,4vw,48px) clamp(20px,4vw,44px) clamp(56px,7vw,88px)" }}>
+    <div style={{ maxWidth: 900, padding: "clamp(32px,4vw,48px) clamp(20px,4vw,44px) clamp(56px,7vw,88px)" }}>
       <Link
         href="/articles"
         style={{ display: "inline-block", marginBottom: 26, font: "500 14px/1 var(--font-body)", color: "#8c491a", cursor: "pointer" }}
@@ -72,6 +76,68 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
                   {r.note}
                 </p>
               ))}
+            </div>
+          );
+        }
+        if (b.t === "bracketVisual") {
+          const { brackets: filled } = calculateProgressiveTax(b.example);
+          const filledMap = new Map(filled.map((f) => [f.rate, f]));
+          let lower = 0;
+          const rows = TAX_BRACKETS.map((br) => {
+            const size = br.upTo === Infinity ? 3000000 : br.upTo - lower;
+            const widthBasis = Math.min(size, 1000000);
+            const f = filledMap.get(br.rate);
+            const row = {
+              lower,
+              upTo: br.upTo,
+              rate: br.rate,
+              widthBasis,
+              taxable: f?.taxableInBracket ?? 0,
+              tax: f?.taxFromBracket ?? 0,
+              reached: !!f,
+            };
+            lower = br.upTo;
+            return row;
+          });
+          return (
+            <div key={i} style={{ margin: "0 0 26px", display: "flex", flexDirection: "column", gap: 14 }}>
+              <span style={{ font: "600 16px/1.5 var(--font-body)", color: "#201e1d" }}>{b.text}</span>
+              <div style={{ display: "flex", gap: 3, height: 46, borderRadius: 10, overflow: "hidden" }}>
+                {rows.map((r) => (
+                  <div
+                    key={r.rate}
+                    style={{
+                      flex: r.widthBasis,
+                      background: r.reached ? `rgba(198,113,57,${0.15 + r.rate * 2.2})` : "#efe6d4",
+                      border: r.reached ? "none" : "1px dashed #dcd3c4",
+                    }}
+                  />
+                ))}
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "12px auto auto 1fr", columnGap: 12, rowGap: 10, alignItems: "center" }}>
+                {rows.map((r) => (
+                  <Fragment key={r.rate}>
+                    <span
+                      style={{
+                        width: 12,
+                        height: 12,
+                        borderRadius: 4,
+                        background: r.reached ? `rgba(198,113,57,${0.15 + r.rate * 2.2})` : "#efe6d4",
+                        border: r.reached ? "none" : "1px dashed #dcd3c4",
+                      }}
+                    />
+                    <span style={{ whiteSpace: "nowrap", font: "600 14px/1 var(--font-number)", color: "#201e1d" }}>
+                      {r.lower.toLocaleString("en-US")}–{r.upTo === Infinity ? "ขึ้นไป" : r.upTo.toLocaleString("en-US")}
+                    </span>
+                    <span style={{ whiteSpace: "nowrap", font: "600 13px/1 var(--font-number)", color: "#8c491a" }}>
+                      {(r.rate * 100).toFixed(0)}%
+                    </span>
+                    <span style={{ minWidth: 0, font: "400 13px/1.6 var(--font-body)", color: r.reached ? "#474238" : "#82796a" }}>
+                      {r.reached ? `เสียภาษี ${fmtBaht(r.tax)} จากส่วนนี้ ${fmtBaht(r.taxable)}` : "ยังไม่ถึงขั้นนี้"}
+                    </span>
+                  </Fragment>
+                ))}
+              </div>
             </div>
           );
         }
