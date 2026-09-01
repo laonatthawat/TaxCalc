@@ -17,10 +17,6 @@ export default function HomeContent() {
   const netInc = Math.max(0, annual - preTaxDed);
   const heroTax = taxOf(netInc).tax;
   const afterTax = Math.max(0, annual - heroTax);
-  // ประกันสังคม/ภาษีหัก ณ ที่จ่าย โชว์แค่ในการ์ดตัวอย่างสลิป (ภาพประกอบ) ไม่ได้เอาไปหักในยอดหลักด้านล่าง
-  // เพราะไม่ใช่ทุกคนมีประกันสังคม การ์ดสรุปจริงด้านล่างเลยคิดจากค่าใช้จ่ายเหมา+ลดหย่อนส่วนตัวเท่านั้น
-  const sso = Math.min(sal * 0.05, 750);
-  const wht = heroTax / 12;
 
   const story = [
     {
@@ -66,12 +62,6 @@ export default function HomeContent() {
     { label: "เงินหลังหักภาษี", value: "฿" + fmt(afterTax), w: (afterTax / Math.max(1, annual)) * 100, bg: SAGE },
   ];
 
-  const slip = [
-    { label: "เงินเดือน", value: "฿" + fmt(sal), fg: "#201e1d" },
-    { label: "ประกันสังคม", value: "−฿" + fmt(sso), fg: "#56633f" },
-    { label: "ภาษีหัก ณ ที่จ่าย", value: "−฿" + fmt(wht), fg: ACC_D },
-  ];
-  const slipNet = "฿" + fmt(Math.max(0, sal - sso - wht));
   const heroEff = (annual > 0 ? (heroTax / annual) * 100 : 0).toFixed(1) + "%";
 
   const audiences = [
@@ -104,15 +94,10 @@ export default function HomeContent() {
       {/* hero */}
       <section
         style={{
-          maxWidth: 1600,
           padding: "clamp(44px,6vw,84px) clamp(20px,4vw,44px) clamp(40px,5vw,64px)",
-          display: "flex",
-          flexWrap: "wrap",
-          gap: "clamp(28px,4vw,52px)",
-          alignItems: "center",
         }}
       >
-        <div style={{ flex: "1 1 460px", minWidth: 0 }}>
+        <div>
           <p
             style={{
               margin: "0 0 18px",
@@ -181,74 +166,6 @@ export default function HomeContent() {
             </Link>
           </div>
         </div>
-
-        <div
-          style={{
-            flex: "1 1 380px",
-            maxWidth: 520,
-            background: "#f9f4ed",
-            border: "1px solid #dcd3c4",
-            borderRadius: 28,
-            padding: "clamp(22px,3vw,30px)",
-            boxShadow: "0 3px 10px rgba(46,43,37,.10)",
-            display: "flex",
-            flexDirection: "column",
-            gap: 16,
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
-            <span
-              style={{
-                font: "600 12px/1 var(--font-body)",
-                letterSpacing: ".1em",
-                textTransform: "uppercase",
-                color: "#82796a",
-              }}
-            >
-              สลิปเดือนนี้
-            </span>
-            <span
-              style={{
-                padding: "5px 11px",
-                borderRadius: 999,
-                background: "#e1eecc",
-                font: "600 11px/1.4 var(--font-body)",
-                color: "#56633f",
-              }}
-            >
-              ตัวอย่าง
-            </span>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 11 }}>
-            {slip.map((r) => (
-              <div
-                key={r.label}
-                style={{
-                  display: "flex",
-                  alignItems: "baseline",
-                  justifyContent: "space-between",
-                  gap: 14,
-                  paddingBottom: 11,
-                  borderBottom: "1px solid #e6dccc",
-                }}
-              >
-                <span style={{ font: "400 14px/1.5 var(--font-body)", color: "#645c50" }}>{r.label}</span>
-                <span style={{ font: "600 16px/1 var(--font-number)", color: r.fg }}>{r.value}</span>
-              </div>
-            ))}
-          </div>
-          <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 14 }}>
-            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-              <span style={{ font: "500 13px/1 var(--font-body)", color: "#645c50" }}>เข้าบัญชีจริง</span>
-              <span style={{ font: "600 clamp(26px,3vw,34px)/1 var(--font-number)", color: "#201e1d" }}>
-                {slipNet}
-              </span>
-            </div>
-            <span style={{ font: "400 12px/1.5 var(--font-body)", color: "#82796a", textAlign: "right", maxWidth: "14ch" }}>
-              คิดจากเงินเดือน ฿{fmt(sal)}
-            </span>
-          </div>
-        </div>
       </section>
 
       {/* narrative */}
@@ -262,7 +179,6 @@ export default function HomeContent() {
       >
         <div
           style={{
-            maxWidth: 1600,
             padding: "0 clamp(20px,4vw,44px)",
             display: "flex",
             flexWrap: "wrap",
@@ -409,7 +325,7 @@ export default function HomeContent() {
       </section>
 
       {/* audience split */}
-      <section style={{ maxWidth: 1600, padding: "clamp(48px,6vw,72px) clamp(20px,4vw,44px) 0" }}>
+      <section style={{ padding: "clamp(48px,6vw,72px) clamp(20px,4vw,44px) 0" }}>
         <h2 style={{ margin: "0 0 10px", fontSize: "clamp(27px,3.4vw,38px)", lineHeight: 1.15, color: "#201e1d" }}>
           คุณมาแบบไหน
         </h2>
@@ -488,7 +404,7 @@ export default function HomeContent() {
       </section>
 
       {/* articles teaser */}
-      <section style={{ maxWidth: 1600, padding: "clamp(44px,5vw,64px) clamp(20px,4vw,44px) clamp(56px,7vw,88px)" }}>
+      <section style={{ padding: "clamp(44px,5vw,64px) clamp(20px,4vw,44px) clamp(56px,7vw,88px)" }}>
         <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 20, flexWrap: "wrap", marginBottom: 24 }}>
           <h2 style={{ margin: 0, fontSize: "clamp(27px,3.4vw,38px)", lineHeight: 1.15, color: "#201e1d" }}>
             อ่านก่อนก็ได้

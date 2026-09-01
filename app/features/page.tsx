@@ -53,7 +53,7 @@ const SETUP_FACTS = [
 
 export default function FeaturesPage() {
   return (
-    <div style={{ maxWidth: 1600, padding: "clamp(44px,6vw,72px) clamp(20px,4vw,44px) clamp(56px,7vw,88px)" }}>
+    <div style={{ padding: "clamp(44px,6vw,72px) clamp(20px,4vw,44px) clamp(56px,7vw,88px)" }}>
       <p
         style={{
           margin: "0 0 16px",

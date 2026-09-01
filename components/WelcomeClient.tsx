@@ -28,7 +28,6 @@ export default function WelcomeClient({ items }: Props) {
   return (
     <div
       style={{
-        maxWidth: 1600,
         padding: 'clamp(40px,5vw,64px) clamp(20px,4vw,44px) clamp(56px,7vw,88px)',
         display: 'flex',
         flexWrap: 'wrap',

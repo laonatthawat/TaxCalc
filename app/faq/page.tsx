@@ -12,7 +12,7 @@ export default function FaqPage() {
   const filtered = FAQS.filter((f) => faqCat === "ทั้งหมด" || f.cat === faqCat);
 
   return (
-    <div style={{ maxWidth: 1600, padding: "clamp(44px,6vw,72px) clamp(20px,4vw,44px) clamp(56px,7vw,88px)" }}>
+    <div style={{ padding: "clamp(44px,6vw,72px) clamp(20px,4vw,44px) clamp(56px,7vw,88px)" }}>
       <div style={{ display: "flex", flexWrap: "wrap", gap: "clamp(24px,4vw,64px)", alignItems: "flex-end", paddingBottom: "clamp(24px,3vw,36px)" }}>
         <div style={{ flex: "1 1 420px", minWidth: 0, maxWidth: 620 }}>
           <p
@@ -30,7 +30,7 @@ export default function FaqPage() {
             ที่คนถามกันบ่อย
           </h1>
         </div>
-        <p style={{ flex: "1 1 340px", minWidth: 0, maxWidth: 560, margin: 0, fontSize: "clamp(15px,1.4vw,18px)", fontWeight: 400, lineHeight: 1.75, color: "#474238", textWrap: "pretty" }}>
+        <p style={{ flex: "1 1 340px", minWidth: 0, maxWidth: 560, marginLeft: "auto", marginTop: 0, marginBottom: 0, textAlign: "right", fontSize: "clamp(15px,1.4vw,18px)", fontWeight: 400, lineHeight: 1.75, color: "#474238", textWrap: "pretty" }}>
           รวมคำถามที่เข้ามาจริงตั้งแต่เปิดเว็บ ตอบตรง ๆ ไม่มีคำว่า &quot;ขึ้นอยู่กับกรณี&quot; ถ้าไม่เจอที่อยากรู้ ส่งมาได้ตรง ๆ
         </p>
       </div>
@@ -142,7 +142,7 @@ export default function FaqPage() {
       <div
         style={{
           marginTop: "clamp(32px,4vw,44px)",
-          background: "#e1eecc",
+          background: "#ebddc5",
           borderRadius: 28,
           padding: "clamp(24px,3vw,32px)",
           display: "flex",
@@ -153,29 +153,29 @@ export default function FaqPage() {
         }}
       >
         <div style={{ display: "flex", flexDirection: "column", gap: 6, maxWidth: "48ch" }}>
-          <span style={{ fontSize: "clamp(18px,1.8vw,21px)", fontWeight: 600, lineHeight: 1.35, color: "#272e1b" }}>
+          <span style={{ fontSize: "clamp(18px,1.8vw,21px)", fontWeight: 600, lineHeight: 1.35, color: "#201e1d" }}>
             ยังไม่เจอคำตอบ
           </span>
-          <span style={{ font: "400 15px/1.65 var(--font-body)", color: "#3d472b" }}>
+          <span style={{ font: "400 15px/1.65 var(--font-body)", color: "#474238" }}>
             ลองดูจุดอื่นของเว็บ หรือกลับมาถามใหม่ทีหลังได้
           </span>
         </div>
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
           <Link
             href="/articles"
-            style={{ padding: "12px 20px", borderRadius: 999, background: "#f0fae1", font: "600 14px/1 var(--font-body)", color: "#3d472b", cursor: "pointer", textDecoration: "none" }}
+            style={{ padding: "12px 20px", borderRadius: 999, background: "#ffe1d0", font: "600 14px/1 var(--font-body)", color: "#8c491a", cursor: "pointer", textDecoration: "none" }}
           >
             ดูคลังบทความ
           </Link>
           <Link
             href="/features"
-            style={{ padding: "12px 20px", borderRadius: 999, background: "#f0fae1", font: "600 14px/1 var(--font-body)", color: "#3d472b", cursor: "pointer", textDecoration: "none" }}
+            style={{ padding: "12px 20px", borderRadius: 999, background: "#ffe1d0", font: "600 14px/1 var(--font-body)", color: "#8c491a", cursor: "pointer", textDecoration: "none" }}
           >
             แอปนี้ทำอะไรได้
           </Link>
           <Link
             href="/login?mode=signup"
-            style={{ padding: "12px 20px", borderRadius: 999, background: "#56633f", font: "600 14px/1 var(--font-body)", color: "#f0fae1", cursor: "pointer", textDecoration: "none" }}
+            style={{ padding: "12px 20px", borderRadius: 999, background: "#c67139", font: "600 14px/1 var(--font-body)", color: "#f5ead8", cursor: "pointer", textDecoration: "none" }}
           >
             เริ่มใช้ฟรี
           </Link>

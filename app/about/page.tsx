@@ -21,7 +21,7 @@ const BELIEFS = [
 
 export default function AboutPage() {
   return (
-    <div style={{ maxWidth: 1600, padding: "clamp(44px,6vw,72px) clamp(20px,4vw,44px) clamp(56px,7vw,88px)" }}>
+    <div style={{ padding: "clamp(44px,6vw,72px) clamp(20px,4vw,44px) clamp(56px,7vw,88px)" }}>
       <div style={{ display: "flex", flexWrap: "wrap", gap: "clamp(24px,4vw,64px)", alignItems: "flex-end", paddingBottom: "clamp(28px,4vw,44px)" }}>
         <div style={{ flex: "1 1 440px", minWidth: 0, maxWidth: 660 }}>
           <p
@@ -39,7 +39,7 @@ export default function AboutPage() {
             ผมเป็นนักศึกษาจบใหม่
           </h1>
         </div>
-        <p style={{ flex: "1 1 380px", minWidth: 0, maxWidth: 600, margin: 0, fontSize: "clamp(16px,1.5vw,19px)", fontWeight: 400, lineHeight: 1.75, color: "#474238", textWrap: "pretty" }}>
+        <p style={{ flex: "1 1 380px", minWidth: 0, maxWidth: 600, marginLeft: "auto", marginTop: 0, marginBottom: 0, textAlign: "right", fontSize: "clamp(16px,1.5vw,19px)", fontWeight: 400, lineHeight: 1.75, color: "#474238", textWrap: "pretty" }}>
           พึ่งเคยทำงานที่แรก ผมเปิดแบบฟอร์มยื่นภาษีแล้วก็ปิดมันไป ไม่ใช่เพราะขี้เกียจ
           แต่เพราะไม่มีใครเคยอธิบายว่าช่องพวกนั้นหมายถึงอะไร สุดท้ายก็คำนวณภาษีไม่เป็น
         </p>
@@ -47,7 +47,7 @@ export default function AboutPage() {
 
       <div style={{ borderTop: "1px solid #dcd3c4", paddingTop: "clamp(26px,3vw,40px)", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(300px,1fr))", gap: "clamp(24px,4vw,48px)", alignItems: "start" }}>
         <p style={{ margin: 0, fontSize: "clamp(15px,1.4vw,17px)", fontWeight: 400, lineHeight: 1.8, color: "#474238", textWrap: "pretty" }}>
-          แอปการเงินที่มีอยู่มักคิดว่าคุณรู้ศัพท์อยู่แล้ว มันให้ช่องกรอกกับกราฟสวย ๆ
+          เว็บการเงินที่มีอยู่มักคิดว่าคุณรู้ศัพท์อยู่แล้ว มันให้ช่องกรอกกับกราฟสวย ๆ
           แต่ไม่บอกว่าทำไมต้องกรอก เราเลยทำอีกแบบ — ทุกช่องที่ให้คุณกรอก
           จะมีคำอธิบายอยู่ข้าง ๆ ว่ามันไปโผล่ที่ไหนในตัวเลขสุดท้าย
         </p>

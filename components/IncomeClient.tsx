@@ -283,7 +283,7 @@ export default function IncomeClient({ initialIncomes }: Props) {
 
   return (
     <div className="dashboard-page">
-      <div style={{ maxWidth: 1180, margin: '0 auto', padding: '24px 24px 0' }}>
+      <div style={{ padding: '24px clamp(16px,4vw,44px) 0' }}>
         <div
           style={{
             display: 'flex',
@@ -491,7 +491,7 @@ export default function IncomeClient({ initialIncomes }: Props) {
                     <div
                       style={{
                         display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+                        gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%,280px), 1fr))',
                         gap: 16,
                         marginBottom: 32,
                       }}
@@ -512,7 +512,7 @@ export default function IncomeClient({ initialIncomes }: Props) {
                     <div
                       style={{
                         display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+                        gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%,280px), 1fr))',
                         gap: 16,
                       }}
                     >

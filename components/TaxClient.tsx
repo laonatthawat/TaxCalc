@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { Save, FileSpreadsheet } from 'lucide-react'
 import HelpTooltip from './HelpTooltip'
 import { saveTaxDeductions } from '@/app/tax/actions'
-import { Income } from '@/lib/incomeUtils'
+import { Income, getIncomeTypeMeta, subLabelOf, toAnnualAmount, CYCLE_OPTIONS } from '@/lib/incomeUtils'
 import { calculateTaxEstimate, DEFAULT_TAX_DEDUCTIONS, TaxDeductions } from '@/lib/taxUtils'
 
 type Props = {
@@ -80,23 +81,135 @@ function NumberField({
   onChange: (v: string) => void
 }) {
   return (
-    <div className="form-field" style={{ flex: '1 1 220px', marginBottom: 12 }}>
-      <label className="form-label">{label}</label>
+    <label style={{ display: 'flex', flexDirection: 'column', gap: 7, justifyContent: 'space-between' }}>
+      <span style={{ minHeight: 18, font: '500 12px/1.45 "IBM Plex Sans Thai",sans-serif', color: '#474238' }}>
+        {label}
+      </span>
       <input
-        type="number"
-        min="0"
-        className="form-input"
+        type="text"
+        inputMode="numeric"
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        style={{
+          width: '100%',
+          boxSizing: 'border-box',
+          padding: '12px 16px',
+          borderRadius: 999,
+          border: '1px solid #cfc2a8',
+          background: '#f5ead8',
+          font: '500 14px/1 "IBM Plex Sans Thai",sans-serif',
+          outline: 'none',
+        }}
       />
+    </label>
+  )
+}
+
+// ฟิลด์นับจำนวนคน (บุตร/บิดามารดา/ผู้พิการ) — พิมพ์เองได้ หรือกด −/+ ก็ได้ เพดานบังคับตรงนี้เลย ไม่ใช่แค่โชว์
+function StepperField({
+  label,
+  value,
+  max,
+  onChange,
+}: {
+  label: string
+  value: string
+  max: number
+  onChange: (v: string) => void
+}) {
+  const n = Math.max(0, Math.floor(Number(value) || 0))
+  const atMin = n <= 0
+  const atMax = n >= max
+  const step = (delta: number) => onChange(String(Math.min(max, Math.max(0, n + delta))))
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 7, justifyContent: 'space-between' }}>
+      <span style={{ minHeight: 18, font: '500 12px/1.45 "IBM Plex Sans Thai",sans-serif', color: '#474238' }}>
+        {label}
+      </span>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          padding: '5px 6px 5px 16px',
+          borderRadius: 999,
+          border: '1px solid #cfc2a8',
+          background: '#f5ead8',
+        }}
+      >
+        <input
+          type="text"
+          inputMode="numeric"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          style={{ flex: 1, minWidth: 0, padding: 0, border: 'none', background: 'transparent', font: '500 14px/1 "IBM Plex Sans Thai",sans-serif', outline: 'none' }}
+        />
+        <button
+          type="button"
+          onClick={() => step(-1)}
+          disabled={atMin}
+          style={{
+            width: 32,
+            height: 32,
+            flexShrink: 0,
+            borderRadius: 999,
+            border: '1px solid #cfc2a8',
+            background: atMin ? 'transparent' : '#fdf7ec',
+            color: atMin ? '#c0b6a5' : '#474238',
+            cursor: atMin ? 'default' : 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            font: '600 18px/1 "IBM Plex Sans Thai",sans-serif',
+          }}
+        >
+          −
+        </button>
+        <button
+          type="button"
+          onClick={() => step(1)}
+          disabled={atMax}
+          style={{
+            width: 32,
+            height: 32,
+            flexShrink: 0,
+            borderRadius: 999,
+            border: 'none',
+            background: atMax ? '#dcd3c4' : '#c67139',
+            color: atMax ? '#82796a' : '#f5ead8',
+            cursor: atMax ? 'default' : 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            font: '600 18px/1 "IBM Plex Sans Thai",sans-serif',
+          }}
+        >
+          +
+        </button>
+      </div>
     </div>
   )
 }
 
-export default function TaxClient({ initialIncomes, initialDeductions }: Props) {
+// grid ฟิลด์ค่าลดหย่อน — กว้างพอให้ label ภาษาไทยที่ยาวที่สุดไม่ตัดบรรทัด
+const fieldGridStyle: React.CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%,330px), 1fr))',
+  gap: 14,
+}
+
+function escCsv(v: string | number): string {
+  if (typeof v === 'number' && isFinite(v)) return String(v)
+  return '"' + String(v).replace(/"/g, '""') + '"'
+}
+
+export default function TaxClient({ initialIncomes, initialDeductions, userEmail }: Props) {
   const [form, setForm] = useState<DeductionFormState>(toFormState(initialDeductions))
   const [isSaving, setIsSaving] = useState(false)
-  const [saveMessage, setSaveMessage] = useState('')
+  const [savedAt, setSavedAt] = useState('')
+  const [saveError, setSaveError] = useState('')
+  const savedAtTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const router = useRouter()
 
   const updateField = (key: keyof DeductionFormState, value: string | boolean) => {
@@ -109,20 +222,74 @@ export default function TaxClient({ initialIncomes, initialDeductions }: Props) 
     [initialIncomes, deductions]
   )
 
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSave = async () => {
     setIsSaving(true)
-    setSaveMessage('')
-
+    setSaveError('')
     try {
       await saveTaxDeductions(deductions)
-      setSaveMessage('บันทึกแล้ว')
+      setSavedAt(new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }))
       router.refresh()
     } catch (err) {
-      setSaveMessage(err instanceof Error ? err.message : 'เกิดข้อผิดพลาด')
+      setSaveError(err instanceof Error ? err.message : 'บันทึกไม่สำเร็จ')
     } finally {
       setIsSaving(false)
     }
+    clearTimeout(savedAtTimer.current)
+    savedAtTimer.current = setTimeout(() => setSavedAt(''), 4000)
+  }
+
+  // ส่งออก .csv (BOM นำหน้าให้ Excel เปิดภาษาไทยถูก, ตัวเลขไม่ใส่ ฿/คอมมา/quote จะได้ sum ต่อได้จริง)
+  const handleExport = () => {
+    const topBracket = estimate.brackets[estimate.brackets.length - 1]
+    const csvRows: (string | number)[][] = [
+      ['สรุปภาษีเงินได้บุคคลธรรมดา'],
+      ['อีเมล', userEmail],
+      ['วันที่ออกรายงาน', new Date().toLocaleDateString('th-TH')],
+      [],
+      ['รายรับ'],
+      ['ชื่อรายรับ', 'ประเภทเงินได้', 'จำนวนต่อรอบ', 'รอบการรับเงิน', 'ประจำ/ครั้งเดียว', 'รวมทั้งปี'],
+    ]
+    initialIncomes.forEach((income) => {
+      const typeMeta = getIncomeTypeMeta(income.income_type)
+      const sub = typeMeta.subs ? subLabelOf(income.income_type, income.income_sub) : null
+      const cycleLabel = income.is_recurring
+        ? CYCLE_OPTIONS.find((c) => c.value === income.billing_cycle)?.label ?? 'รายเดือน'
+        : 'ครั้งเดียว'
+      csvRows.push([
+        income.name,
+        typeMeta.shortLabel + (sub ? ` · ${sub}` : ''),
+        Math.round(income.amount),
+        cycleLabel,
+        income.is_recurring ? 'ประจำ' : 'ครั้งเดียว',
+        Math.round(toAnnualAmount(income)),
+      ])
+    })
+    csvRows.push([])
+    csvRows.push(['ขั้นตอนการคำนวณ'])
+    csvRows.push(['รายการ', 'หมายเหตุ', 'จำนวน (บาท)'])
+    estimate.ladder.forEach((r) => csvRows.push([r.label, r.note, Math.round(r.value)]))
+    csvRows.push([])
+    csvRows.push(['ผลลัพธ์'])
+    csvRows.push(['เงินได้สุทธิ', Math.round(estimate.netTaxableIncome)])
+    csvRows.push(['ภาษีที่ต้องเสีย', Math.round(estimate.totalTax)])
+    csvRows.push(['อัตราภาษีจริง (ตัวเลข %)', Number(estimate.effectiveRate.toFixed(2))])
+    csvRows.push(['ขั้นภาษีสูงสุดที่แตะ (ตัวเลข %)', topBracket ? Number((topBracket.rate * 100).toFixed(0)) : 0])
+    csvRows.push(['ภาษีหัก ณ ที่จ่ายทั้งปี', Math.round(deductions.withholding_tax)])
+    csvRows.push([
+      estimate.settlement.isRefund ? 'ขอคืนภาษีได้' : 'ต้องจ่ายเพิ่มตอนยื่น',
+      Math.round(Math.abs(estimate.settlement.amount)),
+    ])
+
+    const csv = csvRows.map((row) => row.map(escCsv).join(',')).join('\r\n')
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `ภาษี-${new Date().toISOString().slice(0, 10)}.csv`
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    setTimeout(() => URL.revokeObjectURL(url), 1000)
   }
 
   const takeHome = estimate.totalGrossIncome - estimate.totalTax
@@ -134,7 +301,7 @@ export default function TaxClient({ initialIncomes, initialDeductions }: Props) 
 
   return (
     <div className="dashboard-page">
-      <div style={{ maxWidth: 1180, margin: '0 auto', padding: '24px 24px 0' }}>
+      <div style={{ padding: '24px clamp(16px,4vw,44px) 0' }}>
         <div
           style={{
             display: 'flex',
@@ -246,7 +413,7 @@ export default function TaxClient({ initialIncomes, initialDeductions }: Props) 
             </div>
 
             {/* ขั้นที่ 2: ค่าลดหย่อน */}
-            <form onSubmit={handleSave} style={{ background: '#fdf7ec', border: '1px solid #e4d8c1', borderRadius: 24, padding: 26, display: 'flex', flexDirection: 'column', gap: 24 }}>
+            <div style={{ background: '#fdf7ec', border: '1px solid #e4d8c1', borderRadius: 24, padding: 26, display: 'flex', flexDirection: 'column', gap: 24 }}>
               <h3 style={{ margin: 0, fontSize: 20, lineHeight: 1.2 }}>
                 ขั้นที่ <span style={{ fontFamily: 'var(--font-number)' }}>2</span> · ค่าลดหย่อน
               </h3>
@@ -268,19 +435,23 @@ export default function TaxClient({ initialIncomes, initialDeductions }: Props) 
                   />
                   <span style={{ font: '400 14px/1.4 "IBM Plex Sans Thai",sans-serif', color: '#474238' }}>มีคู่สมรสที่ไม่มีเงินได้ (+฿60,000)</span>
                 </label>
-                <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
-                  <NumberField label="บุตร (ทั่วไป) — คนละ ฿30,000" value={form.children_count} onChange={(v) => updateField('children_count', v)} />
-                  <NumberField label="บุตรคนที่ 2+ เกิดปี 2561 ขึ้นไป — คนละ ฿60,000" value={form.children_count_esg} onChange={(v) => updateField('children_count_esg', v)} />
-                  <NumberField label="อุปการะบิดามารดา — คนละ ฿30,000 (ไม่เกิน 4 คน)" value={form.parents_count} onChange={(v) => updateField('parents_count', v)} />
-                  <NumberField label="อุปการะผู้พิการ/ทุพพลภาพ — คนละ ฿60,000" value={form.disabled_dependents_count} onChange={(v) => updateField('disabled_dependents_count', v)} />
+                <div style={fieldGridStyle}>
+                  <StepperField label="บุตร (ทั่วไป) — คนละ ฿30,000" value={form.children_count} max={20} onChange={(v) => updateField('children_count', v)} />
+                  <StepperField label="บุตรคนที่ 2+ เกิดปี 2561 ขึ้นไป — คนละ ฿60,000" value={form.children_count_esg} max={20} onChange={(v) => updateField('children_count_esg', v)} />
+                  <StepperField label="อุปการะบิดามารดา — คนละ ฿30,000 (ไม่เกิน 4 คน)" value={form.parents_count} max={4} onChange={(v) => updateField('parents_count', v)} />
+                  <StepperField label="อุปการะผู้พิการ / ทุพพลภาพ — คนละ ฿60,000" value={form.disabled_dependents_count} max={20} onChange={(v) => updateField('disabled_dependents_count', v)} />
                 </div>
+                <p style={{ margin: 0, font: '400 12px/1.6 "IBM Plex Sans Thai",sans-serif', color: '#82796a' }}>
+                  บุตรคนที่สองขึ้นไปที่เกิดตั้งแต่ปี 2561 ลดหย่อนได้คนละ ฿60,000 · อุปการะบิดามารดาอายุ 60 ปีขึ้นไป
+                  คนละ ฿30,000 ใช้สิทธิได้ไม่เกิน 4 คน
+                </p>
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                 <span style={{ font: '600 12px/1 "IBM Plex Sans Thai",sans-serif', letterSpacing: '.08em', textTransform: 'uppercase', color: '#9c5527' }}>
                   ประกัน
                 </span>
-                <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
+                <div style={fieldGridStyle}>
                   <NumberField label="ประกันสังคมที่จ่ายจริงทั้งปี" value={form.social_security_paid} onChange={(v) => updateField('social_security_paid', v)} />
                   <NumberField label="เบี้ยประกันชีวิตทั้งปี" value={form.life_insurance_premium} onChange={(v) => updateField('life_insurance_premium', v)} />
                   <NumberField label="เบี้ยประกันสุขภาพตนเอง" value={form.health_insurance_premium} onChange={(v) => updateField('health_insurance_premium', v)} />
@@ -296,7 +467,7 @@ export default function TaxClient({ initialIncomes, initialDeductions }: Props) 
                 <span style={{ font: '600 12px/1 "IBM Plex Sans Thai",sans-serif', letterSpacing: '.08em', textTransform: 'uppercase', color: '#9c5527' }}>
                   กองทุนเกษียณและการลงทุน
                 </span>
-                <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
+                <div style={fieldGridStyle}>
                   <NumberField label="กองทุนสำรองเลี้ยงชีพ / กบข." value={form.pvd_contribution} onChange={(v) => updateField('pvd_contribution', v)} />
                   <NumberField label="กองทุน RMF" value={form.rmf_amount} onChange={(v) => updateField('rmf_amount', v)} />
                   <NumberField label="ประกันชีวิตแบบบำนาญ" value={form.pension_insurance} onChange={(v) => updateField('pension_insurance', v)} />
@@ -313,7 +484,7 @@ export default function TaxClient({ initialIncomes, initialDeductions }: Props) 
                 <span style={{ font: '600 12px/1 "IBM Plex Sans Thai",sans-serif', letterSpacing: '.08em', textTransform: 'uppercase', color: '#9c5527' }}>
                   บ้าน มาตรการรายปี และบริจาค
                 </span>
-                <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
+                <div style={fieldGridStyle}>
                   <NumberField label="ดอกเบี้ยกู้ซื้อที่อยู่อาศัย" value={form.mortgage_interest} onChange={(v) => updateField('mortgage_interest', v)} />
                   <NumberField label="Easy E-Receipt 2.0" value={form.easy_e_receipt} onChange={(v) => updateField('easy_e_receipt', v)} />
                   <NumberField label="เงินบริจาคทั่วไป" value={form.donation_general} onChange={(v) => updateField('donation_general', v)} />
@@ -324,14 +495,7 @@ export default function TaxClient({ initialIncomes, initialDeductions }: Props) 
                   หักได้ไม่เกิน 10% ของเงินได้หลังหักค่าลดหย่อนอื่นแล้ว
                 </p>
               </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <button type="submit" disabled={isSaving} className="btn-gradient-primary" style={{ width: 'auto', padding: '9px 20px' }}>
-                  {isSaving ? 'กำลังบันทึก...' : 'บันทึกค่าลดหย่อน'}
-                </button>
-                {saveMessage && <span style={{ fontSize: 12, color: '#474238' }}>{saveMessage}</span>}
-              </div>
-            </form>
+            </div>
 
             {/* ขั้นที่ 3: ขั้นบันได */}
             <div style={{ background: '#fdf7ec', border: '1px solid #e4d8c1', borderRadius: 24, padding: 26, display: 'flex', flexDirection: 'column', gap: 18 }}>
@@ -378,17 +542,28 @@ export default function TaxClient({ initialIncomes, initialDeductions }: Props) 
               <h3 style={{ margin: 0, fontSize: 20, lineHeight: 1.2 }}>
                 ขั้นที่ <span style={{ fontFamily: 'var(--font-number)' }}>4</span> · หักภาษีที่ถูกหักไปแล้ว
               </h3>
-              <div className="wht-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18, alignItems: 'end' }}>
-                <div className="form-field" style={{ marginBottom: 0 }}>
-                  <label className="form-label">ภาษีหัก ณ ที่จ่ายทั้งปี — ดูจากหนังสือรับรอง 50 ทวิ</label>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%,240px), 1fr))', gap: 18, alignItems: 'end' }}>
+                <label style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+                  <span style={{ font: '500 12px/1.45 "IBM Plex Sans Thai",sans-serif', color: '#474238' }}>
+                    ภาษีหัก ณ ที่จ่ายทั้งปี — ดูจากหนังสือรับรอง 50 ทวิ
+                  </span>
                   <input
-                    type="number"
-                    min="0"
-                    className="form-input"
+                    type="text"
+                    inputMode="numeric"
                     value={form.withholding_tax}
                     onChange={(e) => updateField('withholding_tax', e.target.value)}
+                    style={{
+                      width: '100%',
+                      boxSizing: 'border-box',
+                      padding: '12px 16px',
+                      borderRadius: 999,
+                      border: '1px solid #cfc2a8',
+                      background: '#f5ead8',
+                      font: '500 14px/1 "IBM Plex Sans Thai",sans-serif',
+                      outline: 'none',
+                    }}
                   />
-                </div>
+                </label>
                 <div
                   style={{
                     display: 'flex',
@@ -475,6 +650,63 @@ export default function TaxClient({ initialIncomes, initialDeductions }: Props) 
               </div>
             )}
 
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, paddingTop: 14, borderTop: '1px solid #e4d8c1' }}>
+              <button
+                type="button"
+                onClick={handleSave}
+                disabled={isSaving}
+                style={{
+                  width: '100%',
+                  padding: 14,
+                  borderRadius: 999,
+                  border: 'none',
+                  background: '#c67139',
+                  font: '600 14px/1 "IBM Plex Sans Thai",sans-serif',
+                  color: '#f5ead8',
+                  cursor: isSaving ? 'wait' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 8,
+                }}
+              >
+                <Save size={16} /> {isSaving ? 'กำลังบันทึก...' : 'บันทึกการคำนวณ'}
+              </button>
+              <button
+                type="button"
+                onClick={handleExport}
+                style={{
+                  width: '100%',
+                  padding: 14,
+                  borderRadius: 999,
+                  border: '1px solid #c0b6a5',
+                  background: 'transparent',
+                  font: '600 14px/1 "IBM Plex Sans Thai",sans-serif',
+                  color: '#474238',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 8,
+                }}
+              >
+                <FileSpreadsheet size={16} /> ส่งออกเป็นไฟล์ Excel
+              </button>
+              {savedAt && (
+                <span style={{ font: '500 12px/1.5 "IBM Plex Sans Thai",sans-serif', color: '#4f5b3c', textAlign: 'center' }}>
+                  บันทึกแล้ว {savedAt}
+                </span>
+              )}
+              {saveError && (
+                <span style={{ font: '500 12px/1.5 "IBM Plex Sans Thai",sans-serif', color: '#8a3a22', textAlign: 'center' }}>
+                  {saveError}
+                </span>
+              )}
+              <span style={{ font: '400 11px/1.6 "IBM Plex Sans Thai",sans-serif', color: '#82796a', textAlign: 'center' }}>
+                ไฟล์ที่ได้เป็น .csv เปิดใน Excel หรือ Google Sheets ได้ทันที
+              </span>
+            </div>
+
             <Link
               href="/income"
               style={{
@@ -500,9 +732,6 @@ export default function TaxClient({ initialIncomes, initialDeductions }: Props) 
         @media (max-width: 900px) {
           .tax-grid { grid-template-columns: 1fr !important; }
           .tax-sidebar { position: static !important; }
-        }
-        @media (max-width: 520px) {
-          .wht-grid { grid-template-columns: 1fr !important; }
         }
       `}</style>
     </div>

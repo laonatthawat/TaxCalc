@@ -121,152 +121,154 @@ export default function IncomeModal({ isOpen, onClose, editingIncome }: Props) {
         <h2 className="modal-title">{editingIncome ? 'แก้ไขรายรับ' : 'เพิ่มรายรับ'}</h2>
         {/* noValidate: โชว์ error ของเราเองแทน popup ของ browser */}
         <form onSubmit={handleSubmit} noValidate>
-          <div className="form-field">
-            <label className="form-label">ชื่อรายรับ</label>
-            <input
-              type="text"
-              className="form-input"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="เช่น เงินเดือน, งาน freelance บริษัท X"
-            />
-          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%,260px), 1fr))', gap: '16px 20px', marginBottom: 16 }}>
+            <div className="form-field" style={{ marginBottom: 0 }}>
+              <label className="form-label">ชื่อรายรับ</label>
+              <input
+                type="text"
+                className="form-input"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="เช่น เงินเดือน, งาน freelance บริษัท X"
+              />
+            </div>
 
-          <div className="form-field">
-            <label className="form-label">จำนวนเงิน (บาท) ต่อรอบ</label>
-            <input
-              type="number"
-              step="0.01"
-              className="form-input"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-            />
-          </div>
+            <div className="form-field" style={{ marginBottom: 0 }}>
+              <label className="form-label">จำนวนเงิน (บาท) ต่อรอบ</label>
+              <input
+                type="number"
+                step="0.01"
+                className="form-input"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+              />
+            </div>
 
-          <div className="form-field">
-            <label className="form-label">ประเภทเงินได้ (ตามมาตรา 40)</label>
-            <select
-              className="form-input"
-              value={incomeType}
-              onChange={(e) => handleTypeChange(e.target.value as IncomeType)}
-            >
-              {INCOME_TYPES.map((t) => (
-                <option key={t.value} value={t.value}>
-                  {t.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {typeMeta.subs && (
-            <div className="form-field">
-              <label className="form-label">ลักษณะเงินได้ย่อย</label>
+            <div className="form-field" style={{ marginBottom: 0, gridColumn: '1 / -1' }}>
+              <label className="form-label">ประเภทเงินได้ (ตามมาตรา 40)</label>
               <select
                 className="form-input"
-                value={incomeSub ?? typeMeta.subs[0].id}
-                onChange={(e) => setIncomeSub(e.target.value)}
+                value={incomeType}
+                onChange={(e) => handleTypeChange(e.target.value as IncomeType)}
               >
-                {typeMeta.subs.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.label}
+                {INCOME_TYPES.map((t) => (
+                  <option key={t.value} value={t.value}>
+                    {t.label}
                   </option>
                 ))}
               </select>
             </div>
-          )}
 
-          <div
-            style={{
-              display: 'flex',
-              gap: 10,
-              alignItems: 'flex-start',
-              background: '#f4ead9',
-              borderRadius: 16,
-              padding: '12px 16px',
-              marginBottom: 16,
-              font: '400 12px/1.6 "IBM Plex Sans Thai",sans-serif',
-              color: '#5c4b39',
-            }}
-          >
-            {dedHint}
-          </div>
-
-          {/* toggle รายรับประจำ vs ครั้งเดียว — ปุ่มคู่สไตล์ pill กดสลับกันได้ */}
-          <div className="form-field">
-            <label className="form-label">ลักษณะรายรับ</label>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <button
-                type="button"
-                onClick={() => setIsRecurring(true)}
-                className={isRecurring ? 'btn-gradient-primary' : 'btn-secondary'}
-                style={{ flex: 1, width: 'auto', padding: '9px 0' }}
-              >
-                ประจำ (recurring)
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsRecurring(false)}
-                className={!isRecurring ? 'btn-gradient-primary' : 'btn-secondary'}
-                style={{ flex: 1, width: 'auto', padding: '9px 0' }}
-              >
-                ครั้งเดียว (one-time)
-              </button>
-            </div>
-          </div>
-
-          {isRecurring ? (
-            <>
-              <div className="form-field">
-                <label className="form-label">รอบการรับเงิน</label>
+            {typeMeta.subs && (
+              <div className="form-field" style={{ marginBottom: 0, gridColumn: '1 / -1' }}>
+                <label className="form-label">ลักษณะเงินได้ย่อย</label>
                 <select
                   className="form-input"
-                  value={billingCycle}
-                  onChange={(e) => setBillingCycle(e.target.value as BillingCycle)}
+                  value={incomeSub ?? typeMeta.subs[0].id}
+                  onChange={(e) => setIncomeSub(e.target.value)}
                 >
-                  {CYCLE_OPTIONS.map((c) => (
-                    <option key={c.value} value={c.value}>
-                      {c.label}
+                  {typeMeta.subs.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.label}
                     </option>
                   ))}
                 </select>
               </div>
-              <div className="form-field">
-                <label className="form-label">วันที่จะได้รับเงินครั้งถัดไป</label>
+            )}
+
+            <div
+              style={{
+                gridColumn: '1 / -1',
+                display: 'flex',
+                gap: 10,
+                alignItems: 'flex-start',
+                background: '#f4ead9',
+                borderRadius: 16,
+                padding: '12px 16px',
+                font: '400 12px/1.6 "IBM Plex Sans Thai",sans-serif',
+                color: '#5c4b39',
+              }}
+            >
+              {dedHint}
+            </div>
+
+            {/* toggle รายรับประจำ vs ครั้งเดียว — ปุ่มคู่สไตล์ pill กดสลับกันได้ */}
+            <div className="form-field" style={{ marginBottom: 0 }}>
+              <label className="form-label">ลักษณะรายรับ</label>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button
+                  type="button"
+                  onClick={() => setIsRecurring(true)}
+                  className={isRecurring ? 'btn-gradient-primary' : 'btn-secondary'}
+                  style={{ flex: 1, width: 'auto', padding: '9px 0' }}
+                >
+                  ประจำ (recurring)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsRecurring(false)}
+                  className={!isRecurring ? 'btn-gradient-primary' : 'btn-secondary'}
+                  style={{ flex: 1, width: 'auto', padding: '9px 0' }}
+                >
+                  ครั้งเดียว (one-time)
+                </button>
+              </div>
+            </div>
+
+            {isRecurring ? (
+              <>
+                <div className="form-field" style={{ marginBottom: 0 }}>
+                  <label className="form-label">รอบการรับเงิน</label>
+                  <select
+                    className="form-input"
+                    value={billingCycle}
+                    onChange={(e) => setBillingCycle(e.target.value as BillingCycle)}
+                  >
+                    {CYCLE_OPTIONS.map((c) => (
+                      <option key={c.value} value={c.value}>
+                        {c.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="form-field" style={{ marginBottom: 0 }}>
+                  <label className="form-label">วันที่จะได้รับเงินครั้งถัดไป</label>
+                  <input
+                    type="date"
+                    className="form-input"
+                    value={nextPaymentDate}
+                    onChange={(e) => setNextPaymentDate(e.target.value)}
+                  />
+                </div>
+              </>
+            ) : (
+              <div className="form-field" style={{ marginBottom: 0 }}>
+                <label className="form-label">วันที่ได้รับเงิน</label>
                 <input
                   type="date"
                   className="form-input"
-                  value={nextPaymentDate}
-                  onChange={(e) => setNextPaymentDate(e.target.value)}
+                  value={receivedDate}
+                  onChange={(e) => setReceivedDate(e.target.value)}
                 />
               </div>
-            </>
-          ) : (
-            <div className="form-field">
-              <label className="form-label">วันที่ได้รับเงิน</label>
-              <input
-                type="date"
-                className="form-input"
-                value={receivedDate}
-                onChange={(e) => setReceivedDate(e.target.value)}
-              />
-            </div>
-          )}
+            )}
 
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              gap: 12,
-              alignItems: 'baseline',
-              padding: '12px 16px',
-              borderRadius: 14,
-              background: '#e6ecd6',
-              marginBottom: 18,
-              color: '#3f5230',
-            }}
-          >
-            <span style={{ font: '500 13px/1.4 "IBM Plex Sans Thai",sans-serif' }}>รวมเป็นรายรับทั้งปี</span>
-            <span style={{ font: '600 17px/1 "Figtree",sans-serif' }}>฿{fmt(yearPreview)}</span>
+            <div
+              style={{
+                gridColumn: '1 / -1',
+                display: 'flex',
+                justifyContent: 'space-between',
+                gap: 12,
+                alignItems: 'baseline',
+                padding: '14px 20px',
+                borderRadius: 16,
+                background: '#e6ecd6',
+                color: '#3f5230',
+              }}
+            >
+              <span style={{ font: '500 13px/1.4 "IBM Plex Sans Thai",sans-serif' }}>รวมเป็นรายรับทั้งปี</span>
+              <span style={{ font: '600 20px/1 var(--font-number)' }}>฿{fmt(yearPreview)}</span>
+            </div>
           </div>
 
           {error && <p className="auth-alert-error">{error}</p>}

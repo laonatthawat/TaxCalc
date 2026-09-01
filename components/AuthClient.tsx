@@ -146,7 +146,6 @@ function AuthClientInner() {
   return (
     <div
       style={{
-        maxWidth: 1600,
         minHeight: 'calc(100vh - 260px)',
         padding: 'clamp(40px,5vw,64px) clamp(20px,4vw,44px) clamp(48px,6vw,72px)',
         display: 'flex',

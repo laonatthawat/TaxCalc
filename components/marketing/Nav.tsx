@@ -41,7 +41,6 @@ export default function MarketingNav({ userEmail }: Props) {
     >
       <div
         style={{
-          maxWidth: 1600,
           padding: "12px clamp(16px,4vw,44px)",
           display: "flex",
           flexWrap: "wrap",
