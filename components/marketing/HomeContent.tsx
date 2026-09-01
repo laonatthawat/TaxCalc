@@ -88,17 +88,10 @@ export default function HomeContent() {
   const audienceHref = audience === "pro" ? "/features" : "/articles/ladder";
 
   const teaser = ARTICLES;
-  const teaserVisible = 5;
-  const teaserMaxPage = Math.max(0, teaser.length - teaserVisible);
   const [teaserPage, setTeaserPage] = useState(0);
 
   function goTeaser(dir: 1 | -1) {
-    setTeaserPage((p) => {
-      const next = p + dir;
-      if (next < 0) return teaserMaxPage;
-      if (next > teaserMaxPage) return 0;
-      return next;
-    });
+    setTeaserPage((p) => (p + dir + teaser.length) % teaser.length);
   }
 
   return (
@@ -467,9 +460,10 @@ export default function HomeContent() {
         </div>
         <div style={{ overflow: "hidden" }}>
           <div
+            className="teaser-row"
             style={{
               display: "flex",
-              width: `${(teaser.length / teaserVisible) * 100}%`,
+              width: `calc(${teaser.length} / var(--teaser-visible) * 100%)`,
               transform: `translateX(-${teaserPage * (100 / teaser.length)}%)`,
               transition: "transform .5s cubic-bezier(.4,0,.2,1)",
             }}
