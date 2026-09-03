@@ -78,8 +78,8 @@ function AuthClientInner() {
       setError('กรุณากรอกข้อมูลให้ครบทุกช่อง')
       return
     }
-    if (password.length < 6) {
-      setError('รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร')
+    if (password.length < 8) {
+      setError('รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร')
       return
     }
     if (password !== confirmPassword) {
@@ -308,7 +308,7 @@ function AuthClientInner() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   type="password"
-                  placeholder={mode === 'signup' ? 'อย่างน้อย 6 ตัวอักษร' : 'อย่างน้อย 8 ตัว'}
+                  placeholder="อย่างน้อย 8 ตัวอักษร"
                   style={{
                     width: '100%',
                     padding: '14px 18px',

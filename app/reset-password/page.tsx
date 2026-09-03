@@ -35,8 +35,8 @@ export default function ResetPasswordPage() {
       return
     }
 
-    if (password.length < 6) {
-      setError('รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร')
+    if (password.length < 8) {
+      setError('รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร')
       return
     }
 
@@ -112,7 +112,7 @@ export default function ResetPasswordPage() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="อย่างน้อย 6 ตัวอักษร"
+                placeholder="อย่างน้อย 8 ตัวอักษร"
                 disabled={!isSessionReady}
                 style={{
                   width: '100%',
