@@ -11,14 +11,13 @@ import {
 const fmtNum = (n: number) => Math.round(n).toLocaleString('en-US')
 const bt = (n: number) => (n < 0 ? '−฿' : '฿') + fmtNum(Math.abs(n))
 
-// รายการหนึ่งนับเข้าฐานภาษีปีนี้หรือไม่ — ประจำนับเสมอ (annualize), ครั้งเดียวนับเฉพาะที่ได้รับปีนี้จริง
-function annualForTaxYear(income: Income): number {
+// รายการหนึ่งนับเข้าฐานภาษีของปีที่เลือกหรือไม่ — ประจำนับเสมอ (annualize), ครั้งเดียวนับเฉพาะที่ได้รับในปีนั้นจริง
+function annualForTaxYear(income: Income, taxYear: number): number {
   if (income.is_recurring) {
     const timesPerYear = income.billing_cycle === 'yearly' ? 1 : income.billing_cycle === 'biannual' ? 2 : income.billing_cycle === 'quarterly' ? 4 : 12
     return income.amount * timesPerYear
   }
-  const currentYear = new Date().getFullYear()
-  if (income.received_date && Number(income.received_date.slice(0, 4)) === currentYear) {
+  if (income.received_date && Number(income.received_date.slice(0, 4)) === taxYear) {
     return income.amount
   }
   return 0
@@ -26,20 +25,20 @@ function annualForTaxYear(income: Income): number {
 
 // ===== 1) รวมรายรับรายปีแยกตามประเภทเงินได้ (มาตรา 40) — ใช้โชว์สรุปในหน้ารายรับ =====
 
-export function groupIncomeByTypeAnnual(incomes: Income[]): Record<string, number> {
+export function groupIncomeByTypeAnnual(incomes: Income[], taxYear: number): Record<string, number> {
   const totals: Record<string, number> = {
     '40_1': 0, '40_2': 0, '40_3': 0, '40_4': 0, '40_5': 0, '40_6': 0, '40_7': 0, '40_8': 0,
   }
   incomes.forEach((income) => {
     if (income.income_type === 'gift') return
-    totals[income.income_type] += annualForTaxYear(income)
+    totals[income.income_type] += annualForTaxYear(income, taxYear)
   })
   return totals
 }
 
 // รวมยอด "เงินให้" ที่ยกเว้นภาษีทั้งปี — ใช้แค่โชว์เป็นข้อมูลความโปร่งใสบนหน้าภาษี ไม่ได้เอาไปรวมในฐานภาษี
-export function calculateExemptGiftTotal(incomes: Income[]): number {
-  return incomes.filter((i) => i.income_type === 'gift').reduce((sum, i) => sum + annualForTaxYear(i), 0)
+export function calculateExemptGiftTotal(incomes: Income[], taxYear: number): number {
+  return incomes.filter((i) => i.income_type === 'gift').reduce((sum, i) => sum + annualForTaxYear(i, taxYear), 0)
 }
 
 // ===== 2) หักค่าใช้จ่ายเหมาตามประเภทเงินได้ (และลักษณะย่อย ถ้ามี) =====
@@ -56,13 +55,13 @@ export type ExpenseBreakdownItem = {
 
 type Bucket = { gross: number; rate: number; cap: number; label: string }
 
-export function calculateExpenseBreakdown(incomes: Income[]): ExpenseBreakdownItem[] {
+export function calculateExpenseBreakdown(incomes: Income[], taxYear: number): ExpenseBreakdownItem[] {
   const buckets: Record<string, Bucket> = {}
 
   incomes.forEach((income) => {
     const t = getIncomeTypeMeta(income.income_type)
     if (t.exempt) return
-    const annual = annualForTaxYear(income)
+    const annual = annualForTaxYear(income, taxYear)
     if (annual <= 0) return
 
     const key = t.capGroup === 'salary' ? 'salary' : income.income_type + (income.income_sub ? ':' + income.income_sub : '')
@@ -106,6 +105,7 @@ export type TaxDeductions = {
   children_count_esg: number
   parents_count: number
   disabled_dependents_count: number
+  childbirth_expense: number
   social_security_paid: number
   life_insurance_premium: number
   health_insurance_premium: number
@@ -127,6 +127,7 @@ export const DEFAULT_TAX_DEDUCTIONS: TaxDeductions = {
   children_count_esg: 0,
   parents_count: 0,
   disabled_dependents_count: 0,
+  childbirth_expense: 0,
   social_security_paid: 0,
   life_insurance_premium: 0,
   health_insurance_premium: 0,
@@ -200,6 +201,14 @@ export function calculateDeductions(
       label: `อุปการะผู้พิการ/ทุพพลภาพ ${d.disabled_dependents_count} คน`,
       amount: dDisabled,
     })
+  }
+
+  // ค่าฝากครรภ์และคลอดบุตร — ตามที่จ่ายจริง ไม่เกิน 60,000 บาทต่อการตั้งครรภ์หนึ่งครั้ง
+  // (ถ้าคลอดคาบเกี่ยว 2 ปีภาษี ให้แบ่งตามที่จ่ายจริงของแต่ละปี รวมกันไม่เกิน 60,000 บาทต่อครั้ง)
+  const dChildbirth = Math.min(d.childbirth_expense, 60000)
+  if (d.childbirth_expense > 0) {
+    noteIfCapped('ค่าฝากครรภ์และคลอดบุตร', d.childbirth_expense, 60000)
+    items.push({ label: 'ค่าฝากครรภ์และคลอดบุตร', amount: dChildbirth, capped: d.childbirth_expense > 60000 })
   }
 
   const dSso = Math.min(d.social_security_paid, 9000)
@@ -283,7 +292,7 @@ export function calculateDeductions(
 
   const total = items.reduce((sum, i) => sum + i.amount, 0)
   const groups: DeductionGroups = {
-    personalFamily: dPersonal + dSpouse + dKids + dParents + dDisabled,
+    personalFamily: dPersonal + dSpouse + dKids + dParents + dDisabled + dChildbirth,
     insurance: dSso + dLifeHealth + dParentHealth,
     retirementAndEsg: dRetire + dEsg,
     houseAndAnnual: dMortgage + dEReceipt,
@@ -352,10 +361,10 @@ export function calculateProgressiveTax(netTaxableIncome: number): {
 // ของยอดนั้น (ยกเว้นถ้าคำนวณได้ไม่เกิน ฿5,000) — ใช้ยอดที่สูงกว่าระหว่างนี้กับภาษีขั้นบันได
 export type MinTax = { minTax: number; applies: boolean; note: string | null }
 
-export function calculateMinimumTax(incomes: Income[], progressiveTax: number): MinTax {
+export function calculateMinimumTax(incomes: Income[], progressiveTax: number, taxYear: number): MinTax {
   const nonSalary = incomes
     .filter((i) => i.income_type !== 'gift' && i.income_type !== '40_1')
-    .reduce((sum, i) => sum + annualForTaxYear(i), 0)
+    .reduce((sum, i) => sum + annualForTaxYear(i, taxYear), 0)
 
   if (nonSalary <= 120000) return { minTax: 0, applies: false, note: null }
 
@@ -400,9 +409,13 @@ export type TaxEstimate = {
   settlement: { amount: number; isRefund: boolean }
 }
 
-export function calculateTaxEstimate(incomes: Income[], deductions: TaxDeductions): TaxEstimate {
-  const incomeByType = groupIncomeByTypeAnnual(incomes)
-  const expenseBreakdown = calculateExpenseBreakdown(incomes)
+export function calculateTaxEstimate(
+  incomes: Income[],
+  deductions: TaxDeductions,
+  taxYear: number = new Date().getFullYear()
+): TaxEstimate {
+  const incomeByType = groupIncomeByTypeAnnual(incomes, taxYear)
+  const expenseBreakdown = calculateExpenseBreakdown(incomes, taxYear)
   const totalGrossIncome = expenseBreakdown.reduce((sum, i) => sum + i.grossIncome, 0)
   const netIncomeAfterExpense = expenseBreakdown.reduce((sum, i) => sum + i.netIncome, 0)
   const {
@@ -413,16 +426,16 @@ export function calculateTaxEstimate(incomes: Income[], deductions: TaxDeduction
   } = calculateDeductions(deductions, netIncomeAfterExpense)
   const netTaxableIncome = Math.max(0, Math.round(netIncomeAfterExpense - totalDeductions))
   const { brackets, totalTax: progressiveTax } = calculateProgressiveTax(netTaxableIncome)
-  const minTax = calculateMinimumTax(incomes, progressiveTax)
+  const minTax = calculateMinimumTax(incomes, progressiveTax, taxYear)
   const totalTax = Math.max(progressiveTax, minTax.minTax)
   const effectiveRate = totalGrossIncome > 0 ? (totalTax / totalGrossIncome) * 100 : 0
-  const exemptGiftTotal = calculateExemptGiftTotal(incomes)
+  const exemptGiftTotal = calculateExemptGiftTotal(incomes, taxYear)
 
   // ขั้นบันไดหักทีละก้อนจากเงินได้พึงประเมิน — โชว์ในการ์ด "สรุปการคำนวณ" ฝั่งหน้าภาษี
   const ladder = [
     { label: 'เงินได้พึงประเมินที่ต้องเสียภาษี', note: 'ไม่รวมเงินได้ยกเว้น', value: totalGrossIncome },
     { label: 'หักค่าใช้จ่ายตามประเภทเงินได้', note: 'แบบเหมา', value: -(totalGrossIncome - netIncomeAfterExpense) },
-    { label: 'หักส่วนตัว + ครอบครัว', note: 'ส่วนตัว คู่สมรส บุตร บิดามารดา ผู้พิการ', value: -deductionGroups.personalFamily },
+    { label: 'หักส่วนตัว + ครอบครัว', note: 'ส่วนตัว คู่สมรส บุตร บิดามารดา ผู้พิการ ฝากครรภ์คลอดบุตร', value: -deductionGroups.personalFamily },
     { label: 'หักประกัน', note: 'ประกันสังคม ชีวิต สุขภาพ', value: -deductionGroups.insurance },
     { label: 'หักกลุ่มเกษียณ + Thai ESG', note: 'เพดานรวม ฿500,000 และ ESG แยก ฿300,000', value: -deductionGroups.retirementAndEsg },
     { label: 'หักบ้าน + มาตรการรายปี', note: 'ดอกเบี้ยบ้าน Easy E-Receipt', value: -deductionGroups.houseAndAnnual },

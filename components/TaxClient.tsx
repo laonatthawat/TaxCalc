@@ -28,6 +28,7 @@ function toFormState(d: Partial<TaxDeductions> | null): DeductionFormState {
     children_count_esg: String(merged.children_count_esg),
     parents_count: String(merged.parents_count),
     disabled_dependents_count: String(merged.disabled_dependents_count),
+    childbirth_expense: String(merged.childbirth_expense),
     social_security_paid: String(merged.social_security_paid),
     life_insurance_premium: String(merged.life_insurance_premium),
     health_insurance_premium: String(merged.health_insurance_premium),
@@ -51,6 +52,7 @@ function toNumbers(form: DeductionFormState): TaxDeductions {
     children_count_esg: Number(form.children_count_esg) || 0,
     parents_count: Number(form.parents_count) || 0,
     disabled_dependents_count: Number(form.disabled_dependents_count) || 0,
+    childbirth_expense: Number(form.childbirth_expense) || 0,
     social_security_paid: Number(form.social_security_paid) || 0,
     life_insurance_premium: Number(form.life_insurance_premium) || 0,
     health_insurance_premium: Number(form.health_insurance_premium) || 0,
@@ -204,8 +206,13 @@ function escCsv(v: string | number): string {
   return '"' + String(v).replace(/"/g, '""') + '"'
 }
 
+// ตัวเลือกปีภาษีย้อนหลัง — ใช้กรองว่ารายรับก้อนเดียว (ไม่ประจำ) รายการไหนนับเข้าปีที่กำลังดู
+const currentTaxYear = new Date().getFullYear()
+const TAX_YEAR_OPTIONS = [0, 1, 2, 3, 4].map((back) => currentTaxYear - back)
+
 export default function TaxClient({ initialIncomes, initialDeductions, userEmail }: Props) {
   const [form, setForm] = useState<DeductionFormState>(toFormState(initialDeductions))
+  const [taxYear, setTaxYear] = useState(currentTaxYear)
   const [isSaving, setIsSaving] = useState(false)
   const [savedAt, setSavedAt] = useState('')
   const [saveError, setSaveError] = useState('')
@@ -218,8 +225,8 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
 
   const deductions = useMemo(() => toNumbers(form), [form])
   const estimate = useMemo(
-    () => calculateTaxEstimate(initialIncomes, deductions),
-    [initialIncomes, deductions]
+    () => calculateTaxEstimate(initialIncomes, deductions, taxYear),
+    [initialIncomes, deductions, taxYear]
   )
 
   const handleSave = async () => {
@@ -244,6 +251,7 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
     const csvRows: (string | number)[][] = [
       ['สรุปภาษีเงินได้บุคคลธรรมดา'],
       ['อีเมล', userEmail],
+      ['ปีภาษี', taxYear + 543],
       ['วันที่ออกรายงาน', new Date().toLocaleDateString('th-TH')],
       [],
       ['รายรับ'],
@@ -317,10 +325,11 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
               <h1 style={{ margin: 0, fontSize: 22, color: '#201e1d' }}>
                 {estimate.totalTax > 0 ? (
                   <>
-                    ปีนี้ต้องเสียประมาณ <span style={{ fontFamily: 'var(--font-number)' }}>{bt(estimate.totalTax)}</span>
+                    {taxYear === currentTaxYear ? 'ปีนี้' : `ปีภาษี ${taxYear + 543}`} ต้องเสียประมาณ{' '}
+                    <span style={{ fontFamily: 'var(--font-number)' }}>{bt(estimate.totalTax)}</span>
                   </>
                 ) : (
-                  'ปีนี้ยังไม่ต้องเสียภาษี'
+                  `${taxYear === currentTaxYear ? 'ปีนี้' : `ปีภาษี ${taxYear + 543}`}ยังไม่ต้องเสียภาษี`
                 )}
               </h1>
               <HelpTooltip title="วิธีใช้หน้าภาษี">
@@ -334,6 +343,11 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
                   ขั้นบันไดจากเงินได้สุทธิที่เหลือ พร้อมตรวจสอบภาษีขั้นต่ำตามมาตรา 48(2) → ขั้นที่ 4: หัก
                   ภาษีที่ถูกหักไปแล้ว (WHT) เพื่อดูว่าต้องขอคืนหรือจ่ายเพิ่มตอนยื่นจริง
                 </p>
+                <p style={{ margin: '0 0 8px' }}>
+                  ตัวเลือก &quot;ปีภาษี&quot; มุมขวาบนมีผลเฉพาะรายรับ<strong>ก้อนเดียว</strong> (เช่น โบนัส
+                  งานฟรีแลนซ์ครั้งเดียว) ว่านับเข้าปีไหน — รายรับ<strong>ประจำ</strong>ยังคำนวณเป็นยอดทั้งปีเสมอ
+                  ไม่ว่าจะเลือกปีใด ส่วนอัตราภาษีและเพดานลดหย่อนใช้เกณฑ์ปีภาษี 2568 คงที่ทุกปีที่เลือก
+                </p>
                 <p style={{ margin: 0 }}>
                   ตัวเลขทั้งหมดเป็นการประมาณการเบื้องต้นเท่านั้น ไม่ใช่การคำนวณภาษีที่ยื่นจริงกับกรม
                   สรรพากร ควรตรวจสอบกับผู้เชี่ยวชาญ/โปรแกรมยื่นภาษีอย่างเป็นทางการอีกครั้ง
@@ -341,6 +355,29 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
               </HelpTooltip>
             </div>
           </div>
+
+          <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ font: '500 13px/1 "IBM Plex Sans Thai",sans-serif', color: '#645c50' }}>ปีภาษี</span>
+            <select
+              value={taxYear}
+              onChange={(e) => setTaxYear(Number(e.target.value))}
+              style={{
+                padding: '9px 14px',
+                borderRadius: 999,
+                border: '1px solid #c0b6a5',
+                background: '#fdf7ec',
+                font: '600 13px/1 var(--font-number)',
+                color: '#474238',
+                cursor: 'pointer',
+              }}
+            >
+              {TAX_YEAR_OPTIONS.map((y) => (
+                <option key={y} value={y}>
+                  {y + 543}
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
 
         <div
@@ -440,10 +477,12 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
                   <StepperField label="บุตรคนที่ 2+ เกิดปี 2561 ขึ้นไป — คนละ ฿60,000" value={form.children_count_esg} max={20} onChange={(v) => updateField('children_count_esg', v)} />
                   <StepperField label="อุปการะบิดามารดา — คนละ ฿30,000 (ไม่เกิน 4 คน)" value={form.parents_count} max={4} onChange={(v) => updateField('parents_count', v)} />
                   <StepperField label="อุปการะผู้พิการ / ทุพพลภาพ — คนละ ฿60,000" value={form.disabled_dependents_count} max={20} onChange={(v) => updateField('disabled_dependents_count', v)} />
+                  <NumberField label="ค่าฝากครรภ์และคลอดบุตร" value={form.childbirth_expense} onChange={(v) => updateField('childbirth_expense', v)} />
                 </div>
                 <p style={{ margin: 0, font: '400 12px/1.6 "IBM Plex Sans Thai",sans-serif', color: '#82796a' }}>
                   บุตรคนที่สองขึ้นไปที่เกิดตั้งแต่ปี 2561 ลดหย่อนได้คนละ ฿60,000 · อุปการะบิดามารดาอายุ 60 ปีขึ้นไป
-                  คนละ ฿30,000 ใช้สิทธิได้ไม่เกิน 4 คน
+                  คนละ ฿30,000 ใช้สิทธิได้ไม่เกิน 4 คน · ค่าฝากครรภ์และคลอดบุตรตามที่จ่ายจริง ไม่เกิน ฿60,000
+                  ต่อการตั้งครรภ์หนึ่งครั้ง
                 </p>
               </div>
 
