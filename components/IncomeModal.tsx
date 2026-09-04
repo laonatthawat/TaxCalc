@@ -33,7 +33,6 @@ export default function IncomeModal({ isOpen, onClose, editingIncome }: Props) {
   const [billingCycle, setBillingCycle] = useState<BillingCycle>(
     (editingIncome?.billing_cycle as BillingCycle) ?? 'monthly'
   )
-  const [nextPaymentDate, setNextPaymentDate] = useState(editingIncome?.next_payment_date ?? '')
   const [receivedDate, setReceivedDate] = useState(editingIncome?.received_date ?? '')
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState('')
@@ -76,11 +75,6 @@ export default function IncomeModal({ isOpen, onClose, editingIncome }: Props) {
       return
     }
 
-    if (isRecurring && !nextPaymentDate) {
-      setError('กรุณาเลือกวันที่จะได้รับเงินครั้งถัดไป')
-      return
-    }
-
     if (!isRecurring && !receivedDate) {
       setError('กรุณาเลือกวันที่ได้รับเงิน')
       return
@@ -95,7 +89,7 @@ export default function IncomeModal({ isOpen, onClose, editingIncome }: Props) {
       income_sub: typeMeta.subs ? incomeSub : null,
       is_recurring: isRecurring,
       billing_cycle: isRecurring ? billingCycle : null,
-      next_payment_date: isRecurring ? nextPaymentDate : null,
+      next_payment_date: null,
       received_date: isRecurring ? null : receivedDate,
     }
 
@@ -216,31 +210,20 @@ export default function IncomeModal({ isOpen, onClose, editingIncome }: Props) {
             </div>
 
             {isRecurring ? (
-              <>
-                <div className="form-field" style={{ marginBottom: 0 }}>
-                  <label className="form-label">รอบการรับเงิน</label>
-                  <select
-                    className="form-input"
-                    value={billingCycle}
-                    onChange={(e) => setBillingCycle(e.target.value as BillingCycle)}
-                  >
-                    {CYCLE_OPTIONS.map((c) => (
-                      <option key={c.value} value={c.value}>
-                        {c.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="form-field" style={{ marginBottom: 0 }}>
-                  <label className="form-label">วันที่จะได้รับเงินครั้งถัดไป</label>
-                  <input
-                    type="date"
-                    className="form-input"
-                    value={nextPaymentDate}
-                    onChange={(e) => setNextPaymentDate(e.target.value)}
-                  />
-                </div>
-              </>
+              <div className="form-field" style={{ marginBottom: 0 }}>
+                <label className="form-label">รอบการรับเงิน</label>
+                <select
+                  className="form-input"
+                  value={billingCycle}
+                  onChange={(e) => setBillingCycle(e.target.value as BillingCycle)}
+                >
+                  {CYCLE_OPTIONS.map((c) => (
+                    <option key={c.value} value={c.value}>
+                      {c.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
             ) : (
               <div className="form-field" style={{ marginBottom: 0 }}>
                 <label className="form-label">วันที่ได้รับเงิน</label>

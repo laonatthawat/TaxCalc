@@ -21,7 +21,7 @@ import CatMascot from './CatMascot'
 import IncomeModal from './IncomeModal'
 import HelpTooltip from './HelpTooltip'
 import ConfirmDialog from './ConfirmDialog'
-import { deleteIncome, markIncomeAsReceived } from '@/app/income/actions'
+import { deleteIncome } from '@/app/income/actions'
 import {
   Income,
   INCOME_TYPES,
@@ -31,7 +31,6 @@ import {
   getIncomeTypeLabel,
   subLabelOf,
   toAnnualAmount,
-  formatDaysUntilIncome,
 } from '@/lib/incomeUtils'
 
 type Props = {
@@ -51,21 +50,11 @@ const ICONS: Record<string, typeof Briefcase> = {
   gift: Gift,
 }
 
-// วันนี้เทียบกับวันที่จะได้รับเงินครั้งถัดไป — ใช้ตรงสถานะ badge ของการ์ดรายรับประจำ
-function daysUntil(dateStr: string): number {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  const target = new Date(dateStr)
-  target.setHours(0, 0, 0, 0)
-  return Math.round((target.getTime() - today.getTime()) / 86400000)
-}
-
 const fmt = (n: number) => Math.round(n).toLocaleString('en-US')
 
 export default function IncomeClient({ initialIncomes }: Props) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingIncome, setEditingIncome] = useState<Income | null>(null)
-  const [markingReceivedId, setMarkingReceivedId] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [deleteTarget, setDeleteTarget] = useState<Income | null>(null)
   const router = useRouter()
@@ -119,16 +108,6 @@ export default function IncomeClient({ initialIncomes }: Props) {
     router.refresh()
   }
 
-  const handleMarkAsReceived = async (id: string) => {
-    setMarkingReceivedId(id)
-    try {
-      await markIncomeAsReceived(id)
-      router.refresh()
-    } finally {
-      setMarkingReceivedId(null)
-    }
-  }
-
   const renderCard = (income: Income, kind: 'recurring' | 'oneTime') => {
     const typeMeta = getIncomeTypeMeta(income.income_type)
     const Icon = ICONS[typeMeta.icon] ?? Wallet2
@@ -142,6 +121,11 @@ export default function IncomeClient({ initialIncomes }: Props) {
           border: '0.5px solid #dcd3c4',
           borderRadius: 28,
           padding: '1.25rem 1.5rem',
+          // การ์ดสูงเท่ากันทั้งแถว (grid stretch) แล้วดันปุ่มลงล่างสุด ให้ปุ่มทุกใบอยู่ระดับเดียวกัน
+          height: '100%',
+          boxSizing: 'border-box',
+          display: 'flex',
+          flexDirection: 'column',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 12 }}>
@@ -159,9 +143,37 @@ export default function IncomeClient({ initialIncomes }: Props) {
           >
             <Icon size={19} color="#f9f4ed" />
           </div>
+          {/* ชื่อจำกัด 1 บรรทัด · ประเภทเงินได้จองที่ไว้ 2 บรรทัดเสมอ เพื่อให้ยอดเงินและปุ่มของทุกการ์ดอยู่ระดับเดียวกัน
+              (ข้อความเต็มดูได้จาก tooltip ตอน hover) */}
           <div style={{ flex: 1, minWidth: 0 }}>
-            <p style={{ fontSize: 15, fontWeight: 500, margin: 0, color: '#201e1d' }}>{income.name}</p>
-            <p style={{ fontSize: 12, color: '#474238', margin: 0 }}>
+            <p
+              title={income.name}
+              style={{
+                fontSize: 15,
+                fontWeight: 500,
+                margin: 0,
+                color: '#201e1d',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
+            >
+              {income.name}
+            </p>
+            <p
+              title={typeMeta.shortLabel + (subLabel ? ` · ${subLabel}` : '')}
+              style={{
+                fontSize: 12,
+                lineHeight: 1.45,
+                color: '#474238',
+                margin: 0,
+                minHeight: '2.9em',
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+              }}
+            >
               {typeMeta.shortLabel}
               {subLabel ? ` · ${subLabel}` : ''}
             </p>
@@ -198,60 +210,12 @@ export default function IncomeClient({ initialIncomes }: Props) {
           )}
         </p>
 
-        {kind === 'recurring' ? (
-          <>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                margin: '8px 0 14px',
-              }}
-            >
-              <p
-                style={{
-                  fontSize: 12,
-                  color: '#474238',
-                  margin: 0,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 4,
-                }}
-              >
-                <Calendar size={13} /> {new Date(income.next_payment_date!).toLocaleDateString('th-TH')}
-              </p>
-              <span className="renewal-badge renewal-badge-normal">
-                {formatDaysUntilIncome(daysUntil(income.next_payment_date!))}
-              </span>
-            </div>
-
-            <label
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                fontSize: 12,
-                color: '#474238',
-                margin: '0 0 12px',
-                cursor: markingReceivedId === income.id ? 'wait' : 'pointer',
-              }}
-            >
-              <input
-                type="checkbox"
-                checked={markingReceivedId === income.id}
-                disabled={markingReceivedId === income.id}
-                onChange={() => handleMarkAsReceived(income.id)}
-                style={{ width: 16, height: 16, accentColor: '#7a8a5e', cursor: 'inherit' }}
-              />
-              {markingReceivedId === income.id ? 'กำลังบันทึก...' : 'รับแล้ว (เลื่อนรอบถัดไป)'}
-            </label>
-          </>
-        ) : (
+        {kind === 'oneTime' && (
           <p
             style={{
               fontSize: 12,
               color: '#474238',
-              margin: '8px 0 14px',
+              margin: '8px 0 0',
               display: 'flex',
               alignItems: 'center',
               gap: 4,
@@ -261,7 +225,7 @@ export default function IncomeClient({ initialIncomes }: Props) {
           </p>
         )}
 
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div style={{ display: 'flex', gap: 8, marginTop: 'auto', paddingTop: 14 }}>
           <button
             onClick={() => openEditModal(income)}
             className="btn-secondary"

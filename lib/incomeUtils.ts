@@ -41,11 +41,12 @@ export const INCOME_TYPES: IncomeTypeMeta[] = [
     icon: 'key-round',
     // อัตราตามพระราชกฤษฎีกา (ฉบับที่ 629) มีผลตั้งแต่ปีภาษี 2560 เป็นต้นไป —
     // ที่ดินเกษตรกรรมปรับลดจาก 20% เหลือ 15% และแยกที่ดินที่ไม่ใช้เกษตรกรรมออกมาเป็นอีกลักษณะย่อยที่ 15% เท่ากัน
+    // เรียงจากอัตราหักสูงไปต่ำ เพื่อให้เลือกง่ายตอนกรอก
     subs: [
       { id: 'building', label: 'บ้าน / โรงเรือน / สิ่งปลูกสร้างอย่างอื่น / แพ — เหมา 30%', rate: 0.3 },
+      { id: 'vehicle', label: 'ยานพาหนะ — เหมา 30%', rate: 0.3 },
       { id: 'farm', label: 'ที่ดินที่ใช้ในการเกษตรกรรม — เหมา 15%', rate: 0.15 },
       { id: 'land_other', label: 'ที่ดินที่มิได้ใช้ในการเกษตรกรรม — เหมา 15%', rate: 0.15 },
-      { id: 'vehicle', label: 'ยานพาหนะ — เหมา 30%', rate: 0.3 },
       { id: 'other', label: 'ทรัพย์สินอื่น — เหมา 10%', rate: 0.1 },
     ],
   },
@@ -116,43 +117,6 @@ export function timesPerYearOf(cycle: BillingCycle | string | null): number {
   return CYCLE_OPTIONS.find((c) => c.value === cycle)?.timesPerYear ?? 12
 }
 
-function monthsPerCycle(cycle: BillingCycle | string | null): number {
-  switch (cycle) {
-    case 'yearly':
-      return 12
-    case 'biannual':
-      return 6
-    case 'quarterly':
-      return 3
-    default:
-      return 1
-  }
-}
-
-function toISODate(year: number, month: number, day: number): string {
-  const mm = String(month).padStart(2, '0')
-  const dd = String(day).padStart(2, '0')
-  return `${year}-${mm}-${dd}`
-}
-
-// เลื่อนวันที่ไปรอบถัดไปตามรอบการรับเงิน — ถ้าวันที่เดิมเป็นวันสุดท้ายของเดือน (เช่น 31)
-// แล้วเดือนถัดไปมีวันน้อยกว่า จะปรับลงมาเป็นวันสุดท้ายของเดือนนั้นแทน ไม่ล้นไปเดือนถัดไปอีกที
-export function getNextCycleDate(dateStr: string, billingCycle: string | null): string {
-  const [y, m, d] = dateStr.split('-').map(Number)
-  const monthsToAdd = monthsPerCycle(billingCycle)
-
-  let newMonth = m + monthsToAdd
-  let newYear = y
-  while (newMonth > 12) {
-    newMonth -= 12
-    newYear += 1
-  }
-
-  const lastDayOfNewMonth = new Date(newYear, newMonth, 0).getDate()
-  const newDay = Math.min(d, lastDayOfNewMonth)
-
-  return toISODate(newYear, newMonth, newDay)
-}
 
 export type Income = {
   id: string
@@ -198,20 +162,11 @@ export function calculateIncomeTotals(incomes: Income[]) {
   return { totalMonthlyRecurring, totalOneTimeThisYear, totalAnnualEstimate }
 }
 
-// แปลงจำนวนวันเป็นข้อความอ่านง่ายฝั่งรายรับ (ต่างจาก formatDaysUntilRenewal ของฝั่งรายจ่ายเดิม
-// ตรงคำที่ใช้ — รายรับพูดว่า "จะได้รับ" ไม่ใช่ "ครบกำหนด")
-export function formatDaysUntilIncome(days: number): string {
-  if (days < 0) return `เลยกำหนด ${Math.abs(days)} วัน`
-  if (days === 0) return 'วันนี้'
-  if (days === 1) return 'พรุ่งนี้'
-  return `อีก ${days} วัน`
-}
-
-// แยก list รายรับประจำ (เรียงตามวันจ่ายถัดไปใกล้สุดก่อน) กับรายรับที่ได้รับแล้ว (เรียงล่าสุดก่อน)
+// แยก list รายรับประจำ (เรียงจากยอดต่อปีมากไปน้อย) กับรายรับที่ได้รับแล้ว (เรียงล่าสุดก่อน)
 export function splitAndSortIncomes(incomes: Income[]) {
   const recurring = incomes
     .filter((i) => i.is_recurring)
-    .sort((a, b) => new Date(a.next_payment_date!).getTime() - new Date(b.next_payment_date!).getTime())
+    .sort((a, b) => toAnnualAmount(b) - toAnnualAmount(a))
 
   const oneTime = incomes
     .filter((i) => !i.is_recurring)
