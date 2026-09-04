@@ -149,6 +149,16 @@ export type DeductionBreakdownItem = {
   capped?: boolean
 }
 
+// เพดานลดหย่อนประกันสังคม ม.33 = เงินสมทบสูงสุดทั้งปี ซึ่งผูกกับ "เพดานค่าจ้าง" ที่ สปส. ทยอยปรับขึ้นเป็นระยะ
+// (ปีเป็น ค.ศ.) ก่อน 2026 เพดานค่าจ้าง 15,000 → 750/เดือน · 2026-2028 = 17,500 → 875/เดือน
+// · 2029-2031 = 20,000 → 1,000/เดือน · 2032 เป็นต้นไป = 23,000 → 1,150/เดือน
+export function ssoCapOf(taxYear: number): number {
+  if (taxYear >= 2032) return 13800
+  if (taxYear >= 2029) return 12000
+  if (taxYear >= 2026) return 10500
+  return 9000
+}
+
 // กลุ่มลดหย่อนรวมกัน 5 ก้อน ตรงกับที่การ์ด "สรุปการคำนวณ" (ladder) ฝั่งหน้าภาษีใช้โชว์เป็นขั้นบันไดหักทีละก้อน
 export type DeductionGroups = {
   personalFamily: number
@@ -160,7 +170,8 @@ export type DeductionGroups = {
 
 export function calculateDeductions(
   d: TaxDeductions,
-  netIncomeAfterExpense: number
+  netIncomeAfterExpense: number,
+  taxYear: number = new Date().getFullYear()
 ): { items: DeductionBreakdownItem[]; total: number; groups: DeductionGroups; capNotes: string[] } {
   const items: DeductionBreakdownItem[] = [{ label: 'ค่าลดหย่อนส่วนตัว', amount: 60000 }]
   const capNotes: string[] = []
@@ -211,10 +222,11 @@ export function calculateDeductions(
     items.push({ label: 'ค่าฝากครรภ์และคลอดบุตร', amount: dChildbirth, capped: d.childbirth_expense > 60000 })
   }
 
-  const dSso = Math.min(d.social_security_paid, 9000)
+  const ssoCap = ssoCapOf(taxYear)
+  const dSso = Math.min(d.social_security_paid, ssoCap)
   if (d.social_security_paid > 0) {
-    noteIfCapped('ประกันสังคม', d.social_security_paid, 9000)
-    items.push({ label: 'ประกันสังคม', amount: dSso, capped: d.social_security_paid > 9000 })
+    noteIfCapped('ประกันสังคม', d.social_security_paid, ssoCap)
+    items.push({ label: 'ประกันสังคม', amount: dSso, capped: d.social_security_paid > ssoCap })
   }
 
   // ประกันชีวิต + ประกันสุขภาพตนเอง: สุขภาพเดี่ยวๆ ไม่เกิน 25,000 แล้วรวมกับชีวิตไม่เกิน 100,000
@@ -423,7 +435,7 @@ export function calculateTaxEstimate(
     total: totalDeductions,
     groups: deductionGroups,
     capNotes,
-  } = calculateDeductions(deductions, netIncomeAfterExpense)
+  } = calculateDeductions(deductions, netIncomeAfterExpense, taxYear)
   const netTaxableIncome = Math.max(0, Math.round(netIncomeAfterExpense - totalDeductions))
   const { brackets, totalTax: progressiveTax } = calculateProgressiveTax(netTaxableIncome)
   const minTax = calculateMinimumTax(incomes, progressiveTax, taxYear)
@@ -435,11 +447,12 @@ export function calculateTaxEstimate(
   const ladder = [
     { label: 'เงินได้พึงประเมินที่ต้องเสียภาษี', note: 'ไม่รวมเงินได้ยกเว้น', value: totalGrossIncome },
     { label: 'หักค่าใช้จ่ายตามประเภทเงินได้', note: 'แบบเหมา', value: -(totalGrossIncome - netIncomeAfterExpense) },
-    { label: 'หักส่วนตัว + ครอบครัว', note: 'ส่วนตัว คู่สมรส บุตร บิดามารดา ผู้พิการ ฝากครรภ์คลอดบุตร', value: -deductionGroups.personalFamily },
+    // โน้ตในการ์ดสรุปเก็บสั้น ๆ พอให้รู้ว่ากลุ่มนี้มีอะไร — ตัวเลขเพดานเต็ม ๆ อยู่ใต้ช่องกรอกในฟอร์มแล้ว
+    { label: 'หักส่วนตัว + ครอบครัว', note: 'ส่วนตัว คู่สมรส บุตร พ่อแม่ ผู้พิการ คลอดบุตร', value: -deductionGroups.personalFamily },
     { label: 'หักประกัน', note: 'ประกันสังคม ชีวิต สุขภาพ', value: -deductionGroups.insurance },
-    { label: 'หักกลุ่มเกษียณ + Thai ESG', note: 'เพดานรวม ฿500,000 และ ESG แยก ฿300,000', value: -deductionGroups.retirementAndEsg },
-    { label: 'หักบ้าน + มาตรการรายปี', note: 'ดอกเบี้ยบ้าน Easy E-Receipt', value: -deductionGroups.houseAndAnnual },
-    { label: 'หักเงินบริจาค', note: 'เพดาน 10% ของเงินได้หลังหักลดหย่อนอื่น', value: -deductionGroups.donation },
+    { label: 'หักกลุ่มเกษียณ + Thai ESG', note: 'เพดานรวม ฿500,000 · ESG แยก ฿300,000', value: -deductionGroups.retirementAndEsg },
+    { label: 'หักบ้าน + มาตรการรายปี', note: 'ดอกเบี้ยบ้าน · Easy E-Receipt', value: -deductionGroups.houseAndAnnual },
+    { label: 'หักเงินบริจาค', note: 'เพดาน 10% ของเงินได้ที่เหลือ', value: -deductionGroups.donation },
   ]
 
   const settlementAmount = deductions.withholding_tax - totalTax

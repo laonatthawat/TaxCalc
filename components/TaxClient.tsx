@@ -7,7 +7,7 @@ import { Save, FileSpreadsheet } from 'lucide-react'
 import HelpTooltip from './HelpTooltip'
 import { saveTaxDeductions } from '@/app/tax/actions'
 import { Income, getIncomeTypeMeta, subLabelOf, toAnnualAmount, CYCLE_OPTIONS } from '@/lib/incomeUtils'
-import { calculateTaxEstimate, DEFAULT_TAX_DEDUCTIONS, TaxDeductions } from '@/lib/taxUtils'
+import { calculateTaxEstimate, ssoCapOf, DEFAULT_TAX_DEDUCTIONS, TaxDeductions } from '@/lib/taxUtils'
 
 type Props = {
   initialIncomes: Income[]
@@ -72,14 +72,25 @@ function toNumbers(form: DeductionFormState): TaxDeductions {
 const fmt = (n: number) => Math.round(n).toLocaleString('en-US')
 const bt = (n: number) => (n < 0 ? '−฿' : '฿') + fmt(Math.abs(n))
 
+// ข้อความบอกเพดานใต้ช่องกรอก — ให้เห็นทันทีว่ารายการนั้นลดหย่อนได้สูงสุดเท่าไร
+function CapHint({ text }: { text: string }) {
+  return (
+    <span style={{ font: '400 11px/1.45 "IBM Plex Sans Thai",sans-serif', color: '#9c8f7c', paddingLeft: 16 }}>
+      {text}
+    </span>
+  )
+}
+
 // input ตัวเลขแบบสั้นๆ ใช้ซ้ำหลายจุดในฟอร์ม
 function NumberField({
   label,
   value,
+  hint,
   onChange,
 }: {
   label: string
   value: string
+  hint?: string
   onChange: (v: string) => void
 }) {
   return (
@@ -103,6 +114,7 @@ function NumberField({
           outline: 'none',
         }}
       />
+      {hint && <CapHint text={hint} />}
     </label>
   )
 }
@@ -112,11 +124,13 @@ function StepperField({
   label,
   value,
   max,
+  hint,
   onChange,
 }: {
   label: string
   value: string
   max: number
+  hint?: string
   onChange: (v: string) => void
 }) {
   const n = Math.max(0, Math.floor(Number(value) || 0))
@@ -190,6 +204,7 @@ function StepperField({
           +
         </button>
       </div>
+      {hint && <CapHint text={hint} />}
     </div>
   )
 }
@@ -199,6 +214,27 @@ const fieldGridStyle: React.CSSProperties = {
   display: 'grid',
   gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%,330px), 1fr))',
   gap: 14,
+}
+
+// หัวข้อหมวด — ตั้งชื่อให้ตรงกับกลุ่มในการ์ด "สรุปการคำนวณ" ฝั่งขวา จะได้ไล่ตามกันได้
+function SectionHeader({ title }: { title: string }) {
+  return (
+    <span style={{ font: '600 12px/1 "IBM Plex Sans Thai",sans-serif', letterSpacing: '.08em', color: '#9c5527' }}>
+      {title}
+    </span>
+  )
+}
+
+// ป้ายบอกว่ากลุ่มถัดไปคิดเพดานยังไง — ใช้คั่นระหว่าง "เพดานใครเพดานมัน" กับ "เพดานร่วมกัน"
+function CapNote({ text }: { text: string }) {
+  return (
+    <span style={{ font: '400 12px/1.5 "IBM Plex Sans Thai",sans-serif', color: '#82796a' }}>{text}</span>
+  )
+}
+
+// เส้นคั่นหมวดค่าลดหย่อน — ขีดยาวเต็มความกว้างการ์ด ให้เห็นขอบเขตแต่ละหมวดชัด
+function SectionDivider() {
+  return <div style={{ height: 1, background: '#e4d8c1' }} />
 }
 
 function escCsv(v: string | number): string {
@@ -344,9 +380,11 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
                   ภาษีที่ถูกหักไปแล้ว (WHT) เพื่อดูว่าต้องขอคืนหรือจ่ายเพิ่มตอนยื่นจริง
                 </p>
                 <p style={{ margin: '0 0 8px' }}>
-                  ตัวเลือก &quot;ปีภาษี&quot; มุมขวาบนมีผลเฉพาะรายรับ<strong>ก้อนเดียว</strong> (เช่น โบนัส
-                  งานฟรีแลนซ์ครั้งเดียว) ว่านับเข้าปีไหน — รายรับ<strong>ประจำ</strong>ยังคำนวณเป็นยอดทั้งปีเสมอ
-                  ไม่ว่าจะเลือกปีใด ส่วนอัตราภาษีและเพดานลดหย่อนใช้เกณฑ์ปีภาษี 2568 คงที่ทุกปีที่เลือก
+                  ตัวเลือก &quot;ปีภาษี&quot; มุมขวาบนมีผลกับรายรับ<strong>ก้อนเดียว</strong> (เช่น โบนัส
+                  งานฟรีแลนซ์ครั้งเดียว) ว่านับเข้าปีไหน และมีผลกับ<strong>เพดานประกันสังคม</strong>ที่ต่างกันในแต่ละปี
+                  (ปีภาษี 2568 ลงไป ฿9,000 · ตั้งแต่ปีภาษี 2569 ขึ้นเป็น ฿10,500 ตามเพดานค่าจ้างใหม่) —
+                  ส่วนรายรับ<strong>ประจำ</strong>ยังคำนวณเป็นยอดทั้งปีเสมอ และอัตราภาษีขั้นบันไดกับเพดานลดหย่อน
+                  รายการอื่นใช้เกณฑ์เดียวกันทุกปีที่เลือก
                 </p>
                 <p style={{ margin: 0 }}>
                   ตัวเลขทั้งหมดเป็นการประมาณการเบื้องต้นเท่านั้น ไม่ใช่การคำนวณภาษีที่ยื่นจริงกับกรม
@@ -396,8 +434,8 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
         >
           <span>
             ตัวเลขนี้เป็น<strong>การประมาณการ</strong> ไม่ใช่การยื่นภาษีจริง ระบบใช้การหักค่าใช้จ่ายแบบเหมาและ
-            เพดานลดหย่อนตามเกณฑ์ปีภาษี 2568 ยังไม่รวมทางเลือกหักค่าใช้จ่ายตามจริง สิทธิเฉพาะกรณี และการแยกยื่น
-            ของคู่สมรส ก่อนยื่นจริงควรตรวจกับกรมสรรพากรหรือผู้เชี่ยวชาญ
+            เพดานลดหย่อนตามเกณฑ์ล่าสุด (ประกันสังคมปรับตามปีภาษีที่เลือก) ยังไม่รวมทางเลือกหักค่าใช้จ่ายตามจริง
+            สิทธิเฉพาะกรณี และการแยกยื่นของคู่สมรส ก่อนยื่นจริงควรตรวจกับกรมสรรพากรหรือผู้เชี่ยวชาญ
           </span>
         </div>
 
@@ -456,9 +494,8 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
               </h3>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                <span style={{ font: '600 12px/1 "IBM Plex Sans Thai",sans-serif', letterSpacing: '.08em', textTransform: 'uppercase', color: '#9c5527' }}>
-                  ส่วนตัวและครอบครัว
-                </span>
+                <SectionHeader title="ส่วนตัว + ครอบครัว" />
+                <CapNote text="แต่ละรายการมีเพดานของตัวเอง ไม่ได้แชร์โควตากัน" />
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', padding: '12px 18px', borderRadius: 16, background: '#f4ead9' }}>
                   <span style={{ font: '400 14px/1.4 "IBM Plex Sans Thai",sans-serif', color: '#474238' }}>ลดหย่อนส่วนตัว — ได้อัตโนมัติทุกคน</span>
                   <span style={{ font: '600 14px/1 var(--font-number)' }}>฿60,000</span>
@@ -473,66 +510,61 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
                   <span style={{ font: '400 14px/1.4 "IBM Plex Sans Thai",sans-serif', color: '#474238' }}>มีคู่สมรสที่ไม่มีเงินได้ (+฿60,000)</span>
                 </label>
                 <div style={fieldGridStyle}>
-                  <StepperField label="บุตร (ทั่วไป) — คนละ ฿30,000" value={form.children_count} max={20} onChange={(v) => updateField('children_count', v)} />
-                  <StepperField label="บุตรคนที่ 2+ เกิดปี 2561 ขึ้นไป — คนละ ฿60,000" value={form.children_count_esg} max={20} onChange={(v) => updateField('children_count_esg', v)} />
-                  <StepperField label="อุปการะบิดามารดา — คนละ ฿30,000 (ไม่เกิน 4 คน)" value={form.parents_count} max={4} onChange={(v) => updateField('parents_count', v)} />
-                  <StepperField label="อุปการะผู้พิการ / ทุพพลภาพ — คนละ ฿60,000" value={form.disabled_dependents_count} max={20} onChange={(v) => updateField('disabled_dependents_count', v)} />
-                  <NumberField label="ค่าฝากครรภ์และคลอดบุตร" value={form.childbirth_expense} onChange={(v) => updateField('childbirth_expense', v)} />
+                  <StepperField label="บุตร (ทั่วไป)" value={form.children_count} max={20} hint="สูงสุดคนละ ฿30,000 · ไม่จำกัดจำนวนคน" onChange={(v) => updateField('children_count', v)} />
+                  <StepperField label="บุตรคนที่ 2+ เกิดปี 2561 ขึ้นไป" value={form.children_count_esg} max={20} hint="สูงสุดคนละ ฿60,000 (รวมก้อนแรกแล้ว)" onChange={(v) => updateField('children_count_esg', v)} />
+                  <StepperField label="อุปการะบิดามารดา" value={form.parents_count} max={4} hint="สูงสุดคนละ ฿30,000 · ไม่เกิน 4 คน (รวม ฿120,000) · อายุ 60 ปีขึ้นไป" onChange={(v) => updateField('parents_count', v)} />
+                  <StepperField label="อุปการะผู้พิการ / ทุพพลภาพ" value={form.disabled_dependents_count} max={20} hint="สูงสุดคนละ ฿60,000" onChange={(v) => updateField('disabled_dependents_count', v)} />
+                  <NumberField label="ค่าฝากครรภ์และคลอดบุตร" value={form.childbirth_expense} hint="สูงสุด ฿60,000 ต่อการตั้งครรภ์หนึ่งครั้ง" onChange={(v) => updateField('childbirth_expense', v)} />
                 </div>
-                <p style={{ margin: 0, font: '400 12px/1.6 "IBM Plex Sans Thai",sans-serif', color: '#82796a' }}>
-                  บุตรคนที่สองขึ้นไปที่เกิดตั้งแต่ปี 2561 ลดหย่อนได้คนละ ฿60,000 · อุปการะบิดามารดาอายุ 60 ปีขึ้นไป
-                  คนละ ฿30,000 ใช้สิทธิได้ไม่เกิน 4 คน · ค่าฝากครรภ์และคลอดบุตรตามที่จ่ายจริง ไม่เกิน ฿60,000
-                  ต่อการตั้งครรภ์หนึ่งครั้ง
-                </p>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                <span style={{ font: '600 12px/1 "IBM Plex Sans Thai",sans-serif', letterSpacing: '.08em', textTransform: 'uppercase', color: '#9c5527' }}>
-                  ประกัน
-                </span>
-                <div style={fieldGridStyle}>
-                  <NumberField label="ประกันสังคมที่จ่ายจริงทั้งปี" value={form.social_security_paid} onChange={(v) => updateField('social_security_paid', v)} />
-                  <NumberField label="เบี้ยประกันชีวิตทั้งปี" value={form.life_insurance_premium} onChange={(v) => updateField('life_insurance_premium', v)} />
-                  <NumberField label="เบี้ยประกันสุขภาพตนเอง" value={form.health_insurance_premium} onChange={(v) => updateField('health_insurance_premium', v)} />
-                  <NumberField label="เบี้ยประกันสุขภาพบิดามารดา" value={form.parent_health_insurance_premium} onChange={(v) => updateField('parent_health_insurance_premium', v)} />
-                </div>
-                <p style={{ margin: 0, font: '400 12px/1.6 "IBM Plex Sans Thai",sans-serif', color: '#82796a' }}>
-                  เบี้ยประกันชีวิตกับประกันสุขภาพตนเองรวมกันไม่เกิน ฿100,000 โดยส่วนสุขภาพนับได้ไม่เกิน
-                  ฿25,000 · ประกันสุขภาพบิดามารดาไม่เกิน ฿15,000 · ประกันสังคมลูกจ้าง ม.33 ไม่เกิน ฿9,000
-                </p>
-              </div>
+              <SectionDivider />
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                <span style={{ font: '600 12px/1 "IBM Plex Sans Thai",sans-serif', letterSpacing: '.08em', textTransform: 'uppercase', color: '#9c5527' }}>
-                  กองทุนเกษียณและการลงทุน
-                </span>
+                <SectionHeader title="ประกัน" />
+                <CapNote text="ประกันชีวิตกับสุขภาพตนเองใช้เพดานร่วมกัน ฿100,000 · ที่เหลือเพดานใครเพดานมัน" />
                 <div style={fieldGridStyle}>
-                  <NumberField label="กองทุนสำรองเลี้ยงชีพ / กบข." value={form.pvd_contribution} onChange={(v) => updateField('pvd_contribution', v)} />
-                  <NumberField label="กองทุน RMF" value={form.rmf_amount} onChange={(v) => updateField('rmf_amount', v)} />
-                  <NumberField label="ประกันชีวิตแบบบำนาญ" value={form.pension_insurance} onChange={(v) => updateField('pension_insurance', v)} />
-                  <NumberField label="กองทุน Thai ESG / Thai ESGX" value={form.thai_esg_amount} onChange={(v) => updateField('thai_esg_amount', v)} />
+                  <NumberField label="ประกันสังคมที่จ่ายจริงทั้งปี" value={form.social_security_paid} hint={`สูงสุด ${bt(ssoCapOf(taxYear))} (ลูกจ้าง ม.33 · เพดานปีภาษี ${taxYear + 543})`} onChange={(v) => updateField('social_security_paid', v)} />
+                  <NumberField label="เบี้ยประกันชีวิตทั้งปี" value={form.life_insurance_premium} hint="รวมกับประกันสุขภาพตนเอง สูงสุด ฿100,000" onChange={(v) => updateField('life_insurance_premium', v)} />
+                  <NumberField label="เบี้ยประกันสุขภาพตนเอง" value={form.health_insurance_premium} hint="สูงสุด ฿25,000 · อยู่ในเพดานรวม ฿100,000" onChange={(v) => updateField('health_insurance_premium', v)} />
+                  <NumberField label="เบี้ยประกันสุขภาพบิดามารดา" value={form.parent_health_insurance_premium} hint="สูงสุด ฿15,000 · แยกเพดานต่างหาก" onChange={(v) => updateField('parent_health_insurance_premium', v)} />
                 </div>
-                <p style={{ margin: 0, font: '400 12px/1.6 "IBM Plex Sans Thai",sans-serif', color: '#82796a' }}>
-                  กลุ่มเกษียณ (PVD/กบข. + RMF + ประกันบำนาญ) แต่ละตัวมีเพดานของตัวเอง และรวมกันไม่เกิน
-                  ฿500,000 · Thai ESG / ESGX แยกเพดานเอง ไม่เกิน 30% ของเงินได้และไม่เกิน ฿300,000 · สิทธิซื้อ
-                  SSF สิ้นสุดตั้งแต่ปีภาษี 2568
-                </p>
               </div>
 
+              <SectionDivider />
+
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                <span style={{ font: '600 12px/1 "IBM Plex Sans Thai",sans-serif', letterSpacing: '.08em', textTransform: 'uppercase', color: '#9c5527' }}>
-                  บ้าน มาตรการรายปี และบริจาค
-                </span>
+                <SectionHeader title="กลุ่มเกษียณ + Thai ESG" />
+                <CapNote text="กบข./PVD + RMF + ประกันบำนาญ ใช้เพดานร่วมกัน ฿500,000 · ส่วน Thai ESG แยกเพดานของตัวเอง" />
                 <div style={fieldGridStyle}>
-                  <NumberField label="ดอกเบี้ยกู้ซื้อที่อยู่อาศัย" value={form.mortgage_interest} onChange={(v) => updateField('mortgage_interest', v)} />
-                  <NumberField label="Easy E-Receipt 2.0" value={form.easy_e_receipt} onChange={(v) => updateField('easy_e_receipt', v)} />
-                  <NumberField label="เงินบริจาคทั่วไป" value={form.donation_general} onChange={(v) => updateField('donation_general', v)} />
-                  <NumberField label="บริจาคการศึกษา / กีฬา / รพ.รัฐ (นับ 2 เท่า)" value={form.donation_education_sports} onChange={(v) => updateField('donation_education_sports', v)} />
+                  <NumberField label="กองทุนสำรองเลี้ยงชีพ / กบข." value={form.pvd_contribution} hint="15% ของเงินได้ · กลุ่มเกษียณรวมกันสูงสุด ฿500,000" onChange={(v) => updateField('pvd_contribution', v)} />
+                  <NumberField label="กองทุน RMF" value={form.rmf_amount} hint="30% ของเงินได้ · กลุ่มเกษียณรวมกันสูงสุด ฿500,000" onChange={(v) => updateField('rmf_amount', v)} />
+                  <NumberField label="ประกันชีวิตแบบบำนาญ" value={form.pension_insurance} hint="15% ของเงินได้ · สูงสุด ฿200,000 (อยู่ในเพดานรวม ฿500,000)" onChange={(v) => updateField('pension_insurance', v)} />
+                  <NumberField label="กองทุน Thai ESG / Thai ESGX" value={form.thai_esg_amount} hint="30% ของเงินได้ · สูงสุด ฿300,000 · ไม่กินโควตากลุ่มเกษียณ" onChange={(v) => updateField('thai_esg_amount', v)} />
                 </div>
-                <p style={{ margin: 0, font: '400 12px/1.6 "IBM Plex Sans Thai",sans-serif', color: '#82796a' }}>
-                  บริจาคเพื่อการศึกษา กีฬา และโรงพยาบาลรัฐ นับได้ 2 เท่าของที่จ่าย · เงินบริจาคทุกก้อนรวมกัน
-                  หักได้ไม่เกิน 10% ของเงินได้หลังหักค่าลดหย่อนอื่นแล้ว
-                </p>
+                <CapNote text="สิทธิซื้อ SSF สิ้นสุดตั้งแต่ปีภาษี 2568 จึงไม่มีในกลุ่มนี้แล้ว" />
+              </div>
+
+              <SectionDivider />
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                <SectionHeader title="บ้าน + มาตรการรายปี" />
+                <CapNote text="แต่ละรายการมีเพดานของตัวเอง ไม่ได้แชร์โควตากัน" />
+                <div style={fieldGridStyle}>
+                  <NumberField label="ดอกเบี้ยกู้ซื้อที่อยู่อาศัย" value={form.mortgage_interest} hint="สูงสุด ฿100,000" onChange={(v) => updateField('mortgage_interest', v)} />
+                  <NumberField label="Easy E-Receipt 2.0" value={form.easy_e_receipt} hint="สูงสุด ฿50,000" onChange={(v) => updateField('easy_e_receipt', v)} />
+                </div>
+              </div>
+
+              <SectionDivider />
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                <SectionHeader title="เงินบริจาค" />
+                <CapNote text="ทุกก้อนรวมกันไม่เกิน 10% ของเงินได้หลังหักลดหย่อนอื่น · คิดเป็นลำดับสุดท้าย" />
+                <div style={fieldGridStyle}>
+                  <NumberField label="เงินบริจาคทั่วไป" value={form.donation_general} hint="นับตามที่จ่ายจริง · อยู่ในเพดาน 10% ร่วมกัน" onChange={(v) => updateField('donation_general', v)} />
+                  <NumberField label="บริจาคการศึกษา / กีฬา / รพ.รัฐ" value={form.donation_education_sports} hint="นับ 2 เท่าของที่จ่าย · อยู่ในเพดาน 10% เดียวกัน" onChange={(v) => updateField('donation_education_sports', v)} />
+                </div>
               </div>
             </div>
 
@@ -581,46 +613,28 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
               <h3 style={{ margin: 0, fontSize: 20, lineHeight: 1.2 }}>
                 ขั้นที่ <span style={{ fontFamily: 'var(--font-number)' }}>4</span> · หักภาษีที่ถูกหักไปแล้ว
               </h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%,240px), 1fr))', gap: 18, alignItems: 'end' }}>
-                <label style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
-                  <span style={{ font: '500 12px/1.45 "IBM Plex Sans Thai",sans-serif', color: '#474238' }}>
-                    ภาษีหัก ณ ที่จ่ายทั้งปี — ดูจากหนังสือรับรอง 50 ทวิ
-                  </span>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    value={form.withholding_tax}
-                    onChange={(e) => updateField('withholding_tax', e.target.value)}
-                    style={{
-                      width: '100%',
-                      boxSizing: 'border-box',
-                      padding: '12px 16px',
-                      borderRadius: 999,
-                      border: '1px solid #cfc2a8',
-                      background: '#f5ead8',
-                      font: '500 14px/1 "IBM Plex Sans Thai",sans-serif',
-                      outline: 'none',
-                    }}
-                  />
-                </label>
-                <div
+              <label style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+                <span style={{ font: '500 12px/1.45 "IBM Plex Sans Thai",sans-serif', color: '#474238' }}>
+                  ภาษีหัก ณ ที่จ่ายทั้งปี — ดูจากหนังสือรับรอง 50 ทวิ
+                </span>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={form.withholding_tax}
+                  onChange={(e) => updateField('withholding_tax', e.target.value)}
                   style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 5,
-                    padding: '16px 20px',
-                    borderRadius: 18,
-                    background: estimate.settlement.isRefund ? '#e6ecd6' : '#f7ddd0',
+                    width: '100%',
+                    boxSizing: 'border-box',
+                    padding: '12px 16px',
+                    borderRadius: 999,
+                    border: '1px solid #cfc2a8',
+                    background: '#f5ead8',
+                    font: '500 14px/1 "IBM Plex Sans Thai",sans-serif',
+                    outline: 'none',
                   }}
-                >
-                  <span style={{ font: '500 12px/1.4 "IBM Plex Sans Thai",sans-serif', color: estimate.settlement.isRefund ? '#3f5230' : '#8c491a' }}>
-                    {estimate.settlement.isRefund ? 'ขอคืนภาษีได้' : 'ต้องจ่ายเพิ่มตอนยื่น'}
-                  </span>
-                  <span style={{ font: '600 28px/1 var(--font-number)', color: estimate.settlement.isRefund ? '#3f5230' : '#8c491a' }}>
-                    {bt(Math.abs(estimate.settlement.amount))}
-                  </span>
-                </div>
-              </div>
+                />
+                <CapHint text="ผลลัพธ์ว่าได้คืนหรือต้องจ่ายเพิ่ม ดูที่การ์ดสรุปด้านขวา" />
+              </label>
             </div>
           </div>
 
@@ -660,9 +674,15 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
 
             <div style={{ height: 1, background: '#ece0cb' }} />
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-              <span style={{ font: '500 13px/1 "IBM Plex Sans Thai",sans-serif', color: '#6b6355' }}>เงินได้สุทธิ</span>
-              <span style={{ font: '600 26px/1 var(--font-number)' }}>{bt(estimate.netTaxableIncome)}</span>
+            {/* ช่วงที่ 1 · ภาษีทั้งปี — ฐานคำนวณสองบรรทัด แล้วจบที่ยอดภาษี (เลขใหญ่ตัวเดียวของการ์ด) */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'baseline' }}>
+              <span style={{ font: '400 13px/1.5 "IBM Plex Sans Thai",sans-serif', color: '#6b6355' }}>รายได้รวมทั้งปี</span>
+              <span style={{ font: '600 15px/1 var(--font-number)' }}>{bt(estimate.totalGrossIncome)}</span>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'baseline' }}>
+              <span style={{ font: '400 13px/1.5 "IBM Plex Sans Thai",sans-serif', color: '#6b6355' }}>เงินได้สุทธิที่ใช้คิดภาษี</span>
+              <span style={{ font: '600 15px/1 var(--font-number)' }}>{bt(estimate.netTaxableIncome)}</span>
             </div>
 
             <div style={{ background: '#f2e0cb', borderRadius: 18, padding: 20, display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -673,9 +693,41 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
               <span style={{ font: '400 13px/1.5 "IBM Plex Sans Thai",sans-serif', color: '#6d3714' }}>{taxMonthNote}</span>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'baseline' }}>
               <span style={{ font: '400 13px/1.5 "IBM Plex Sans Thai",sans-serif', color: '#6b6355' }}>เหลือหลังภาษีทั้งปี</span>
-              <span style={{ font: '600 14px/1 var(--font-number)' }}>{bt(takeHome)}</span>
+              <span style={{ font: '600 15px/1 var(--font-number)' }}>{bt(takeHome)}</span>
+            </div>
+
+            <div style={{ height: 1, background: '#ece0cb' }} />
+
+            {/* ช่วงที่ 2 · ตอนยื่นจริง — เทียบภาษีทั้งปีกับที่ถูกหักไปแล้ว เหลือเป็นยอดคืน/จ่ายเพิ่ม */}
+            <span style={{ font: '600 11px/1 "IBM Plex Sans Thai",sans-serif', letterSpacing: '.1em', color: '#9c8f7c' }}>
+              ตอนยื่นจริง
+            </span>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'baseline' }}>
+              <span style={{ font: '400 13px/1.5 "IBM Plex Sans Thai",sans-serif', color: '#6b6355' }}>หัก ณ ที่จ่ายไปแล้ว</span>
+              <span style={{ font: '600 15px/1 var(--font-number)' }}>{bt(deductions.withholding_tax)}</span>
+            </div>
+
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'baseline',
+                gap: 12,
+                padding: '14px 18px',
+                borderRadius: 18,
+                background: estimate.settlement.isRefund ? '#e6ecd6' : '#f7ddd0',
+              }}
+            >
+              <span style={{ font: '600 13px/1.4 "IBM Plex Sans Thai",sans-serif', color: estimate.settlement.isRefund ? '#3f5230' : '#8c491a' }}>
+                {estimate.settlement.isRefund ? 'ขอคืนภาษีได้' : 'ต้องจ่ายเพิ่ม'}
+              </span>
+              <span style={{ font: '600 20px/1 var(--font-number)', color: estimate.settlement.isRefund ? '#3f5230' : '#8c491a' }}>
+                {estimate.settlement.isRefund ? '+' : '−'}
+                {bt(Math.abs(estimate.settlement.amount))}
+              </span>
             </div>
 
             {estimate.capNotes.length > 0 && (
@@ -736,10 +788,26 @@ export default function TaxClient({ initialIncomes, initialDeductions, userEmail
                   บันทึกแล้ว {savedAt}
                 </span>
               )}
+              {/* บันทึกไม่สำเร็จต้องเห็นชัด ไม่งั้นผู้ใช้นึกว่าเซฟแล้วแต่จริง ๆ ข้อมูลหาย */}
               {saveError && (
-                <span style={{ font: '500 12px/1.5 "IBM Plex Sans Thai",sans-serif', color: '#8a3a22', textAlign: 'center' }}>
-                  {saveError}
-                </span>
+                <div
+                  style={{
+                    padding: '12px 14px',
+                    borderRadius: 14,
+                    background: '#fbe4dc',
+                    border: '1px solid #e0a08c',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 4,
+                  }}
+                >
+                  <span style={{ font: '600 13px/1.4 "IBM Plex Sans Thai",sans-serif', color: '#8a3a22' }}>
+                    บันทึกไม่สำเร็จ — ข้อมูลยังไม่ถูกเซฟ
+                  </span>
+                  <span style={{ font: '400 12px/1.55 "IBM Plex Sans Thai",sans-serif', color: '#6d3714', wordBreak: 'break-word' }}>
+                    {saveError}
+                  </span>
+                </div>
               )}
               <span style={{ font: '400 11px/1.6 "IBM Plex Sans Thai",sans-serif', color: '#82796a', textAlign: 'center' }}>
                 ไฟล์ที่ได้เป็น .csv เปิดใน Excel หรือ Google Sheets ได้ทันที
